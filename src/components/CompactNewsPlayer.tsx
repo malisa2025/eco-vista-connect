@@ -14,10 +14,10 @@ export const CompactNewsPlayer = () => {
       {/* Bloomberg Live Stream */}
       <div className="relative aspect-video bg-black">
         <iframe
-          src="https://www.bloomberg.com/media-manifest/embed/video?autoplay=true&muted=false"
+          src="https://www.youtube.com/embed/iEpJwprxDdk?autoplay=1&mute=1&controls=1&modestbranding=1&rel=0"
           className="w-full h-full"
           frameBorder="0"
-          allow="autoplay; encrypted-media; fullscreen"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowFullScreen
           title="Bloomberg Live TV"
         />
