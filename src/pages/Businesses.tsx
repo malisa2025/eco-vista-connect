@@ -107,8 +107,8 @@ const Businesses = () => {
 
               {/* Sidebar with Ad */}
               <div className="lg:col-span-1">
-                <div className="sticky top-24">
-                  <AdSlot location="business_list_top" />
+                <div className="sticky top-24 space-y-6">
+                  <AdSlot location="business_list_top" className="w-full" />
                 </div>
               </div>
             </div>
