@@ -6,6 +6,7 @@ import BusinessList from "@/components/BusinessList";
 import BusinessFilters from "@/components/BusinessFilters";
 import CategoryPills from "@/components/CategoryPills";
 import { useBusinesses } from "@/hooks/useBusinesses";
+import AdSlot from "@/components/AdSlot";
 import { Building2 } from "lucide-react";
 
 const Businesses = () => {
@@ -65,42 +66,51 @@ const Businesses = () => {
         {/* Filters and Content */}
         <section className="py-12">
           <div className="container mx-auto px-4">
-            <div className="space-y-8">
-              {/* Category Pills */}
-              <CategoryPills
-                selectedCategory={category}
-                onCategorySelect={setCategory}
-              />
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+              <div className="lg:col-span-3 space-y-8">
+                {/* Category Pills */}
+                <CategoryPills
+                  selectedCategory={category}
+                  onCategorySelect={setCategory}
+                />
 
-              {/* Filters */}
-              <BusinessFilters
-                search={search}
-                category={category}
-                region={region}
-                sortBy={sortBy}
-                onSearchChange={setSearch}
-                onCategoryChange={setCategory}
-                onRegionChange={setRegion}
-                onSortByChange={setSortBy}
-                onClearFilters={handleClearFilters}
-              />
+                {/* Filters */}
+                <BusinessFilters
+                  search={search}
+                  category={category}
+                  region={region}
+                  sortBy={sortBy}
+                  onSearchChange={setSearch}
+                  onCategoryChange={setCategory}
+                  onRegionChange={setRegion}
+                  onSortByChange={setSortBy}
+                  onClearFilters={handleClearFilters}
+                />
 
-              {/* Results Count */}
-              <div className="flex items-center justify-between">
-                <p className="text-muted-foreground">
-                  {isLoading ? (
-                    "Loading businesses..."
-                  ) : (
-                    `${businesses?.length || 0} businesses found`
-                  )}
-                </p>
+                {/* Results Count */}
+                <div className="flex items-center justify-between">
+                  <p className="text-muted-foreground">
+                    {isLoading ? (
+                      "Loading businesses..."
+                    ) : (
+                      `${businesses?.length || 0} businesses found`
+                    )}
+                  </p>
+                </div>
+
+                {/* Business List */}
+                <BusinessList
+                  businesses={businesses || []}
+                  isLoading={isLoading}
+                />
               </div>
 
-              {/* Business List */}
-              <BusinessList
-                businesses={businesses || []}
-                isLoading={isLoading}
-              />
+              {/* Sidebar with Ad */}
+              <div className="lg:col-span-1">
+                <div className="sticky top-24">
+                  <AdSlot location="business_list_top" />
+                </div>
+              </div>
             </div>
           </div>
         </section>

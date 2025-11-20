@@ -2,6 +2,7 @@ import { useActiveAds, useAdMutations } from '@/hooks/useAdvertisements';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ExternalLink } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 
 interface AdSlotProps {
   location: string;
@@ -10,12 +11,46 @@ interface AdSlotProps {
 
 const AdSlot = ({ location, className = '' }: AdSlotProps) => {
   const { data: ads } = useActiveAds(location);
-  const { recordAdClick } = useAdMutations();
+  const { recordAdClick, recordAdImpression } = useAdMutations();
+  const adRef = useRef<HTMLDivElement>(null);
+  const [impressionRecorded, setImpressionRecorded] = useState(false);
 
   if (!ads || ads.length === 0) return null;
 
   // Show first ad for the location
   const ad = ads[0];
+
+  // Track impression when ad is visible
+  useEffect(() => {
+    if (!adRef.current || impressionRecorded) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+            // Record impression after 1 second of visibility
+            const timer = setTimeout(() => {
+              if (entry.isIntersecting) {
+                recordAdImpression.mutate(ad.id);
+                setImpressionRecorded(true);
+              }
+            }, 1000);
+
+            return () => clearTimeout(timer);
+          }
+        });
+      },
+      { threshold: 0.5 }
+    );
+
+    observer.observe(adRef.current);
+
+    return () => {
+      if (adRef.current) {
+        observer.unobserve(adRef.current);
+      }
+    };
+  }, [ad.id, impressionRecorded, recordAdImpression]);
 
   const handleClick = () => {
     recordAdClick.mutate(ad.id);
@@ -26,6 +61,7 @@ const AdSlot = ({ location, className = '' }: AdSlotProps) => {
 
   return (
     <Card
+      ref={adRef}
       className={`relative overflow-hidden cursor-pointer group hover:shadow-lg transition-all ${className}`}
       onClick={handleClick}
     >

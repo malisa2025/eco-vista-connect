@@ -7,6 +7,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import VideoPlayer from "@/components/VideoPlayer";
 import ContactBusinessButton from "@/components/ContactBusinessButton";
+import AdSlot from "@/components/AdSlot";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -196,10 +197,16 @@ const BusinessDetail = () => {
                   </CardContent>
                 </Card>
               )}
+
+              {/* Message Business Button */}
+              <ContactBusinessButton businessId={id!} />
             </div>
 
             {/* Sidebar */}
             <div className="space-y-6">
+              {/* Advertisement */}
+              <AdSlot location="business_detail_sidebar" />
+
               {/* Contact Information */}
               <Card>
                 <CardContent className="pt-6 space-y-4">

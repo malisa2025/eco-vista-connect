@@ -134,5 +134,26 @@ export const useAdMutations = () => {
     },
   });
 
-  return { createAd, updateAdStatus, recordAdClick };
+  const recordAdImpression = useMutation({
+    mutationFn: async (adId: string) => {
+      // Fetch current impressions count
+      const { data: ad } = await supabase
+        .from('advertisements')
+        .select('impressions')
+        .eq('id', adId)
+        .single();
+
+      if (!ad) return;
+
+      // Increment impressions
+      const { error } = await supabase
+        .from('advertisements')
+        .update({ impressions: (ad.impressions || 0) + 1 })
+        .eq('id', adId);
+
+      if (error) throw error;
+    },
+  });
+
+  return { createAd, updateAdStatus, recordAdClick, recordAdImpression };
 };
