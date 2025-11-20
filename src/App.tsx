@@ -12,6 +12,8 @@ import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
 import RegisterBusiness from "./pages/RegisterBusiness";
 import MyBusinesses from "./pages/MyBusinesses";
+import Jobs from "./pages/Jobs";
+import PostJob from "./pages/PostJob";
 import AdAnalytics from "./pages/AdAnalytics";
 import Favorites from "./pages/Favorites";
 import Inbox from "./pages/Inbox";
@@ -33,10 +35,11 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/businesses" element={<Businesses />} />
-            <Route path="/businesses/:id" element={<BusinessDetail />} />
-            <Route path="/auth" element={<Auth />} />
+                <Route path="/" element={<Index />} />
+                <Route path="/businesses" element={<Businesses />} />
+                <Route path="/businesses/:id" element={<BusinessDetail />} />
+                <Route path="/jobs" element={<Jobs />} />
+                <Route path="/auth" element={<Auth />} />
             <Route
               path="/inbox"
               element={
@@ -61,14 +64,22 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
-            <Route
-              path="/my-businesses"
-              element={
-                <ProtectedRoute requireRole="business_owner">
-                  <MyBusinesses />
-                </ProtectedRoute>
-              }
-            />
+                <Route
+                  path="/my-businesses"
+                  element={
+                    <ProtectedRoute requireRole="business_owner">
+                      <MyBusinesses />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/post-job"
+                  element={
+                    <ProtectedRoute requireRole="business_owner">
+                      <PostJob />
+                    </ProtectedRoute>
+                  }
+                />
             <Route
               path="/purchase-ad"
               element={

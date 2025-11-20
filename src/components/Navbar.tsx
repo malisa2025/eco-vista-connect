@@ -53,6 +53,12 @@ const Navbar = () => {
             >
               Businesses
             </button>
+            <button 
+              onClick={() => navigate('/jobs')}
+              className="text-sm font-medium hover:text-primary transition-smooth"
+            >
+              Jobs
+            </button>
             {isHome && (
               <>
                 <a href="#features" className="text-sm font-medium hover:text-primary transition-smooth">
