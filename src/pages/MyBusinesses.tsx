@@ -206,7 +206,9 @@ const BusinessAdvertisements = ({ businesses }: { businesses: any[] }) => {
         <Card>
           <CardContent className="pt-6">
             <div className="text-center">
-              <div className="text-3xl font-bold mb-1">0</div>
+              <div className="text-3xl font-bold mb-1">
+                {allAds.reduce((sum: number, ad: any) => sum + (ad.total_clicks || 0), 0)}
+              </div>
               <p className="text-sm text-muted-foreground">Total Clicks</p>
             </div>
           </CardContent>
@@ -224,7 +226,6 @@ const BusinessAdvertisements = ({ businesses }: { businesses: any[] }) => {
       {allAds.map((ad: any) => {
         const businessName = businesses.find(b => b.id === ad.business_id)?.name;
         const daysRemaining = Math.ceil((new Date(ad.end_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-        const ctr = ad.impressions > 0 ? (0 / ad.impressions * 100).toFixed(2) : '0.00';
 
         return (
           <Card key={ad.id}>
@@ -261,12 +262,12 @@ const BusinessAdvertisements = ({ businesses }: { businesses: any[] }) => {
                 <div>
                   <div className="flex items-center gap-2 text-2xl font-bold mb-1">
                     <MousePointerClick className="h-5 w-5 text-muted-foreground" />
-                    0
+                    {ad.total_clicks || 0}
                   </div>
                   <p className="text-sm text-muted-foreground">Clicks</p>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold mb-1">{ctr}%</div>
+                  <div className="text-2xl font-bold mb-1">{ad.ctr}%</div>
                   <p className="text-sm text-muted-foreground">CTR</p>
                 </div>
                 <div>
