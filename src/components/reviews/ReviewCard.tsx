@@ -19,7 +19,7 @@ interface ReviewCardProps {
     profiles: {
       full_name: string | null;
       avatar_url: string | null;
-    };
+    } | null;
   };
   onEdit?: () => void;
   onDelete?: () => void;

@@ -1,3 +1,5 @@
+import { useAuth } from '@/contexts/AuthContext';
+import { useBusinessOwners } from '@/hooks/useBusinessClaims';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,9 +10,22 @@ import { useNavigate } from 'react-router-dom';
 
 const MyBusinesses = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { data: ownerships, isLoading } = useBusinessOwners(user?.id);
 
-  // TODO: Fetch user's businesses
-  const businesses: any[] = [];
+  const businesses = ownerships?.map(o => o.businesses).filter(Boolean) || [];
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-1 container mx-auto px-4 py-8">
+          <div className="text-center py-20">Loading...</div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col">

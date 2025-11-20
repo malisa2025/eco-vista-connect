@@ -8,18 +8,33 @@ export const useBusinessReviews = (businessId: string) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('reviews')
-        .select(`
-          *,
-          profiles:user_id (
-            full_name,
-            avatar_url
-          )
-        `)
+        .select('*')
         .eq('business_id', businessId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data;
+      
+      // Fetch profiles for all user_ids
+      if (data && data.length > 0) {
+        const userIds = data.map(r => r.user_id);
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, full_name, avatar_url')
+          .in('id', userIds);
+        
+        // Map profiles to reviews
+        const reviewsWithProfiles = data.map(review => ({
+          ...review,
+          profiles: profiles?.find(p => p.id === review.user_id) || null
+        }));
+        
+        return reviewsWithProfiles;
+      }
+      
+      return data?.map(review => ({
+        ...review,
+        profiles: null
+      })) || [];
     },
   });
 };
