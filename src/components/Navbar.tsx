@@ -1,14 +1,34 @@
 import { Button } from "@/components/ui/button";
-import { Building2, Menu } from "lucide-react";
+import { Building2, Menu, User, Heart, LogOut, LayoutDashboard } from "lucide-react";
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, profile, hasRole, signOut } = useAuth();
 
   const isHome = location.pathname === '/';
+
+  const getInitials = () => {
+    if (!profile?.full_name) return 'U';
+    return profile.full_name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
 
   return (
     <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border/50 shadow-sm">
@@ -53,8 +73,57 @@ const Navbar = () => {
 
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center gap-3">
-            <Button variant="ghost">Sign In</Button>
-            <Button>Get Started</Button>
+            {user ? (
+              <>
+                <Button variant="ghost" size="icon" onClick={() => navigate('/favorites')}>
+                  <Heart className="h-5 w-5" />
+                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="rounded-full">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={profile?.avatar_url || ''} />
+                        <AvatarFallback>{getInitials()}</AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem onClick={() => navigate('/profile')}>
+                      <User className="mr-2 h-4 w-4" />
+                      Profile
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/favorites')}>
+                      <Heart className="mr-2 h-4 w-4" />
+                      Favorites
+                    </DropdownMenuItem>
+                    {hasRole('business_owner') && (
+                      <DropdownMenuItem onClick={() => navigate('/my-businesses')}>
+                        <Building2 className="mr-2 h-4 w-4" />
+                        My Businesses
+                      </DropdownMenuItem>
+                    )}
+                    {hasRole('admin') && (
+                      <DropdownMenuItem onClick={() => navigate('/admin/dashboard')}>
+                        <LayoutDashboard className="mr-2 h-4 w-4" />
+                        Admin Dashboard
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={signOut}>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Sign Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
+            ) : (
+              <>
+                <Button variant="ghost" onClick={() => navigate('/auth')}>
+                  Sign In
+                </Button>
+                <Button onClick={() => navigate('/auth')}>Get Started</Button>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -93,8 +162,33 @@ const Navbar = () => {
                 </>
               )}
               <div className="flex flex-col gap-2 pt-4 border-t border-border/50">
-                <Button variant="ghost" className="w-full">Sign In</Button>
-                <Button className="w-full">Get Started</Button>
+                {user ? (
+                  <>
+                    <Button variant="ghost" className="w-full" onClick={() => { navigate('/profile'); setIsOpen(false); }}>
+                      Profile
+                    </Button>
+                    <Button variant="ghost" className="w-full" onClick={() => { navigate('/favorites'); setIsOpen(false); }}>
+                      Favorites
+                    </Button>
+                    {hasRole('business_owner') && (
+                      <Button variant="ghost" className="w-full" onClick={() => { navigate('/my-businesses'); setIsOpen(false); }}>
+                        My Businesses
+                      </Button>
+                    )}
+                    <Button variant="outline" className="w-full" onClick={() => { signOut(); setIsOpen(false); }}>
+                      Sign Out
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button variant="ghost" className="w-full" onClick={() => { navigate('/auth'); setIsOpen(false); }}>
+                      Sign In
+                    </Button>
+                    <Button className="w-full" onClick={() => { navigate('/auth'); setIsOpen(false); }}>
+                      Get Started
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
           </div>

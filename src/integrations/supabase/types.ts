@@ -38,13 +38,132 @@ export type Database = {
         }
         Relationships: []
       }
+      business_claims: {
+        Row: {
+          admin_notes: string | null
+          business_data: Json | null
+          business_id: string | null
+          claim_type: Database["public"]["Enums"]["claim_type"]
+          created_at: string | null
+          documents: Json | null
+          id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["claim_status"]
+          submitted_at: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          business_data?: Json | null
+          business_id?: string | null
+          claim_type: Database["public"]["Enums"]["claim_type"]
+          created_at?: string | null
+          documents?: Json | null
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["claim_status"]
+          submitted_at?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          business_data?: Json | null
+          business_id?: string | null
+          claim_type?: Database["public"]["Enums"]["claim_type"]
+          created_at?: string | null
+          documents?: Json | null
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["claim_status"]
+          submitted_at?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_claims_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      business_owners: {
+        Row: {
+          business_id: string
+          created_at: string | null
+          id: string
+          is_primary: boolean | null
+          user_id: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string | null
+          id?: string
+          is_primary?: boolean | null
+          user_id: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string | null
+          id?: string
+          is_primary?: boolean | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_owners_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      business_views: {
+        Row: {
+          business_id: string
+          id: string
+          user_id: string | null
+          viewed_at: string | null
+        }
+        Insert: {
+          business_id: string
+          id?: string
+          user_id?: string | null
+          viewed_at?: string | null
+        }
+        Update: {
+          business_id?: string
+          id?: string
+          user_id?: string | null
+          viewed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_views_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       businesses: {
         Row: {
           address: string | null
+          business_hours: Json | null
           category: string
           created_at: string | null
           description: string | null
           email: string | null
+          gallery_images: string[] | null
           id: string
           image_url: string | null
           is_featured: boolean | null
@@ -62,10 +181,12 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          business_hours?: Json | null
           category: string
           created_at?: string | null
           description?: string | null
           email?: string | null
+          gallery_images?: string[] | null
           id?: string
           image_url?: string | null
           is_featured?: boolean | null
@@ -83,10 +204,12 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          business_hours?: Json | null
           category?: string
           created_at?: string | null
           description?: string | null
           email?: string | null
+          gallery_images?: string[] | null
           id?: string
           image_url?: string | null
           is_featured?: boolean | null
@@ -104,15 +227,179 @@ export type Database = {
         }
         Relationships: []
       }
+      favorites: {
+        Row: {
+          business_id: string
+          created_at: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "favorites_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string | null
+          email: string | null
+          full_name: string | null
+          id: string
+          phone: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id: string
+          phone?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      review_helpful: {
+        Row: {
+          created_at: string | null
+          id: string
+          review_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          review_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          review_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_helpful_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reviews: {
+        Row: {
+          business_id: string
+          comment: string
+          created_at: string | null
+          helpful_count: number | null
+          id: string
+          rating: number
+          title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          business_id: string
+          comment: string
+          created_at?: string | null
+          helpful_count?: number | null
+          id?: string
+          rating: number
+          title: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          business_id?: string
+          comment?: string
+          created_at?: string | null
+          helpful_count?: number | null
+          id?: string
+          rating?: number
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "user" | "business_owner" | "admin"
+      claim_status: "pending" | "approved" | "rejected"
+      claim_type: "new_business" | "claim_existing"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -239,6 +526,10 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["user", "business_owner", "admin"],
+      claim_status: ["pending", "approved", "rejected"],
+      claim_type: ["new_business", "claim_existing"],
+    },
   },
 } as const
