@@ -22,19 +22,19 @@ const Jobs = () => {
   const [sortBy, setSortBy] = useState("latest");
 
   const { data: jobs, isLoading } = usePublicJobs({
-    category: category || undefined,
-    location: location || undefined,
-    jobType: jobType || undefined,
-    experienceLevel: experienceLevel || undefined,
+    category: category && category !== "all" ? category : undefined,
+    location: location && location !== "all" ? location : undefined,
+    jobType: jobType && jobType !== "all" ? jobType : undefined,
+    experienceLevel: experienceLevel && experienceLevel !== "all" ? experienceLevel : undefined,
     search: search || undefined,
   });
 
   const handleClearFilters = () => {
     setSearch("");
-    setCategory("");
-    setLocation("");
-    setJobType("");
-    setExperienceLevel("");
+    setCategory("all");
+    setLocation("all");
+    setJobType("all");
+    setExperienceLevel("all");
     setSortBy("latest");
   };
 
