@@ -1,6 +1,6 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { useBusinessOwners } from '@/hooks/useBusinessClaims';
-import { useBusinessAds } from '@/hooks/useAdvertisements';
+import { useBusinessAds, useAdMutations } from '@/hooks/useAdvertisements';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -146,6 +146,7 @@ const MyBusinesses = () => {
 
 const BusinessAdvertisements = ({ businesses }: { businesses: any[] }) => {
   const navigate = useNavigate();
+  const { updateAdStatus } = useAdMutations();
   
   // Fetch ads for all businesses owned by the user
   const businessIds = businesses.map(b => b.id);
@@ -277,12 +278,22 @@ const BusinessAdvertisements = ({ businesses }: { businesses: any[] }) => {
               </div>
               <div className="flex gap-2">
                 {ad.status === 'active' && (
-                  <Button variant="outline" size="sm">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => updateAdStatus.mutate({ adId: ad.id, status: 'paused' })}
+                    disabled={updateAdStatus.isPending}
+                  >
                     Pause
                   </Button>
                 )}
                 {ad.status === 'paused' && (
-                  <Button variant="outline" size="sm">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => updateAdStatus.mutate({ adId: ad.id, status: 'active' })}
+                    disabled={updateAdStatus.isPending}
+                  >
                     Resume
                   </Button>
                 )}
