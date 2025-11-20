@@ -1,10 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { MapPin } from 'lucide-react';
+import { MapPin, Building2 } from 'lucide-react';
 
 const regions = [
   { name: "Greater Accra", businessCount: 2847, coordinates: [-0.1870, 5.6037] },
@@ -29,13 +27,12 @@ const GhanaMap = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
-  const [mapboxToken, setMapboxToken] = useState('');
-  const [tokenEntered, setTokenEntered] = useState(false);
 
   useEffect(() => {
-    if (!mapContainer.current || !tokenEntered || !mapboxToken) return;
+    const token = import.meta.env.VITE_MAPBOX_PUBLIC_TOKEN;
+    if (!mapContainer.current || !token) return;
 
-    mapboxgl.accessToken = mapboxToken;
+    mapboxgl.accessToken = token;
     
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
@@ -136,48 +133,41 @@ const GhanaMap = () => {
       markersRef.current = [];
       map.current?.remove();
     };
-  }, [tokenEntered, mapboxToken]);
+  }, []);
 
-  if (!tokenEntered) {
+  const token = import.meta.env.VITE_MAPBOX_PUBLIC_TOKEN;
+
+  if (!token) {
     return (
-      <section className="py-24 px-4 bg-gradient-subtle">
+      <section id="map" className="py-24 px-4 bg-gradient-subtle">
         <div className="container mx-auto max-w-2xl">
-          <Card className="p-8">
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                <MapPin className="w-8 h-8 text-primary" />
-              </div>
-              <h2 className="text-2xl font-bold mb-2">Enter Mapbox Token</h2>
-              <p className="text-muted-foreground text-sm">
-                To display the interactive Ghana map, please enter your Mapbox public token.
-                <br />
-                Get your token at{' '}
-                <a 
-                  href="https://mapbox.com/" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-primary hover:underline"
-                >
-                  mapbox.com
-                </a>
-              </p>
-            </div>
-            <div className="space-y-4">
-              <Input
-                type="text"
-                placeholder="pk.eyJ1IjoieW91cnVzZXJuYW1lIiwi..."
-                value={mapboxToken}
-                onChange={(e) => setMapboxToken(e.target.value)}
-                className="font-mono text-sm"
-              />
-              <Button 
-                onClick={() => setTokenEntered(true)}
-                disabled={!mapboxToken}
-                className="w-full"
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Interactive Ghana Map
+            </h2>
+            <p className="text-lg text-muted-foreground">
+              Explore businesses across all regions of Ghana
+            </p>
+          </div>
+          
+          <Card className="p-8 text-center">
+            <MapPin className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-xl font-semibold mb-2">Mapbox Token Required</h3>
+            <p className="text-muted-foreground mb-2">
+              Please add your Mapbox public token to the .env file as{" "}
+              <code className="bg-muted px-2 py-1 rounded text-sm">VITE_MAPBOX_PUBLIC_TOKEN</code>
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Get your free token at{" "}
+              <a 
+                href="https://mapbox.com/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-primary hover:underline"
               >
-                Load Map
-              </Button>
-            </div>
+                mapbox.com
+              </a>
+            </p>
           </Card>
         </div>
       </section>
