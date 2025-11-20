@@ -15,14 +15,12 @@ const AdSlot = ({ location, className = '' }: AdSlotProps) => {
   const adRef = useRef<HTMLDivElement>(null);
   const [impressionRecorded, setImpressionRecorded] = useState(false);
 
-  if (!ads || ads.length === 0) return null;
-
   // Show first ad for the location
-  const ad = ads[0];
+  const ad = ads?.[0];
 
   // Track impression when ad is visible
   useEffect(() => {
-    if (!adRef.current || impressionRecorded) return;
+    if (!ad || !adRef.current || impressionRecorded) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -50,7 +48,10 @@ const AdSlot = ({ location, className = '' }: AdSlotProps) => {
         observer.unobserve(adRef.current);
       }
     };
-  }, [ad.id, impressionRecorded, recordAdImpression]);
+  }, [ad?.id, impressionRecorded, recordAdImpression]);
+
+  // Early return after all hooks
+  if (!ads || ads.length === 0 || !ad) return null;
 
   const handleClick = () => {
     recordAdClick.mutate(ad.id);
