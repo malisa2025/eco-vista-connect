@@ -9,7 +9,7 @@ const Hero = () => {
       <div className="absolute inset-0 z-0">
         <img 
           src={heroBg} 
-          alt="Business community" 
+          alt="Kejetia Market in Kumasi, Ghana - vibrant marketplace showcasing Ghana's business community" 
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/80 to-background/60" />
