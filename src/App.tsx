@@ -38,6 +38,7 @@ import BusinessAnalytics from "./pages/BusinessAnalytics";
 import HiringPipeline from "./pages/HiringPipeline";
 import SeedDemoData from "./pages/SeedDemoData";
 import NotFound from "./pages/NotFound";
+import BusinessNews from "./pages/BusinessNews";
 
 const queryClient = new QueryClient();
 
@@ -53,6 +54,7 @@ const App = () => (
         <Route path="/businesses" element={<Businesses />} />
         <Route path="/businesses/:id" element={<BusinessDetail />} />
         <Route path="/businesses/:id/edit" element={<ProtectedRoute><EditBusiness /></ProtectedRoute>} />
+        <Route path="/business-news" element={<BusinessNews />} />
                 <Route path="/jobs" element={<Jobs />} />
                 <Route path="/jobs/:id" element={<JobDetail />} />
                 <Route path="/subscribe-job-seeker" element={<SubscribeJobSeeker />} />
