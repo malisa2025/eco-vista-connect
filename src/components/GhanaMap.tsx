@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { Card } from '@/components/ui/card';
@@ -27,6 +28,7 @@ const GhanaMap = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const token = import.meta.env.VITE_MAPBOX_PUBLIC_TOKEN;
@@ -119,8 +121,7 @@ const GhanaMap = () => {
 
         // Click handler
         el.addEventListener('click', () => {
-          console.log(`Clicked region: ${region.name}`);
-          // Future: Navigate to /businesses?region=${region.name}
+          navigate(`/businesses?region=${encodeURIComponent(region.name)}`);
         });
 
         markersRef.current.push(marker);

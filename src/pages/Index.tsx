@@ -1,6 +1,7 @@
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import Features from "@/components/Features";
+import FeaturedBusinesses from "@/components/FeaturedBusinesses";
 import RegionsShowcase from "@/components/RegionsShowcase";
 import GhanaMap from "@/components/GhanaMap";
 import Benefits from "@/components/Benefits";
@@ -14,6 +15,7 @@ const Index = () => {
       <main>
         <Hero />
         <Features />
+        <FeaturedBusinesses />
         <RegionsShowcase />
         <GhanaMap />
         <Benefits />
