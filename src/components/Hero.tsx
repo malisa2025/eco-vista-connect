@@ -1,9 +1,22 @@
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { ArrowRight, Search } from "lucide-react";
 import heroBg from "@/assets/hero-bg.jpg";
 import { CompactNewsPlayer } from "@/components/CompactNewsPlayer";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Hero = () => {
+  const [searchQuery, setSearchQuery] = useState("");
+  const navigate = useNavigate();
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/businesses?search=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
+
   return (
     <section className="relative min-h-[90vh] flex items-center overflow-hidden">
       {/* Background Image with Overlay */}
@@ -33,14 +46,37 @@ const Hero = () => {
             Connecting businesses with customers across all the regions in Ghana through our powerful directory, advertising, and community platform.
           </p>
 
+          {/* Search Bar */}
+          <form onSubmit={handleSearch} className="mb-8">
+            <div className="relative max-w-2xl">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10" />
+              <Input
+                type="text"
+                placeholder="Search businesses by name or phone number..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-12 pr-32 h-14 text-lg bg-background/95 backdrop-blur border-2 border-border/50 focus:border-primary shadow-lg hover:shadow-xl transition-smooth"
+              />
+              <Button 
+                type="submit"
+                size="lg" 
+                className="absolute right-2 top-1/2 -translate-y-1/2 shadow-glow"
+              >
+                Search
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
+          </form>
+
           <div className="flex flex-col sm:flex-row gap-4 mb-12">
-            <Button size="lg" className="group shadow-glow hover:shadow-xl transition-smooth text-lg px-8 py-6">
-              Get Started
-              <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-smooth" />
-            </Button>
-            <Button size="lg" variant="outline" className="text-lg px-8 py-6 border-2">
-              <Search className="mr-2 h-5 w-5" />
-              Explore Businesses
+            <Button 
+              size="lg" 
+              onClick={() => navigate('/businesses')}
+              variant="outline"
+              className="text-lg px-8 py-6 border-2"
+            >
+              Explore All Businesses
+              <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           </div>
 
