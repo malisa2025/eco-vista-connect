@@ -10,6 +10,17 @@ interface Profile {
   avatar_url: string | null;
   phone: string | null;
   bio: string | null;
+  skills: string[] | null;
+  experience_years: number | null;
+  education: string | null;
+  resume_url: string | null;
+  linkedin_url: string | null;
+  github_url: string | null;
+  portfolio_url: string | null;
+  preferred_job_types: string[] | null;
+  preferred_locations: string[] | null;
+  salary_expectation: string | null;
+  availability: string | null;
 }
 
 interface UserRole {

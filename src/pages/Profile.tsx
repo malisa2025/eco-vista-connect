@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -9,21 +9,57 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { User, Mail, Phone, FileText } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { User, Mail, Phone, FileText, Briefcase, GraduationCap, Settings, Link as LinkIcon } from 'lucide-react';
+import ProfileCompletenessBar from '@/components/profile/ProfileCompletenessBar';
+import SkillsManager from '@/components/profile/SkillsManager';
+import PreferencesSection from '@/components/profile/PreferencesSection';
+import LinksSection from '@/components/profile/LinksSection';
 
 const Profile = () => {
-  const { profile, roles, updateProfile } = useAuth();
-  const [isEditing, setIsEditing] = useState(false);
+  const { profile, roles, updateProfile, user } = useAuth();
+  const [activeTab, setActiveTab] = useState("overview");
   const [formData, setFormData] = useState({
     full_name: profile?.full_name || '',
     phone: profile?.phone || '',
     bio: profile?.bio || '',
+    skills: profile?.skills || [],
+    experience_years: profile?.experience_years || 0,
+    education: profile?.education || '',
+    linkedin_url: profile?.linkedin_url || '',
+    github_url: profile?.github_url || '',
+    portfolio_url: profile?.portfolio_url || '',
+    resume_url: profile?.resume_url || '',
+    preferred_job_types: profile?.preferred_job_types || [],
+    preferred_locations: profile?.preferred_locations || [],
+    salary_expectation: profile?.salary_expectation || '',
+    availability: profile?.availability || 'immediate',
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // Update form data when profile changes
+  useEffect(() => {
+    if (profile) {
+      setFormData({
+        full_name: profile.full_name || '',
+        phone: profile.phone || '',
+        bio: profile.bio || '',
+        skills: profile.skills || [],
+        experience_years: profile.experience_years || 0,
+        education: profile.education || '',
+        linkedin_url: profile.linkedin_url || '',
+        github_url: profile.github_url || '',
+        portfolio_url: profile.portfolio_url || '',
+        resume_url: profile.resume_url || '',
+        preferred_job_types: profile.preferred_job_types || [],
+        preferred_locations: profile.preferred_locations || [],
+        salary_expectation: profile.salary_expectation || '',
+        availability: profile.availability || 'immediate',
+      });
+    }
+  }, [profile]);
+
+  const handleSave = async () => {
     await updateProfile(formData);
-    setIsEditing(false);
   };
 
   const getInitials = () => {
@@ -73,22 +109,57 @@ const Profile = () => {
               </CardHeader>
             </Card>
 
-            {/* Profile Information Card */}
+            {/* Profile Completeness */}
+            <ProfileCompletenessBar />
+
+            {/* Tabbed Profile Editor */}
             <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle>Profile Information</CardTitle>
-                    <CardDescription>Update your personal details</CardDescription>
-                  </div>
-                  {!isEditing && (
-                    <Button onClick={() => setIsEditing(true)}>Edit Profile</Button>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent>
-                {isEditing ? (
-                  <form onSubmit={handleSubmit} className="space-y-4">
+              <CardContent className="pt-6">
+                <Tabs value={activeTab} onValueChange={setActiveTab}>
+                  <TabsList className="grid w-full grid-cols-6">
+                    <TabsTrigger value="overview">Overview</TabsTrigger>
+                    <TabsTrigger value="basic">Basic</TabsTrigger>
+                    <TabsTrigger value="professional">Professional</TabsTrigger>
+                    <TabsTrigger value="education">Education</TabsTrigger>
+                    <TabsTrigger value="preferences">Preferences</TabsTrigger>
+                    <TabsTrigger value="links">Links</TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="overview" className="space-y-4 mt-6">
+                    <div className="grid md:grid-cols-3 gap-4">
+                      <Card>
+                        <CardContent className="pt-6">
+                          <div className="text-center">
+                            <Briefcase className="w-8 h-8 mx-auto mb-2 text-primary" />
+                            <p className="text-2xl font-bold">{profile?.experience_years || 0}</p>
+                            <p className="text-sm text-muted-foreground">Years Experience</p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                      <Card>
+                        <CardContent className="pt-6">
+                          <div className="text-center">
+                            <FileText className="w-8 h-8 mx-auto mb-2 text-primary" />
+                            <p className="text-2xl font-bold">{profile?.skills?.length || 0}</p>
+                            <p className="text-sm text-muted-foreground">Skills</p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                      <Card>
+                        <CardContent className="pt-6">
+                          <div className="text-center">
+                            <LinkIcon className="w-8 h-8 mx-auto mb-2 text-primary" />
+                            <p className="text-2xl font-bold">
+                              {[profile?.linkedin_url, profile?.github_url, profile?.portfolio_url, profile?.resume_url].filter(Boolean).length}
+                            </p>
+                            <p className="text-sm text-muted-foreground">Links Added</p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="basic" className="space-y-4 mt-6">
                     <div className="space-y-2">
                       <Label htmlFor="full_name">
                         <User className="inline h-4 w-4 mr-2" />
@@ -115,47 +186,88 @@ const Profile = () => {
                     <div className="space-y-2">
                       <Label htmlFor="bio">
                         <FileText className="inline h-4 w-4 mr-2" />
-                        Bio
+                        Professional Bio
                       </Label>
                       <Textarea
                         id="bio"
                         value={formData.bio}
                         onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                        rows={4}
+                        rows={6}
+                        placeholder="Tell employers about yourself, your experience, and what you're looking for..."
                       />
                     </div>
-                    <div className="flex gap-2">
-                      <Button type="submit">Save Changes</Button>
-                      <Button type="button" variant="outline" onClick={() => setIsEditing(false)}>
-                        Cancel
-                      </Button>
-                    </div>
-                  </form>
-                ) : (
-                  <div className="space-y-4">
-                    <div>
-                      <Label className="text-muted-foreground">
-                        <User className="inline h-4 w-4 mr-2" />
-                        Full Name
+                    <Button onClick={handleSave}>Save Changes</Button>
+                  </TabsContent>
+
+                  <TabsContent value="professional" className="space-y-4 mt-6">
+                    <div className="space-y-2">
+                      <Label>
+                        <Briefcase className="inline h-4 w-4 mr-2" />
+                        Years of Experience
                       </Label>
-                      <p className="mt-1">{profile?.full_name || 'Not set'}</p>
+                      <Input
+                        type="number"
+                        min="0"
+                        value={formData.experience_years}
+                        onChange={(e) => setFormData({ ...formData, experience_years: parseInt(e.target.value) || 0 })}
+                      />
                     </div>
-                    <div>
-                      <Label className="text-muted-foreground">
-                        <Phone className="inline h-4 w-4 mr-2" />
-                        Phone
+                    <div className="space-y-2">
+                      <Label>Skills & Expertise</Label>
+                      <SkillsManager
+                        skills={formData.skills}
+                        onChange={(skills) => setFormData({ ...formData, skills })}
+                      />
+                    </div>
+                    <Button onClick={handleSave}>Save Changes</Button>
+                  </TabsContent>
+
+                  <TabsContent value="education" className="space-y-4 mt-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="education">
+                        <GraduationCap className="inline h-4 w-4 mr-2" />
+                        Education
                       </Label>
-                      <p className="mt-1">{profile?.phone || 'Not set'}</p>
+                      <Textarea
+                        id="education"
+                        value={formData.education}
+                        onChange={(e) => setFormData({ ...formData, education: e.target.value })}
+                        rows={6}
+                        placeholder="List your educational background, degrees, certifications..."
+                      />
                     </div>
-                    <div>
-                      <Label className="text-muted-foreground">
-                        <FileText className="inline h-4 w-4 mr-2" />
-                        Bio
-                      </Label>
-                      <p className="mt-1">{profile?.bio || 'Not set'}</p>
-                    </div>
-                  </div>
-                )}
+                    <Button onClick={handleSave}>Save Changes</Button>
+                  </TabsContent>
+
+                  <TabsContent value="preferences" className="space-y-4 mt-6">
+                    <PreferencesSection
+                      preferredJobTypes={formData.preferred_job_types}
+                      preferredLocations={formData.preferred_locations}
+                      salaryExpectation={formData.salary_expectation}
+                      availability={formData.availability}
+                      onJobTypesChange={(types) => setFormData({ ...formData, preferred_job_types: types })}
+                      onLocationsChange={(locations) => setFormData({ ...formData, preferred_locations: locations })}
+                      onSalaryChange={(salary) => setFormData({ ...formData, salary_expectation: salary })}
+                      onAvailabilityChange={(availability) => setFormData({ ...formData, availability })}
+                    />
+                    <Button onClick={handleSave}>Save Changes</Button>
+                  </TabsContent>
+
+                  <TabsContent value="links" className="space-y-4 mt-6">
+                    <LinksSection
+                      linkedinUrl={formData.linkedin_url}
+                      githubUrl={formData.github_url}
+                      portfolioUrl={formData.portfolio_url}
+                      resumeUrl={formData.resume_url}
+                      userId={user?.id || ''}
+                      onLinkedinChange={(url) => setFormData({ ...formData, linkedin_url: url })}
+                      onGithubChange={(url) => setFormData({ ...formData, github_url: url })}
+                      onPortfolioChange={(url) => setFormData({ ...formData, portfolio_url: url })}
+                      onResumeUrlChange={(url) => setFormData({ ...formData, resume_url: url })}
+                    />
+                    <Button onClick={handleSave}>Save Changes</Button>
+                  </TabsContent>
+                </Tabs>
               </CardContent>
             </Card>
           </div>
