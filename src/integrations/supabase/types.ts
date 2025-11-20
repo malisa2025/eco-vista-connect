@@ -90,6 +90,9 @@ export type Database = {
           image_url: string
           impressions: number | null
           link_url: string | null
+          paid_at: string | null
+          payment_reference: string | null
+          payment_status: string | null
           start_date: string
           status: Database["public"]["Enums"]["ad_status"] | null
           stripe_payment_id: string | null
@@ -107,6 +110,9 @@ export type Database = {
           image_url: string
           impressions?: number | null
           link_url?: string | null
+          paid_at?: string | null
+          payment_reference?: string | null
+          payment_status?: string | null
           start_date: string
           status?: Database["public"]["Enums"]["ad_status"] | null
           stripe_payment_id?: string | null
@@ -124,6 +130,9 @@ export type Database = {
           image_url?: string
           impressions?: number | null
           link_url?: string | null
+          paid_at?: string | null
+          payment_reference?: string | null
+          payment_status?: string | null
           start_date?: string
           status?: Database["public"]["Enums"]["ad_status"] | null
           stripe_payment_id?: string | null
@@ -466,6 +475,53 @@ export type Database = {
           },
         ]
       }
+      payment_transactions: {
+        Row: {
+          advertisement_id: string
+          amount: number
+          created_at: string | null
+          id: string
+          metadata: Json | null
+          paid_at: string | null
+          payment_method: string | null
+          payment_reference: string
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          advertisement_id: string
+          amount: number
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          paid_at?: string | null
+          payment_method?: string | null
+          payment_reference: string
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          advertisement_id?: string
+          amount?: number
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          paid_at?: string | null
+          payment_method?: string | null
+          payment_reference?: string
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_transactions_advertisement_id_fkey"
+            columns: ["advertisement_id"]
+            isOneToOne: false
+            referencedRelation: "advertisements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -598,6 +654,25 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_admin_stats: {
+        Args: never
+        Returns: {
+          pending_claims: number
+          total_businesses: number
+          total_reviews: number
+          total_users: number
+        }[]
+      }
+      get_recent_activity: {
+        Args: never
+        Returns: {
+          activity_type: string
+          created_at: string
+          description: string
+          id: string
+          title: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

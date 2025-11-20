@@ -14,6 +14,8 @@ import { Badge } from '@/components/ui/badge';
 import { TrendingUp, MapPin } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import { usePaystackPayment } from 'react-paystack';
+import { supabase } from '@/integrations/supabase/client';
 
 const PurchaseAd = () => {
   const navigate = useNavigate();
@@ -42,20 +44,69 @@ const PurchaseAd = () => {
     : 0;
   const totalCost = selectedSpot && daysDiff > 0 ? selectedSpot.price_per_day * daysDiff : 0;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const handlePayment = async () => {
     if (!formData.business_id || !formData.ad_spot_id || !formData.title || !formData.image_url) {
       toast.error('Please fill in all required fields');
       return;
     }
 
-    await createAd.mutateAsync({
-      ...formData,
-      total_cost: totalCost,
-    });
+    if (totalCost <= 0) {
+      toast.error('Invalid ad duration');
+      return;
+    }
 
-    navigate('/my-businesses');
+    try {
+      // Create the advertisement first
+      const ad = await createAd.mutateAsync({
+        ...formData,
+        total_cost: totalCost,
+      });
+
+      // Initialize Paystack payment
+      const config = {
+        reference: `ad_${ad.id}_${Date.now()}`,
+        email: user?.email || '',
+        amount: Math.round(totalCost * 100), // Convert to kobo
+        publicKey: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || '',
+        metadata: {
+          advertisement_id: ad.id,
+          business_id: formData.business_id,
+          custom_fields: [],
+        },
+      };
+
+      const initializePayment = usePaystackPayment(config);
+      
+      initializePayment({
+        onSuccess: async (reference: any) => {
+          toast.success('Payment successful! Verifying...');
+          
+          // Verify payment with our edge function
+          const { error } = await supabase.functions.invoke('verify-paystack-payment', {
+            body: { reference: reference.reference },
+          });
+
+          if (error) {
+            toast.error('Payment verification failed. Please contact support.');
+            console.error('Verification error:', error);
+          } else {
+            toast.success('Advertisement activated successfully!');
+            navigate('/my-businesses');
+          }
+        },
+        onClose: () => {
+          toast.error('Payment cancelled');
+        }
+      });
+    } catch (error) {
+      console.error('Error creating advertisement:', error);
+      toast.error('Failed to create advertisement');
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await handlePayment();
   };
 
   return (
