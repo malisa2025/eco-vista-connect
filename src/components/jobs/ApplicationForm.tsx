@@ -1,32 +1,84 @@
-import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useState, useEffect } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useApplicationMutations } from "@/hooks/useJobApplications";
 import { useAuth } from "@/contexts/AuthContext";
+import { useProfileCompleteness } from "@/hooks/useProfileCompleteness";
 import { toast } from "sonner";
-import { Upload, FileText } from "lucide-react";
+import { Upload, FileText, AlertCircle } from "lucide-react";
 import VideoRecorder from "./VideoRecorder";
+import AIGenerateButton from "./AIGenerateButton";
 import { supabase } from "@/integrations/supabase/client";
 
 interface ApplicationFormProps {
   jobId: string;
   jobTitle: string;
+  jobDescription?: string;
   requireVideo: boolean;
   videoPrompt?: string;
   onClose: () => void;
 }
 
-const ApplicationForm = ({ jobId, jobTitle, requireVideo, videoPrompt, onClose }: ApplicationFormProps) => {
-  const { user } = useAuth();
+const ApplicationForm = ({ jobId, jobTitle, jobDescription, requireVideo, videoPrompt, onClose }: ApplicationFormProps) => {
+  const { user, profile } = useAuth();
+  const { completionPercentage } = useProfileCompleteness();
   const { submitApplication } = useApplicationMutations();
   const [coverLetter, setCoverLetter] = useState("");
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [videoTab, setVideoTab] = useState<"record" | "upload">("record");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  // Auto-fill from profile
+  useEffect(() => {
+    if (profile?.bio && !coverLetter) {
+      setCoverLetter(`Dear Hiring Manager,\n\n${profile.bio}\n\nI am excited about this opportunity and believe my skills and experience make me a strong candidate for this position.\n\nBest regards,\n${profile.full_name || 'Applicant'}`);
+    }
+  }, [profile]);
+
+  const handleUseProfileResume = () => {
+    if (profile?.resume_url) {
+      toast.success("Using resume from your profile");
+      // We'll handle this in submit
+    } else {
+      toast.error("No resume found in your profile. Please upload one.");
+    }
+  };
+
+  const handleGenerateCoverLetter = async () => {
+    if (!profile) {
+      toast.error("Please complete your profile first");
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-cover-letter', {
+        body: {
+          jobTitle,
+          jobDescription: jobDescription || '',
+          userProfile: profile,
+        },
+      });
+
+      if (error) throw error;
+
+      if (data?.coverLetter) {
+        setCoverLetter(data.coverLetter);
+        toast.success("Cover letter generated!");
+      }
+    } catch (error) {
+      console.error("Cover letter generation error:", error);
+      toast.error("Failed to generate cover letter. Please try again.");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   const handleResumeUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -92,6 +144,9 @@ const ApplicationForm = ({ jobId, jobTitle, requireVideo, videoPrompt, onClose }
       let resumeUrl = null;
       if (resumeFile) {
         resumeUrl = await uploadFile(resumeFile, "resume");
+      } else if (profile?.resume_url) {
+        // Use profile resume if no file uploaded
+        resumeUrl = profile.resume_url;
       }
 
       let videoUrl = null;
@@ -122,14 +177,34 @@ const ApplicationForm = ({ jobId, jobTitle, requireVideo, videoPrompt, onClose }
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Apply for {jobTitle}</DialogTitle>
+          <DialogDescription>
+            Submit your application with a personalized cover letter
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
-          {/* Cover Letter */}
+          {/* Profile Completeness Warning */}
+          {completionPercentage < 50 && (
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                Your profile is only {completionPercentage}% complete. Complete your profile to increase your chances of getting hired.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* Cover Letter with AI Generate */}
           <div>
-            <Label htmlFor="coverLetter">
-              Cover Letter <span className="text-destructive">*</span>
-            </Label>
+            <div className="flex items-center justify-between mb-2">
+              <Label htmlFor="coverLetter">
+                Cover Letter <span className="text-destructive">*</span>
+              </Label>
+              <AIGenerateButton
+                onClick={handleGenerateCoverLetter}
+                loading={isGenerating}
+                text="Generate with AI"
+              />
+            </div>
             <p className="text-sm text-muted-foreground mb-2">
               Tell the employer why you're a great fit (minimum 100 characters)
             </p>
@@ -148,7 +223,19 @@ const ApplicationForm = ({ jobId, jobTitle, requireVideo, videoPrompt, onClose }
 
           {/* Resume Upload */}
           <div>
-            <Label htmlFor="resume">Resume (Optional)</Label>
+            <div className="flex items-center justify-between mb-2">
+              <Label htmlFor="resume">Resume (Optional)</Label>
+              {profile?.resume_url && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleUseProfileResume}
+                >
+                  Use Profile Resume
+                </Button>
+              )}
+            </div>
             <p className="text-sm text-muted-foreground mb-2">
               PDF, DOC, or DOCX (max 5MB)
             </p>

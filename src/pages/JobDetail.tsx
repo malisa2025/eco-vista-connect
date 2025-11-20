@@ -330,6 +330,7 @@ const JobDetail = () => {
         <ApplicationForm 
           jobId={id!}
           jobTitle={job.title}
+          jobDescription={job.description}
           requireVideo={job.require_video || false}
           videoPrompt={job.video_prompt || undefined}
           onClose={() => setShowApplicationForm(false)}
