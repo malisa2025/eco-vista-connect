@@ -9,20 +9,30 @@ export const useJobApplications = (jobId: string) => {
       const { data, error } = await supabase
         .from('job_applications')
         .select(`
-          *,
-          profiles (
-            id,
-            full_name,
-            email,
-            avatar_url,
-            phone
-          )
+          *
         `)
         .eq('job_id', jobId)
         .order('applied_at', { ascending: false });
 
       if (error) throw error;
-      return data;
+      
+      // Fetch profile data separately for each application
+      const applicationsWithProfiles = await Promise.all(
+        (data || []).map(async (application) => {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('id, full_name, email, avatar_url, phone')
+            .eq('id', application.user_id)
+            .single();
+          
+          return {
+            ...application,
+            profiles: profile,
+          };
+        })
+      );
+      
+      return applicationsWithProfiles;
     },
     enabled: !!jobId,
   });

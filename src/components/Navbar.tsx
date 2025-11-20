@@ -59,6 +59,14 @@ const Navbar = () => {
             >
               Jobs
             </button>
+            {user && !hasRole('business_owner') && !hasRole('admin') && (
+              <button 
+                onClick={() => navigate('/my-applications')}
+                className="text-sm font-medium hover:text-primary transition-smooth"
+              >
+                My Applications
+              </button>
+            )}
             {isHome && (
               <>
                 <a href="#features" className="text-sm font-medium hover:text-primary transition-smooth">
@@ -161,6 +169,20 @@ const Navbar = () => {
               >
                 Businesses
               </button>
+              <button 
+                onClick={() => { navigate('/jobs'); setIsOpen(false); }}
+                className="text-sm font-medium hover:text-primary transition-smooth py-2 text-left"
+              >
+                Jobs
+              </button>
+              {user && !hasRole('business_owner') && !hasRole('admin') && (
+                <button 
+                  onClick={() => { navigate('/my-applications'); setIsOpen(false); }}
+                  className="text-sm font-medium hover:text-primary transition-smooth py-2 text-left"
+                >
+                  My Applications
+                </button>
+              )}
               {isHome && (
                 <>
                   <a href="#features" className="text-sm font-medium hover:text-primary transition-smooth py-2">
