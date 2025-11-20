@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useReviewMutations } from '@/hooks/useBusinessReviews';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
@@ -27,6 +28,7 @@ interface ReviewFormProps {
 
 const ReviewForm = ({ businessId, existingReview, onSuccess }: ReviewFormProps) => {
   const { user } = useAuth();
+  const { createReview, updateReview } = useReviewMutations(businessId);
   const [rating, setRating] = useState(existingReview?.rating || 0);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [title, setTitle] = useState(existingReview?.title || '');
@@ -46,9 +48,21 @@ const ReviewForm = ({ businessId, existingReview, onSuccess }: ReviewFormProps) 
 
     setIsSubmitting(true);
     
-    // Implementation will use Supabase mutation hooks
-    onSuccess();
-    setIsSubmitting(false);
+    try {
+      if (existingReview) {
+        await updateReview.mutateAsync({
+          reviewId: existingReview.id,
+          updates: { rating, title, comment }
+        });
+      } else {
+        await createReview.mutateAsync({ rating, title, comment });
+      }
+      onSuccess();
+    } catch (error) {
+      // Error handling is done in the mutation
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

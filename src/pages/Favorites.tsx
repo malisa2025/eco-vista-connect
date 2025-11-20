@@ -1,12 +1,15 @@
+import { useAuth } from '@/contexts/AuthContext';
+import { useFavorites } from '@/hooks/useFavorites';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import BusinessList from '@/components/BusinessList';
 import { Heart } from 'lucide-react';
 
 const Favorites = () => {
-  // TODO: Fetch user's favorite businesses
-  const businesses: any[] = [];
-  const isLoading = false;
+  const { user } = useAuth();
+  const { data: favorites, isLoading } = useFavorites(user?.id);
+  
+  const businesses = favorites?.map(f => f.businesses).filter(Boolean) || [];
 
   return (
     <div className="min-h-screen flex flex-col">

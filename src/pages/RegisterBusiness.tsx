@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { useClaimMutations } from '@/hooks/useBusinessClaims';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,6 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Building2, Search } from 'lucide-react';
 import { useBusinessCategories } from '@/hooks/useBusinessCategories';
+import { useBusinesses } from '@/hooks/useBusinesses';
 import { z } from 'zod';
 import { toast } from 'sonner';
 
@@ -31,10 +35,19 @@ const regions = [
 ];
 
 const RegisterBusiness = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const { data: categories } = useBusinessCategories();
+  const { submitClaim } = useClaimMutations();
   const [activeTab, setActiveTab] = useState('new');
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedBusiness, setSelectedBusiness] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { data: searchResults } = useBusinesses({
+    search: searchQuery,
+    limit: 10,
+  });
 
   const [formData, setFormData] = useState({
     name: '',
@@ -47,6 +60,26 @@ const RegisterBusiness = () => {
     address: '',
   });
 
+  const handleClaimExisting = async () => {
+    if (!selectedBusiness) {
+      toast.error('Please select a business to claim');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await submitClaim.mutateAsync({
+        business_id: selectedBusiness,
+        claim_type: 'claim_existing',
+      });
+      navigate('/my-businesses');
+    } catch (error) {
+      // Error handled in mutation
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -57,11 +90,17 @@ const RegisterBusiness = () => {
     }
 
     setIsSubmitting(true);
-    
-    // TODO: Implement business claim submission
-    toast.success('Business registration submitted for review!');
-    
-    setIsSubmitting(false);
+    try {
+      await submitClaim.mutateAsync({
+        claim_type: 'new_business',
+        business_data: formData,
+      });
+      navigate('/my-businesses');
+    } catch (error) {
+      // Error handled in mutation
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -97,21 +136,50 @@ const RegisterBusiness = () => {
                   <div className="space-y-4">
                     <div className="space-y-2">
                       <Label>Search for your business</Label>
-                      <div className="flex gap-2">
-                        <Input
-                          placeholder="Enter business name..."
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                        />
-                        <Button>
-                          <Search className="h-4 w-4 mr-2" />
-                          Search
+                      <Input
+                        placeholder="Enter business name..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                      />
+                    </div>
+
+                    {searchResults && searchResults.length > 0 ? (
+                      <div className="space-y-2">
+                        {searchResults.map((business) => (
+                          <Card
+                            key={business.id}
+                            className={`cursor-pointer transition-colors ${
+                              selectedBusiness === business.id
+                                ? 'border-primary'
+                                : 'hover:border-primary/50'
+                            }`}
+                            onClick={() => setSelectedBusiness(business.id)}
+                          >
+                            <CardContent className="p-4">
+                              <h4 className="font-semibold">{business.name}</h4>
+                              <p className="text-sm text-muted-foreground">
+                                {business.category} • {business.region}
+                              </p>
+                            </CardContent>
+                          </Card>
+                        ))}
+                        <Button
+                          className="w-full mt-4"
+                          onClick={handleClaimExisting}
+                          disabled={!selectedBusiness || isSubmitting}
+                        >
+                          {isSubmitting ? 'Submitting...' : 'Claim This Business'}
                         </Button>
                       </div>
-                    </div>
-                    <div className="text-center py-8 text-muted-foreground">
-                      Search for your business to claim ownership
-                    </div>
+                    ) : searchQuery ? (
+                      <div className="text-center py-8 text-muted-foreground">
+                        No businesses found. Try a different search or add a new business.
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 text-muted-foreground">
+                        Search for your business to claim ownership
+                      </div>
+                    )}
                   </div>
                 </TabsContent>
 

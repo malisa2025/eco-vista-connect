@@ -15,7 +15,7 @@ interface Review {
   profiles: {
     full_name: string | null;
     avatar_url: string | null;
-  };
+  } | null;
 }
 
 interface ReviewsListProps {

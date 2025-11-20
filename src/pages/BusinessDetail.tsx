@@ -2,6 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTrackBusinessView } from "@/hooks/useBusinessViews";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,7 @@ import ReviewForm from "@/components/reviews/ReviewForm";
 import ReviewsList from "@/components/reviews/ReviewsList";
 import { useBusinessReviews, useUserReview, useReviewMutations, useUserHelpfulReviews } from "@/hooks/useBusinessReviews";
 import { useState } from "react";
+import FavoriteButton from "@/components/FavoriteButton";
 import {
   ArrowLeft,
   Star,
@@ -21,7 +23,6 @@ import {
   Mail,
   Globe,
   CheckCircle2,
-  Heart,
 } from "lucide-react";
 
 const BusinessDetail = () => {
@@ -29,6 +30,9 @@ const BusinessDetail = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [showReviewForm, setShowReviewForm] = useState(false);
+
+  // Track business view
+  useTrackBusinessView(id!);
 
   const { data: reviews, isLoading: reviewsLoading } = useBusinessReviews(id!);
   const { data: userReview } = useUserReview(id!, user?.id);
@@ -112,11 +116,16 @@ const BusinessDetail = () => {
               {business.name.charAt(0)}
             </div>
           )}
-          {business.is_verified && (
-            <div className="absolute top-6 right-6 bg-primary text-primary-foreground rounded-full p-3 shadow-lg">
-              <CheckCircle2 className="w-6 h-6" />
+          <div className="absolute top-6 right-6 flex gap-3">
+            {business.is_verified && (
+              <div className="bg-primary text-primary-foreground rounded-full p-3 shadow-lg">
+                <CheckCircle2 className="w-6 h-6" />
+              </div>
+            )}
+            <div className="bg-background rounded-full shadow-lg">
+              <FavoriteButton businessId={id!} size="lg" />
             </div>
-          )}
+          </div>
         </div>
 
         {/* Content */}
@@ -267,6 +276,67 @@ const BusinessDetail = () => {
                 </CardContent>
               </Card>
             </div>
+          </div>
+        </div>
+
+        {/* Reviews Section */}
+        <div className="container mx-auto px-4 pb-12">
+          <div className="max-w-4xl space-y-6">
+            <h2 className="text-2xl font-bold">Reviews & Ratings</h2>
+            
+            <ReviewSummary
+              averageRating={business.rating || 0}
+              totalReviews={business.review_count || 0}
+              ratingDistribution={{
+                5: reviews?.filter(r => r.rating === 5).length || 0,
+                4: reviews?.filter(r => r.rating === 4).length || 0,
+                3: reviews?.filter(r => r.rating === 3).length || 0,
+                2: reviews?.filter(r => r.rating === 2).length || 0,
+                1: reviews?.filter(r => r.rating === 1).length || 0,
+              }}
+              onWriteReview={() => setShowReviewForm(true)}
+              canWriteReview={!!user && !userReview}
+            />
+
+            {showReviewForm && !userReview && (
+              <Card>
+                <CardContent className="pt-6">
+                  <h3 className="text-xl font-semibold mb-4">Write a Review</h3>
+                  <ReviewForm
+                    businessId={id!}
+                    onSuccess={() => {
+                      setShowReviewForm(false);
+                    }}
+                  />
+                </CardContent>
+              </Card>
+            )}
+
+            {userReview && (
+              <Card className="border-primary">
+                <CardContent className="pt-6">
+                  <h3 className="text-xl font-semibold mb-4">Your Review</h3>
+                  <ReviewForm
+                    businessId={id!}
+                    existingReview={userReview}
+                    onSuccess={() => {}}
+                  />
+                </CardContent>
+              </Card>
+            )}
+
+            <ReviewsList
+              reviews={reviews || []}
+              isLoading={reviewsLoading}
+              onDelete={(reviewId) => deleteReview.mutate(reviewId)}
+              onHelpful={(reviewId) => 
+                toggleHelpful.mutate({ 
+                  reviewId, 
+                  isHelpful: helpfulReviewIds.includes(reviewId) 
+                })
+              }
+              helpfulReviewIds={helpfulReviewIds}
+            />
           </div>
         </div>
       </main>

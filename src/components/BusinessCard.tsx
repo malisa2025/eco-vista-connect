@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Star, MapPin, Phone, Mail, Globe, CheckCircle2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import FavoriteButton from "./FavoriteButton";
 
 interface BusinessCardProps {
   id: string;
@@ -48,15 +49,20 @@ const BusinessCard = ({
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-6xl font-bold text-primary/20">
+          <div className="w-full h-full flex items-center justify-center text-6xl font-bold text-primary/20 transition-colors group-hover:text-primary/30">
             {name.charAt(0)}
           </div>
         )}
-        {is_verified && (
-          <div className="absolute top-3 right-3 bg-primary text-primary-foreground rounded-full p-2 shadow-lg">
-            <CheckCircle2 className="w-4 h-4" />
+        <div className="absolute top-2 right-2 flex gap-2">
+          {is_verified && (
+            <div className="bg-primary text-primary-foreground rounded-full p-1.5 shadow-lg">
+              <CheckCircle2 className="w-4 h-4" />
+            </div>
+          )}
+          <div className="bg-background/80 backdrop-blur-sm rounded-full">
+            <FavoriteButton businessId={id} />
           </div>
-        )}
+        </div>
       </div>
 
       <CardHeader className="space-y-3">
