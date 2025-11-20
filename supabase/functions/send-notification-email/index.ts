@@ -90,6 +90,44 @@ const getEmailContent = (type: string, data: any) => {
         `
       };
     
+    case 'expiring_soon':
+      return {
+        subject: `Your ad expires in ${data.days_remaining} day${data.days_remaining > 1 ? 's' : ''}`,
+        html: `
+          <!DOCTYPE html>
+          <html>
+            <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+              <h2 style="color: #333;">⏰ Ad Expiration Reminder</h2>
+              <p>Hi ${data.user_name},</p>
+              <p>Your advertisement "<strong>${data.ad_title}</strong>" will expire in <strong>${data.days_remaining} day${data.days_remaining > 1 ? 's' : ''}</strong>.</p>
+              <div style="background: #fff7ed; padding: 16px; border-radius: 5px; margin: 20px 0;">
+                <p style="margin: 0;">Total Impressions: ${data.impressions.toLocaleString()}</p>
+              </div>
+              <a href="${Deno.env.get('SUPABASE_URL')}/purchase-ad" style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">Renew Advertisement</a>
+              <p style="color: #898989; font-size: 12px; margin-top: 40px;">Ghana Business Directory</p>
+            </body>
+          </html>
+        `
+      };
+    
+    case 'low_performance':
+      return {
+        subject: 'Tips to improve your ad performance',
+        html: `
+          <!DOCTYPE html>
+          <html>
+            <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+              <h2 style="color: #333;">💡 Ad Performance Insights</h2>
+              <p>Hi ${data.user_name},</p>
+              <p>Your ad "<strong>${data.ad_title}</strong>" has a CTR of ${data.ctr}% (${data.clicks} clicks from ${data.impressions} impressions).</p>
+              <p><strong>Tips to improve:</strong></p>
+              <ul><li>Update your ad image</li><li>Revise your ad title</li><li>Consider different ad placement</li></ul>
+              <a href="${Deno.env.get('SUPABASE_URL')}/my-businesses" style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">View Details</a>
+            </body>
+          </html>
+        `
+      };
+    
     default:
       throw new Error(`Unknown email type: ${type}`);
   }

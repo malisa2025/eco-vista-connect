@@ -12,6 +12,7 @@ import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
 import RegisterBusiness from "./pages/RegisterBusiness";
 import MyBusinesses from "./pages/MyBusinesses";
+import AdAnalytics from "./pages/AdAnalytics";
 import Favorites from "./pages/Favorites";
 import Inbox from "./pages/Inbox";
 import PurchaseAd from "./pages/PurchaseAd";
@@ -73,6 +74,14 @@ const App = () => (
               element={
                 <ProtectedRoute requireRole="business_owner">
                   <PurchaseAd />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ad-analytics/:adId"
+              element={
+                <ProtectedRoute requireRole="business_owner">
+                  <AdAnalytics />
                 </ProtectedRoute>
               }
             />

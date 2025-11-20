@@ -60,7 +60,27 @@ export const useBusinessAds = (businessId?: string) => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data;
+
+      // Fetch click counts for each ad
+      const adsWithClicks = await Promise.all(
+        data.map(async (ad) => {
+          const { count } = await supabase
+            .from('ad_clicks')
+            .select('*', { count: 'exact', head: true })
+            .eq('advertisement_id', ad.id);
+
+          const clicks = count || 0;
+          const ctr = ad.impressions > 0 ? (clicks / ad.impressions) * 100 : 0;
+
+          return {
+            ...ad,
+            total_clicks: clicks,
+            ctr: ctr.toFixed(2),
+          };
+        })
+      );
+
+      return adsWithClicks;
     },
     enabled: !!businessId,
   });

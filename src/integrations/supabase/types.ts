@@ -49,6 +49,41 @@ export type Database = {
           },
         ]
       }
+      ad_impressions_daily: {
+        Row: {
+          advertisement_id: string
+          clicks: number | null
+          created_at: string | null
+          date: string
+          id: string
+          impressions: number | null
+        }
+        Insert: {
+          advertisement_id: string
+          clicks?: number | null
+          created_at?: string | null
+          date: string
+          id?: string
+          impressions?: number | null
+        }
+        Update: {
+          advertisement_id?: string
+          clicks?: number | null
+          created_at?: string | null
+          date?: string
+          id?: string
+          impressions?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ad_impressions_daily_advertisement_id_fkey"
+            columns: ["advertisement_id"]
+            isOneToOne: false
+            referencedRelation: "advertisements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ad_spots: {
         Row: {
           created_at: string | null
@@ -654,6 +689,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      aggregate_daily_ad_stats: {
+        Args: { target_date?: string }
+        Returns: undefined
+      }
       get_admin_stats: {
         Args: never
         Returns: {
