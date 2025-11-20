@@ -477,11 +477,14 @@ export type Database = {
       }
       job_applications: {
         Row: {
+          application_duration: number | null
           applied_at: string | null
           cover_letter: string
+          device_type: string | null
           id: string
           job_id: string
           notes: string | null
+          quality_score: number | null
           resume_url: string | null
           reviewed_at: string | null
           reviewed_by: string | null
@@ -490,11 +493,14 @@ export type Database = {
           video_url: string | null
         }
         Insert: {
+          application_duration?: number | null
           applied_at?: string | null
           cover_letter: string
+          device_type?: string | null
           id?: string
           job_id: string
           notes?: string | null
+          quality_score?: number | null
           resume_url?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -503,11 +509,14 @@ export type Database = {
           video_url?: string | null
         }
         Update: {
+          application_duration?: number | null
           applied_at?: string | null
           cover_letter?: string
+          device_type?: string | null
           id?: string
           job_id?: string
           notes?: string | null
+          quality_score?: number | null
           resume_url?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -520,6 +529,47 @@ export type Database = {
             foreignKeyName: "job_applications_job_id_fkey"
             columns: ["job_id"]
             isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_performance_cache: {
+        Row: {
+          conversion_score: number | null
+          engagement_score: number | null
+          job_id: string
+          last_updated: string | null
+          overall_score: number | null
+          quality_score: number | null
+          recommendations: Json | null
+          visibility_score: number | null
+        }
+        Insert: {
+          conversion_score?: number | null
+          engagement_score?: number | null
+          job_id: string
+          last_updated?: string | null
+          overall_score?: number | null
+          quality_score?: number | null
+          recommendations?: Json | null
+          visibility_score?: number | null
+        }
+        Update: {
+          conversion_score?: number | null
+          engagement_score?: number | null
+          job_id?: string
+          last_updated?: string | null
+          overall_score?: number | null
+          quality_score?: number | null
+          recommendations?: Json | null
+          visibility_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_performance_cache_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: true
             referencedRelation: "jobs"
             referencedColumns: ["id"]
           },
@@ -578,6 +628,47 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      job_views: {
+        Row: {
+          device_type: string | null
+          id: string
+          job_id: string
+          referrer: string | null
+          session_id: string | null
+          source: string | null
+          user_id: string | null
+          viewed_at: string | null
+        }
+        Insert: {
+          device_type?: string | null
+          id?: string
+          job_id: string
+          referrer?: string | null
+          session_id?: string | null
+          source?: string | null
+          user_id?: string | null
+          viewed_at?: string | null
+        }
+        Update: {
+          device_type?: string | null
+          id?: string
+          job_id?: string
+          referrer?: string | null
+          session_id?: string | null
+          source?: string | null
+          user_id?: string | null
+          viewed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_views_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       jobs: {
         Row: {
@@ -928,6 +1019,10 @@ export type Database = {
     Functions: {
       aggregate_daily_ad_stats: {
         Args: { target_date?: string }
+        Returns: undefined
+      }
+      calculate_job_performance: {
+        Args: { p_job_id: string }
         Returns: undefined
       }
       check_job_seeker_subscription: {
