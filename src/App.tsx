@@ -16,6 +16,10 @@ import Favorites from "./pages/Favorites";
 import Inbox from "./pages/Inbox";
 import PurchaseAd from "./pages/PurchaseAd";
 import AdminDashboard from "./pages/admin/Dashboard";
+import AdminClaims from "./pages/admin/Claims";
+import AdminBusinesses from "./pages/admin/Businesses";
+import AdminUsers from "./pages/admin/Users";
+import AdminAdvertisements from "./pages/admin/Advertisements";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -80,14 +84,46 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
-            <Route
-              path="/admin/dashboard"
-              element={
-                <ProtectedRoute requireRole="admin">
-                  <AdminDashboard />
-                </ProtectedRoute>
-              }
-            />
+          <Route
+            path="/admin/dashboard"
+            element={
+              <ProtectedRoute requireRole="admin">
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/claims"
+            element={
+              <ProtectedRoute requireRole="admin">
+                <AdminClaims />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/businesses"
+            element={
+              <ProtectedRoute requireRole="admin">
+                <AdminBusinesses />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/users"
+            element={
+              <ProtectedRoute requireRole="admin">
+                <AdminUsers />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/advertisements"
+            element={
+              <ProtectedRoute requireRole="admin">
+                <AdminAdvertisements />
+              </ProtectedRoute>
+            }
+          />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
