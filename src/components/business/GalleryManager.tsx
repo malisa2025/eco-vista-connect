@@ -1,11 +1,12 @@
-import { useState } from 'react';
-import { Plus, X, Star, GripVertical } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Plus, X, Star, GripVertical, Check, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ImageUploader } from './ImageUploader';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, useSortable, rectSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { useBusinessUpdate } from '@/hooks/useBusinessUpdate';
 
 interface GalleryManagerProps {
   images: string[];
@@ -13,6 +14,8 @@ interface GalleryManagerProps {
   onImagesChange: (images: string[]) => void;
   onHeroImageChange: (url: string) => void;
   maxImages?: number;
+  autoSave?: boolean;
+  businessId?: string;
 }
 
 interface SortableImageItemProps {
@@ -96,8 +99,56 @@ export const GalleryManager = ({
   onImagesChange,
   onHeroImageChange,
   maxImages = 10,
+  autoSave = false,
+  businessId,
 }: GalleryManagerProps) => {
   const [isAddingImage, setIsAddingImage] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const saveTimeoutRef = useRef<NodeJS.Timeout>();
+  const previousImagesRef = useRef<string[]>(images);
+  
+  const { mutate: updateBusiness } = useBusinessUpdate(businessId || '');
+
+  // Auto-save effect
+  useEffect(() => {
+    if (!autoSave || !businessId) return;
+    
+    // Check if images actually changed
+    const imagesChanged = JSON.stringify(images) !== JSON.stringify(previousImagesRef.current);
+    if (!imagesChanged) return;
+    
+    previousImagesRef.current = images;
+    
+    // Clear existing timeout
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+    
+    // Set saving status immediately
+    setSaveStatus('saving');
+    
+    // Debounced save after 1.5 seconds
+    saveTimeoutRef.current = setTimeout(() => {
+      updateBusiness(
+        { gallery_images: images },
+        {
+          onSuccess: () => {
+            setSaveStatus('saved');
+            setTimeout(() => setSaveStatus('idle'), 2000);
+          },
+          onError: () => {
+            setSaveStatus('idle');
+          },
+        }
+      );
+    }, 1500);
+    
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, [images, autoSave, businessId, updateBusiness]);
 
   const handleAddImage = (url: string) => {
     if (url && images.length < maxImages) {
@@ -130,9 +181,27 @@ export const GalleryManager = ({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <label className="text-sm font-medium">
-          Gallery Images ({images.length}/{maxImages})
-        </label>
+        <div className="flex items-center gap-3">
+          <label className="text-sm font-medium">
+            Gallery Images ({images.length}/{maxImages})
+          </label>
+          {autoSave && saveStatus !== 'idle' && (
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              {saveStatus === 'saving' && (
+                <>
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  <span>Saving...</span>
+                </>
+              )}
+              {saveStatus === 'saved' && (
+                <>
+                  <Check className="h-3 w-3 text-green-600" />
+                  <span className="text-green-600">Saved</span>
+                </>
+              )}
+            </div>
+          )}
+        </div>
         
         {images.length < maxImages && (
           <Dialog open={isAddingImage} onOpenChange={setIsAddingImage}>
