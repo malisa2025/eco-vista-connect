@@ -13,9 +13,10 @@ import {
   Building2, Share2, CheckCircle2, Video 
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ApplicationForm from "@/components/jobs/ApplicationForm";
 import { useMyApplications } from "@/hooks/useJobApplications";
+import { useTrackJobView } from "@/hooks/useJobPerformance";
 
 const JobDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -26,9 +27,22 @@ const JobDetail = () => {
   const { data: job, isLoading } = useJob(id!);
   const { data: subscription } = useJobSeekerSubscription(user?.id || "");
   const { data: myApplications } = useMyApplications(user?.id || "");
+  const trackView = useTrackJobView();
 
   const hasApplied = myApplications?.some(app => app.job_id === id);
   const isSubscribed = subscription?.status === "active";
+
+  // Track job view
+  useEffect(() => {
+    if (id) {
+      const deviceType = /Mobile|Android|iPhone/i.test(navigator.userAgent) ? 'mobile' : 'desktop';
+      trackView.mutate({ 
+        jobId: id, 
+        source: document.referrer.includes('jobs') ? 'search' : 'direct',
+        deviceType 
+      });
+    }
+  }, [id]);
 
   const handleShare = () => {
     if (navigator.share) {

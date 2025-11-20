@@ -155,6 +155,10 @@ const MyBusinesses = () => {
               <TabsContent value="advertisements" className="space-y-6">
                 <BusinessAdvertisements businesses={businesses} />
               </TabsContent>
+
+              <TabsContent value="jobs" className="space-y-6">
+                <BusinessJobs businesses={businesses} />
+              </TabsContent>
             </Tabs>
           )}
         </div>
@@ -332,4 +336,178 @@ const BusinessAdvertisements = ({ businesses }: { businesses: any[] }) => {
   );
 };
 
+const BusinessJobs = ({ businesses }: { businesses: any[] }) => {
+  const navigate = useNavigate();
+  const businessIds = businesses.map(b => b.id);
+  const { data: jobs, isLoading } = useBusinessJobs(businessIds);
+  const { data: stats } = useJobStats(businessIds);
+  const { deleteJob } = useJobMutations();
+  const [deleteJobId, setDeleteJobId] = useState<string | null>(null);
+
+  const handleDeleteConfirm = () => {
+    if (deleteJobId) {
+      deleteJob.mutate(deleteJobId);
+      setDeleteJobId(null);
+    }
+  };
+
+  if (isLoading) {
+    return <div className="text-center py-8">Loading jobs...</div>;
+  }
+
+  if (!jobs || jobs.length === 0) {
+    return (
+      <Card>
+        <CardContent className="flex flex-col items-center justify-center py-20">
+          <Briefcase className="h-20 w-20 text-muted-foreground/20 mb-4" />
+          <h3 className="text-2xl font-bold mb-2">No job listings yet</h3>
+          <p className="text-muted-foreground mb-6 text-center max-w-md">
+            Start hiring talented professionals by posting your first job
+          </p>
+          <Button onClick={() => navigate('/post-job')}>
+            <Plus className="h-4 w-4 mr-2" />
+            Post a Job
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-center">
+              <div className="text-3xl font-bold text-primary mb-1">{stats?.totalJobs || 0}</div>
+              <p className="text-sm text-muted-foreground">Total Jobs</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-center">
+              <div className="text-3xl font-bold text-primary mb-1">{stats?.activeJobs || 0}</div>
+              <p className="text-sm text-muted-foreground">Active Jobs</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-center">
+              <div className="text-3xl font-bold mb-1">{stats?.totalApplications || 0}</div>
+              <p className="text-sm text-muted-foreground">Total Applications</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Button onClick={() => navigate('/post-job')}>
+        <Plus className="h-4 w-4 mr-2" />
+        Post New Job
+      </Button>
+
+      {jobs.map((job: any) => (
+        <Card key={job.id}>
+          <CardHeader>
+            <div className="flex items-start justify-between">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <CardTitle className="text-lg">{job.title}</CardTitle>
+                  <Badge>{job.status}</Badge>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  {job.businesses?.name} • Posted {formatDistanceToNow(new Date(job.created_at))} ago
+                </p>
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm">
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => navigate(`/job-performance/${job.id}`)}>
+                    <TrendingUp className="mr-2 h-4 w-4" />
+                    View Performance
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate(`/job-applications/${job.id}`)}>
+                    <Users className="mr-2 h-4 w-4" />
+                    View Applications
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate(`/post-job?edit=${job.id}`)}>
+                    <Edit className="mr-2 h-4 w-4" />
+                    Edit Job
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setDeleteJobId(job.id)}
+                    className="text-destructive"
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div>
+                <div className="flex items-center gap-2 text-2xl font-bold mb-1">
+                  <Eye className="h-5 w-5 text-muted-foreground" />
+                  {job.views_count || 0}
+                </div>
+                <p className="text-sm text-muted-foreground">Views</p>
+              </div>
+              <div>
+                <div className="flex items-center gap-2 text-2xl font-bold mb-1">
+                  <Users className="h-5 w-5 text-muted-foreground" />
+                  {job.applications_count || 0}
+                </div>
+                <p className="text-sm text-muted-foreground">Applications</p>
+              </div>
+              <div>
+                <div className="text-2xl font-bold mb-1">
+                  {job.views_count > 0
+                    ? ((job.applications_count / job.views_count) * 100).toFixed(1)
+                    : 0}%
+                </div>
+                <p className="text-sm text-muted-foreground">Conv. Rate</p>
+              </div>
+              <div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full"
+                  onClick={() => navigate(`/job-performance/${job.id}`)}
+                >
+                  <TrendingUp className="h-4 w-4 mr-2" />
+                  View Analytics
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+
+      <AlertDialog open={!!deleteJobId} onOpenChange={() => setDeleteJobId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Job</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this job? This action cannot be undone.
+              All applications will also be deleted.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+};
+
 export default MyBusinesses;
+

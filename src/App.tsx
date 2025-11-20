@@ -29,6 +29,8 @@ import AdminUsers from "./pages/admin/Users";
 import AdminAdvertisements from "./pages/admin/Advertisements";
 import AdminJobs from "./pages/admin/Jobs";
 import AdminSubscriptions from "./pages/admin/Subscriptions";
+import JobPerformance from "./pages/JobPerformance";
+import BusinessAnalytics from "./pages/BusinessAnalytics";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -117,6 +119,22 @@ const App = () => (
               element={
                 <ProtectedRoute requireRole="business_owner">
                   <AdAnalytics />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/job-performance/:jobId"
+              element={
+                <ProtectedRoute requireRole="business_owner">
+                  <JobPerformance />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/business-analytics/:businessId"
+              element={
+                <ProtectedRoute requireRole="business_owner">
+                  <BusinessAnalytics />
                 </ProtectedRoute>
               }
             />
