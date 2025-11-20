@@ -1,12 +1,18 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import ReviewSummary from "@/components/reviews/ReviewSummary";
+import ReviewForm from "@/components/reviews/ReviewForm";
+import ReviewsList from "@/components/reviews/ReviewsList";
+import { useBusinessReviews, useUserReview, useReviewMutations, useUserHelpfulReviews } from "@/hooks/useBusinessReviews";
+import { useState } from "react";
 import {
   ArrowLeft,
   Star,
@@ -15,11 +21,19 @@ import {
   Mail,
   Globe,
   CheckCircle2,
+  Heart,
 } from "lucide-react";
 
 const BusinessDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [showReviewForm, setShowReviewForm] = useState(false);
+
+  const { data: reviews, isLoading: reviewsLoading } = useBusinessReviews(id!);
+  const { data: userReview } = useUserReview(id!, user?.id);
+  const { data: helpfulReviewIds = [] } = useUserHelpfulReviews(id!, user?.id);
+  const { createReview, updateReview, deleteReview, toggleHelpful } = useReviewMutations(id!);
 
   const { data: business, isLoading } = useQuery({
     queryKey: ["business", id],
