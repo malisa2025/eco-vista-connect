@@ -213,16 +213,19 @@ Deno.serve(async (req) => {
           gallery: ['/demo/fashion-hero.jpg', '/demo/fashion-logo.jpg', '/demo/fashion-hero.jpg'],
           image: '/demo/fashion-hero.jpg',
           logo: '/demo/fashion-logo.jpg',
+          video: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
         },
         restaurant: {
           gallery: ['/demo/restaurant-hero.jpg', '/demo/restaurant-logo.jpg', '/demo/restaurant-hero.jpg'],
           image: '/demo/restaurant-hero.jpg',
           logo: '/demo/restaurant-logo.jpg',
+          video: 'https://www.youtube.com/watch?v=jNQXAC9IVRw',
         },
         technology: {
           gallery: ['/demo/tech-hero.jpg', '/demo/tech-logo.jpg', '/demo/tech-hero.jpg'],
           image: '/demo/tech-hero.jpg',
           logo: '/demo/tech-logo.jpg',
+          video: 'https://www.youtube.com/watch?v=ScMzIvxBSi4',
         },
       };
 
@@ -242,6 +245,7 @@ Deno.serve(async (req) => {
             gallery_images: images.gallery,
             image_url: images.image,
             logo_url: images.logo,
+            video_url: images.video,
           })
           .eq('id', business.id);
 

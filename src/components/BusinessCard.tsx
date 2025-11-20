@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Star, MapPin, Phone, Mail, Globe, CheckCircle2 } from "lucide-react";
+import { Star, MapPin, Phone, Mail, Globe, CheckCircle2, Video } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import FavoriteButton from "./FavoriteButton";
 
@@ -15,6 +15,7 @@ interface BusinessCardProps {
   website: string | null;
   logo_url: string | null;
   image_url: string | null;
+  video_url?: string | null;
   rating: number;
   review_count: number;
   is_verified: boolean;
@@ -30,6 +31,7 @@ const BusinessCard = ({
   email,
   website,
   image_url,
+  video_url,
   rating,
   review_count,
   is_verified,
@@ -63,6 +65,14 @@ const BusinessCard = ({
             <FavoriteButton businessId={id} />
           </div>
         </div>
+        {video_url && (
+          <div className="absolute bottom-2 left-2">
+            <Badge variant="secondary" className="gap-1">
+              <Video className="w-3 h-3" />
+              Video
+            </Badge>
+          </div>
+        )}
       </div>
 
       <CardHeader className="space-y-3">
