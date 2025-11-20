@@ -1,5 +1,8 @@
 project_id = "oxaghzctrjemldcezcqq"
 
+[functions.seed-demo-data]
+verify_jwt = false
+
 [functions.verify-paystack-payment]
 
 [functions.send-notification-email]
