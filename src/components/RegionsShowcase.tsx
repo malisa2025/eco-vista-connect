@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { MapPin, Search, X } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -34,10 +35,10 @@ const filterRanges = [
 const RegionsShowcase = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("all");
+  const navigate = useNavigate();
 
   const handleRegionClick = (regionName: string) => {
-    console.log(`Clicked region: ${regionName}`);
-    // Future: Navigate to /businesses?region=${regionName}
+    navigate(`/businesses?region=${encodeURIComponent(regionName)}`);
   };
 
   const filteredRegions = useMemo(() => {

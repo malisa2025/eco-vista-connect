@@ -1,16 +1,24 @@
 import { Button } from "@/components/ui/button";
 import { Building2, Menu } from "lucide-react";
 import { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const isHome = location.pathname === '/';
 
   return (
     <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border/50 shadow-sm">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex items-center gap-2">
+          <div 
+            className="flex items-center gap-2 cursor-pointer" 
+            onClick={() => navigate('/')}
+          >
             <div className="w-10 h-10 rounded-xl gradient-hero flex items-center justify-center">
               <Building2 className="h-6 w-6 text-white" />
             </div>
@@ -19,18 +27,28 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
-            <a href="#features" className="text-sm font-medium hover:text-primary transition-smooth">
-              Features
-            </a>
-            <a href="#benefits" className="text-sm font-medium hover:text-primary transition-smooth">
-              Benefits
-            </a>
-            <a href="#pricing" className="text-sm font-medium hover:text-primary transition-smooth">
-              Pricing
-            </a>
-            <a href="#about" className="text-sm font-medium hover:text-primary transition-smooth">
-              About
-            </a>
+            <button 
+              onClick={() => navigate('/businesses')}
+              className="text-sm font-medium hover:text-primary transition-smooth"
+            >
+              Businesses
+            </button>
+            {isHome && (
+              <>
+                <a href="#features" className="text-sm font-medium hover:text-primary transition-smooth">
+                  Features
+                </a>
+                <a href="#benefits" className="text-sm font-medium hover:text-primary transition-smooth">
+                  Benefits
+                </a>
+                <a href="#pricing" className="text-sm font-medium hover:text-primary transition-smooth">
+                  Pricing
+                </a>
+                <a href="#about" className="text-sm font-medium hover:text-primary transition-smooth">
+                  About
+                </a>
+              </>
+            )}
           </div>
 
           {/* Desktop CTA */}
@@ -52,18 +70,28 @@ const Navbar = () => {
         {isOpen && (
           <div className="md:hidden py-4 border-t border-border/50 animate-fade-in">
             <div className="flex flex-col gap-4">
-              <a href="#features" className="text-sm font-medium hover:text-primary transition-smooth py-2">
-                Features
-              </a>
-              <a href="#benefits" className="text-sm font-medium hover:text-primary transition-smooth py-2">
-                Benefits
-              </a>
-              <a href="#pricing" className="text-sm font-medium hover:text-primary transition-smooth py-2">
-                Pricing
-              </a>
-              <a href="#about" className="text-sm font-medium hover:text-primary transition-smooth py-2">
-                About
-              </a>
+              <button 
+                onClick={() => { navigate('/businesses'); setIsOpen(false); }}
+                className="text-sm font-medium hover:text-primary transition-smooth py-2 text-left"
+              >
+                Businesses
+              </button>
+              {isHome && (
+                <>
+                  <a href="#features" className="text-sm font-medium hover:text-primary transition-smooth py-2">
+                    Features
+                  </a>
+                  <a href="#benefits" className="text-sm font-medium hover:text-primary transition-smooth py-2">
+                    Benefits
+                  </a>
+                  <a href="#pricing" className="text-sm font-medium hover:text-primary transition-smooth py-2">
+                    Pricing
+                  </a>
+                  <a href="#about" className="text-sm font-medium hover:text-primary transition-smooth py-2">
+                    About
+                  </a>
+                </>
+              )}
               <div className="flex flex-col gap-2 pt-4 border-t border-border/50">
                 <Button variant="ghost" className="w-full">Sign In</Button>
                 <Button className="w-full">Get Started</Button>

@@ -14,7 +14,96 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      business_categories: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          icon: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          icon: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          icon?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      businesses: {
+        Row: {
+          address: string | null
+          category: string
+          created_at: string | null
+          description: string | null
+          email: string | null
+          id: string
+          image_url: string | null
+          is_featured: boolean | null
+          is_verified: boolean | null
+          latitude: number | null
+          logo_url: string | null
+          longitude: number | null
+          name: string
+          phone: string | null
+          rating: number | null
+          region: string
+          review_count: number | null
+          updated_at: string | null
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          category: string
+          created_at?: string | null
+          description?: string | null
+          email?: string | null
+          id?: string
+          image_url?: string | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          latitude?: number | null
+          logo_url?: string | null
+          longitude?: number | null
+          name: string
+          phone?: string | null
+          rating?: number | null
+          region: string
+          review_count?: number | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          category?: string
+          created_at?: string | null
+          description?: string | null
+          email?: string | null
+          id?: string
+          image_url?: string | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          latitude?: number | null
+          logo_url?: string | null
+          longitude?: number | null
+          name?: string
+          phone?: string | null
+          rating?: number | null
+          region?: string
+          review_count?: number | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
