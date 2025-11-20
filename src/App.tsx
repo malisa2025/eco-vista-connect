@@ -36,6 +36,7 @@ import AdminSubscriptions from "./pages/admin/Subscriptions";
 import JobPerformance from "./pages/JobPerformance";
 import BusinessAnalytics from "./pages/BusinessAnalytics";
 import HiringPipeline from "./pages/HiringPipeline";
+import SeedDemoData from "./pages/SeedDemoData";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -240,6 +241,7 @@ const App = () => (
               </ProtectedRoute>
             }
           />
+          <Route path="/seed-demo-data" element={<SeedDemoData />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
