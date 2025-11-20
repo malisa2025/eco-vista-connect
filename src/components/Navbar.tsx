@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Building2, Menu, User, Heart, LogOut, LayoutDashboard } from "lucide-react";
+import { Building2, Menu, User, Heart, LogOut, LayoutDashboard, MessageCircle, TrendingUp } from "lucide-react";
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -92,6 +92,10 @@ const Navbar = () => {
                       <User className="mr-2 h-4 w-4" />
                       Profile
                     </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/inbox')}>
+                      <MessageCircle className="mr-2 h-4 w-4" />
+                      Messages
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate('/favorites')}>
                       <Heart className="mr-2 h-4 w-4" />
                       Favorites
@@ -100,6 +104,12 @@ const Navbar = () => {
                       <DropdownMenuItem onClick={() => navigate('/my-businesses')}>
                         <Building2 className="mr-2 h-4 w-4" />
                         My Businesses
+                      </DropdownMenuItem>
+                    )}
+                    {hasRole('business_owner') && (
+                      <DropdownMenuItem onClick={() => navigate('/purchase-ad')}>
+                        <TrendingUp className="mr-2 h-4 w-4" />
+                        Purchase Ad
                       </DropdownMenuItem>
                     )}
                     {hasRole('admin') && (

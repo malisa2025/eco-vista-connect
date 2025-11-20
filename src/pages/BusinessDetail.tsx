@@ -5,6 +5,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useTrackBusinessView } from "@/hooks/useBusinessViews";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import VideoPlayer from "@/components/VideoPlayer";
+import ContactBusinessButton from "@/components/ContactBusinessButton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -177,6 +179,20 @@ const BusinessDetail = () => {
                     <p className="text-muted-foreground leading-relaxed">
                       {business.description}
                     </p>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Video Section */}
+              {business.video_url && (
+                <Card>
+                  <CardContent className="pt-6">
+                    <h2 className="text-2xl font-bold mb-4">Business Introduction</h2>
+                    <VideoPlayer
+                      videoUrl={business.video_url}
+                      thumbnailUrl={business.video_thumbnail_url || business.image_url}
+                      title={business.name}
+                    />
                   </CardContent>
                 </Card>
               )}

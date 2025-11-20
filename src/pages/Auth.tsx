@@ -47,6 +47,7 @@ const Auth = () => {
     email: '',
     password: '',
     confirmPassword: '',
+    userType: 'user' as 'user' | 'business_owner',
   });
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -80,7 +81,8 @@ const Auth = () => {
     const { error } = await signUp(
       signUpForm.email,
       signUpForm.password,
-      signUpForm.fullName
+      signUpForm.fullName,
+      signUpForm.userType
     );
     setIsLoading(false);
 
@@ -147,6 +149,18 @@ const Auth = () => {
 
               <TabsContent value="signup">
                 <form onSubmit={handleSignUp} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-type">I want to</Label>
+                    <select
+                      id="signup-type"
+                      className="w-full rounded-md border border-input bg-background px-3 py-2"
+                      value={signUpForm.userType}
+                      onChange={(e) => setSignUpForm({ ...signUpForm, userType: e.target.value as 'user' | 'business_owner' })}
+                    >
+                      <option value="user">Browse and review businesses</option>
+                      <option value="business_owner">Register and manage my business</option>
+                    </select>
+                  </div>
                   <div className="space-y-2">
                     <Label htmlFor="signup-name">Full Name</Label>
                     <Input

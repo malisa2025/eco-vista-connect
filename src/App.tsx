@@ -13,6 +13,8 @@ import Profile from "./pages/Profile";
 import RegisterBusiness from "./pages/RegisterBusiness";
 import MyBusinesses from "./pages/MyBusinesses";
 import Favorites from "./pages/Favorites";
+import Inbox from "./pages/Inbox";
+import PurchaseAd from "./pages/PurchaseAd";
 import AdminDashboard from "./pages/admin/Dashboard";
 import NotFound from "./pages/NotFound";
 
@@ -30,6 +32,14 @@ const App = () => (
             <Route path="/businesses" element={<Businesses />} />
             <Route path="/businesses/:id" element={<BusinessDetail />} />
             <Route path="/auth" element={<Auth />} />
+            <Route
+              path="/inbox"
+              element={
+                <ProtectedRoute>
+                  <Inbox />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/profile"
               element={
@@ -51,6 +61,14 @@ const App = () => (
               element={
                 <ProtectedRoute requireRole="business_owner">
                   <MyBusinesses />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/purchase-ad"
+              element={
+                <ProtectedRoute requireRole="business_owner">
+                  <PurchaseAd />
                 </ProtectedRoute>
               }
             />
