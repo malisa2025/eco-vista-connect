@@ -192,6 +192,76 @@ export type Database = {
           },
         ]
       }
+      applicant_notes: {
+        Row: {
+          application_id: string
+          author_id: string
+          created_at: string | null
+          id: string
+          note: string
+          updated_at: string | null
+        }
+        Insert: {
+          application_id: string
+          author_id: string
+          created_at?: string | null
+          id?: string
+          note: string
+          updated_at?: string | null
+        }
+        Update: {
+          application_id?: string
+          author_id?: string
+          created_at?: string | null
+          id?: string
+          note?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "applicant_notes_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "job_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      applicant_tags: {
+        Row: {
+          application_id: string
+          color: string | null
+          created_at: string | null
+          created_by: string
+          id: string
+          tag: string
+        }
+        Insert: {
+          application_id: string
+          color?: string | null
+          created_at?: string | null
+          created_by: string
+          id?: string
+          tag: string
+        }
+        Update: {
+          application_id?: string
+          color?: string | null
+          created_at?: string | null
+          created_by?: string
+          id?: string
+          tag?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "applicant_tags_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "job_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_categories: {
         Row: {
           created_at: string | null
@@ -475,6 +545,56 @@ export type Database = {
           },
         ]
       }
+      interview_schedule: {
+        Row: {
+          application_id: string
+          created_at: string | null
+          duration_minutes: number | null
+          id: string
+          interviewer_id: string
+          location: string | null
+          meeting_link: string | null
+          notes: string | null
+          scheduled_at: string
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          application_id: string
+          created_at?: string | null
+          duration_minutes?: number | null
+          id?: string
+          interviewer_id: string
+          location?: string | null
+          meeting_link?: string | null
+          notes?: string | null
+          scheduled_at: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          application_id?: string
+          created_at?: string | null
+          duration_minutes?: number | null
+          id?: string
+          interviewer_id?: string
+          location?: string | null
+          meeting_link?: string | null
+          notes?: string | null
+          scheduled_at?: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interview_schedule_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "job_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       job_applications: {
         Row: {
           application_duration: number | null
@@ -489,6 +609,8 @@ export type Database = {
           reviewed_at: string | null
           reviewed_by: string | null
           status: Database["public"]["Enums"]["application_status"] | null
+          status_changed_at: string | null
+          status_changed_by: string | null
           user_id: string
           video_url: string | null
         }
@@ -505,6 +627,8 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: Database["public"]["Enums"]["application_status"] | null
+          status_changed_at?: string | null
+          status_changed_by?: string | null
           user_id: string
           video_url?: string | null
         }
@@ -521,6 +645,8 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: Database["public"]["Enums"]["application_status"] | null
+          status_changed_at?: string | null
+          status_changed_by?: string | null
           user_id?: string
           video_url?: string | null
         }
