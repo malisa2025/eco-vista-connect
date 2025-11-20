@@ -27,7 +27,7 @@ const Hero = () => {
           </h1>
           
           <p className="text-xl md:text-2xl text-muted-foreground mb-8 leading-relaxed">
-            Connect businesses with customers across Ashanti Region and Ghana through our powerful directory, advertising, and community platform.
+            Connecting businesses with customers across all the regions in Ghana through our powerful directory, advertising, and community platform.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 mb-12">

@@ -14,7 +14,7 @@ const Navbar = () => {
             <div className="w-10 h-10 rounded-xl gradient-hero flex items-center justify-center">
               <Building2 className="h-6 w-6 text-white" />
             </div>
-            <span className="text-xl font-display font-bold">AshantiConnect</span>
+            <span className="text-xl font-display font-bold">GHKonect</span>
           </div>
 
           {/* Desktop Navigation */}

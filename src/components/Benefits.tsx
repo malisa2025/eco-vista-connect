@@ -47,7 +47,7 @@ const Benefits = () => {
         <div className="text-center max-w-3xl mx-auto mb-16 animate-fade-in">
           <h2 className="font-display mb-4">Built for Everyone</h2>
           <p className="text-xl text-muted-foreground">
-            AshantiConnect creates value for businesses, citizens, and government partners.
+            GHKonect creates value for businesses, citizens, and government partners.
           </p>
         </div>
 
