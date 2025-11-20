@@ -117,7 +117,7 @@ const JobFilters = ({
             </SelectTrigger>
             <SelectContent>
               {categories.map((cat) => (
-                <SelectItem key={cat} value={cat === "All Categories" ? "" : cat}>
+                <SelectItem key={cat} value={cat === "All Categories" ? "all" : cat}>
                   {cat}
                 </SelectItem>
               ))}
@@ -134,7 +134,7 @@ const JobFilters = ({
             </SelectTrigger>
             <SelectContent>
               {regions.map((region) => (
-                <SelectItem key={region} value={region === "All Locations" ? "" : region}>
+                <SelectItem key={region} value={region === "All Locations" ? "all" : region}>
                   {region}
                 </SelectItem>
               ))}
@@ -150,7 +150,7 @@ const JobFilters = ({
               <SelectValue placeholder="Select job type" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Types</SelectItem>
+              <SelectItem value="all">All Types</SelectItem>
               <SelectItem value="full_time">Full-time</SelectItem>
               <SelectItem value="part_time">Part-time</SelectItem>
               <SelectItem value="contract">Contract</SelectItem>
@@ -167,7 +167,7 @@ const JobFilters = ({
               <SelectValue placeholder="Select level" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Levels</SelectItem>
+              <SelectItem value="all">All Levels</SelectItem>
               <SelectItem value="entry">Entry Level</SelectItem>
               <SelectItem value="mid">Mid Level</SelectItem>
               <SelectItem value="senior">Senior Level</SelectItem>
