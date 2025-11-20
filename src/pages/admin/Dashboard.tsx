@@ -117,6 +117,18 @@ const AdminDashboard = () => {
                     View Advertisements
                   </Button>
                 </Link>
+                <Link to="/admin/jobs">
+                  <Button className="w-full" variant="outline">
+                    <ClipboardCheck className="h-4 w-4 mr-2" />
+                    Manage Jobs
+                  </Button>
+                </Link>
+                <Link to="/admin/subscriptions">
+                  <Button className="w-full" variant="outline">
+                    <Users className="h-4 w-4 mr-2" />
+                    View Subscriptions
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
           </div>
