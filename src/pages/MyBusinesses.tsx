@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBusinessOwners } from '@/hooks/useBusinessClaims';
 import { useBusinessAds, useAdMutations } from '@/hooks/useAdvertisements';
@@ -7,8 +8,26 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Building2, Eye, Star, Edit, Plus, TrendingUp, MousePointerClick } from 'lucide-react';
+import { Building2, Eye, Star, Edit, Plus, TrendingUp, MousePointerClick, Briefcase, Users, MoreVertical, Play, Pause, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useBusinessJobs, useJobStats, useJobMutations } from '@/hooks/useJobs';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { formatDistanceToNow } from 'date-fns';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const MyBusinesses = () => {
   const navigate = useNavigate();
@@ -60,9 +79,10 @@ const MyBusinesses = () => {
             </Card>
           ) : (
             <Tabs defaultValue="businesses" className="w-full">
-              <TabsList className="grid w-full max-w-md grid-cols-2 mb-8">
+              <TabsList className="grid w-full max-w-2xl grid-cols-3 mb-8">
                 <TabsTrigger value="businesses">My Businesses</TabsTrigger>
                 <TabsTrigger value="advertisements">Advertisements</TabsTrigger>
+                <TabsTrigger value="jobs">Job Listings</TabsTrigger>
               </TabsList>
 
               <TabsContent value="businesses" className="space-y-6">
