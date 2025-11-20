@@ -262,6 +262,120 @@ const getEmailContent = (type: string, data: any) => {
           </html>
         `
       };
+
+    case 'job_alert_digest':
+      return {
+        subject: `${data.jobs_count} new jobs match your alert: ${data.alert_name}`,
+        html: `
+          <!DOCTYPE html>
+          <html>
+            <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+              <h2 style="color: #333;">📬 New Jobs Matching Your Alert</h2>
+              <p>Hi ${data.user_name},</p>
+              <p>We found <strong>${data.jobs_count} new job${data.jobs_count > 1 ? 's' : ''}</strong> matching your alert "<strong>${data.alert_name}</strong>":</p>
+              ${data.jobs.map((job: any) => `
+                <div style="background: #f4f4f4; padding: 16px; border-radius: 5px; margin: 16px 0;">
+                  <h3 style="margin: 0 0 8px 0; color: #333;">${job.title}</h3>
+                  <p style="margin: 4px 0; color: #666;"><strong>${job.company}</strong></p>
+                  <p style="margin: 4px 0; color: #666;">📍 ${job.location} • ${job.job_type}</p>
+                  ${job.salary ? `<p style="margin: 4px 0; color: #666;">💰 ${job.salary}</p>` : ''}
+                  <a href="${job.url}" style="background: #000; color: #fff; padding: 8px 16px; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 8px;">View Job</a>
+                </div>
+              `).join('')}
+              <p style="margin-top: 24px;">Keep your profile updated to stand out to employers!</p>
+              <a href="${Deno.env.get('SUPABASE_URL')}/job-alerts" style="color: #2754C5; text-decoration: underline;">Manage your job alerts</a>
+              <p style="color: #898989; font-size: 12px; margin-top: 40px;">Ghana Business Directory - Connecting businesses across Ghana</p>
+            </body>
+          </html>
+        `
+      };
+
+    case 'interview_reminder':
+      return {
+        subject: `Interview Reminder: ${data.job_title} ${data.user_type === 'applicant' ? 'tomorrow' : 'with ' + data.applicant_name}`,
+        html: `
+          <!DOCTYPE html>
+          <html>
+            <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+              <h2 style="color: #333;">📅 Interview Reminder</h2>
+              <p>Hi ${data.user_name},</p>
+              <p>${data.user_type === 'applicant' ? 'Your interview is coming up!' : `You have an interview scheduled with ${data.applicant_name}.`}</p>
+              <div style="background: #fef3c7; padding: 16px; border-radius: 5px; margin: 20px 0;">
+                <p style="margin: 4px 0;"><strong>Position:</strong> ${data.job_title}</p>
+                <p style="margin: 4px 0;"><strong>Company:</strong> ${data.company_name}</p>
+                <p style="margin: 4px 0;"><strong>When:</strong> ${data.scheduled_time}</p>
+                <p style="margin: 4px 0;"><strong>Duration:</strong> ${data.duration} minutes</p>
+                <p style="margin: 4px 0;"><strong>Location:</strong> ${data.location}</p>
+                ${data.meeting_link ? `<p style="margin: 4px 0;"><strong>Meeting Link:</strong> <a href="${data.meeting_link}">${data.meeting_link}</a></p>` : ''}
+              </div>
+              ${data.notes ? `<div style="background: #f4f4f4; padding: 16px; border-radius: 5px; margin: 20px 0;"><p style="margin: 0;"><strong>Notes:</strong> ${data.notes}</p></div>` : ''}
+              ${data.user_type === 'applicant' ? `
+                <div style="background: #d1fae5; padding: 16px; border-radius: 5px; margin: 20px 0;">
+                  <p style="margin: 8px 0; font-weight: bold;">Preparation Tips:</p>
+                  <ul style="margin: 8px 0;">
+                    <li>Review the job description</li>
+                    <li>Prepare examples of your work</li>
+                    <li>Have questions ready for the interviewer</li>
+                    <li>Test your tech setup if it's a video interview</li>
+                  </ul>
+                </div>
+              ` : ''}
+              <p style="color: #898989; font-size: 12px; margin-top: 40px;">Ghana Business Directory - Connecting businesses across Ghana</p>
+            </body>
+          </html>
+        `
+      };
+
+    case 'hiring_digest':
+      return {
+        subject: `Weekly Hiring Digest for ${data.business_name}`,
+        html: `
+          <!DOCTYPE html>
+          <html>
+            <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+              <h2 style="color: #333;">📊 Your Weekly Hiring Summary</h2>
+              <p>Hi ${data.employer_name},</p>
+              <p>Here's what happened with your job postings at <strong>${data.business_name}</strong> this week:</p>
+              
+              <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin: 20px 0;">
+                <div style="background: #d1fae5; padding: 16px; border-radius: 5px; text-align: center;">
+                  <div style="font-size: 32px; font-weight: bold; color: #059669;">${data.new_applications}</div>
+                  <div style="color: #666;">New Applications</div>
+                </div>
+                <div style="background: #fef3c7; padding: 16px; border-radius: 5px; text-align: center;">
+                  <div style="font-size: 32px; font-weight: bold; color: #d97706;">${data.pending_review}</div>
+                  <div style="color: #666;">Pending Review</div>
+                </div>
+                <div style="background: #dbeafe; padding: 16px; border-radius: 5px; text-align: center;">
+                  <div style="font-size: 32px; font-weight: bold; color: #2563eb;">${data.shortlisted}</div>
+                  <div style="color: #666;">Shortlisted</div>
+                </div>
+                <div style="background: #f3e8ff; padding: 16px; border-radius: 5px; text-align: center;">
+                  <div style="font-size: 32px; font-weight: bold; color: #9333ea;">${data.quality_applicants}</div>
+                  <div style="color: #666;">Quality Applicants</div>
+                </div>
+              </div>
+
+              ${data.upcoming_interviews > 0 ? `
+                <div style="background: #fef2f2; padding: 16px; border-radius: 5px; margin: 20px 0;">
+                  <p style="margin: 0;"><strong>📅 ${data.upcoming_interviews} upcoming interview${data.upcoming_interviews > 1 ? 's' : ''}</strong></p>
+                </div>
+              ` : ''}
+
+              <h3 style="color: #333; margin-top: 24px;">Jobs Performance</h3>
+              ${data.jobs.map((job: any) => `
+                <div style="background: #f4f4f4; padding: 12px; border-radius: 5px; margin: 12px 0;">
+                  <p style="margin: 4px 0; font-weight: bold;">${job.title}</p>
+                  <p style="margin: 4px 0; color: #666; font-size: 14px;">${job.new_applications} new • ${job.pending} pending review</p>
+                </div>
+              `).join('')}
+
+              <a href="${Deno.env.get('SUPABASE_URL')}/hiring-pipeline" style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 20px;">View Hiring Pipeline</a>
+              <p style="color: #898989; font-size: 12px; margin-top: 40px;">Ghana Business Directory - Connecting businesses across Ghana</p>
+            </body>
+          </html>
+        `
+      };
     
     default:
       return {

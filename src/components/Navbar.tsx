@@ -3,6 +3,7 @@ import { Building2, Menu, User, Heart, LogOut, LayoutDashboard, MessageCircle, T
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { NotificationBell } from "./NotificationBell";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -89,6 +90,7 @@ const Navbar = () => {
           <div className="hidden md:flex items-center gap-3">
             {user ? (
               <>
+                <NotificationBell />
                 <Button variant="ghost" size="icon" onClick={() => navigate('/favorites')}>
                   <Heart className="h-5 w-5" />
                 </Button>

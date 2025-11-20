@@ -22,6 +22,7 @@ import AdAnalytics from "./pages/AdAnalytics";
 import Favorites from "./pages/Favorites";
 import SavedJobs from "./pages/SavedJobs";
 import JobAlerts from "./pages/JobAlerts";
+import Notifications from "./pages/Notifications";
 import Inbox from "./pages/Inbox";
 import PurchaseAd from "./pages/PurchaseAd";
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -65,6 +66,14 @@ const App = () => (
                   element={
                     <ProtectedRoute>
                       <JobAlerts />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/notifications"
+                  element={
+                    <ProtectedRoute>
+                      <Notifications />
                     </ProtectedRoute>
                   }
                 />
