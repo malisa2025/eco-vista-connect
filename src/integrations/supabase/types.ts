@@ -527,11 +527,15 @@ export type Database = {
       }
       job_seeker_subscriptions: {
         Row: {
+          admin_notes: string | null
           amount: number
           auto_renew: boolean | null
+          cancellation_reason: string | null
+          cancelled_at: string | null
           created_at: string | null
           end_date: string
           id: string
+          lifetime_value: number | null
           payment_method: string | null
           payment_reference: string | null
           start_date: string | null
@@ -540,11 +544,15 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          admin_notes?: string | null
           amount?: number
           auto_renew?: boolean | null
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
           created_at?: string | null
           end_date: string
           id?: string
+          lifetime_value?: number | null
           payment_method?: string | null
           payment_reference?: string | null
           start_date?: string | null
@@ -553,11 +561,15 @@ export type Database = {
           user_id: string
         }
         Update: {
+          admin_notes?: string | null
           amount?: number
           auto_renew?: boolean | null
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
           created_at?: string | null
           end_date?: string
           id?: string
+          lifetime_value?: number | null
           payment_method?: string | null
           payment_reference?: string | null
           start_date?: string | null
@@ -569,6 +581,7 @@ export type Database = {
       }
       jobs: {
         Row: {
+          admin_notes: string | null
           applications_count: number | null
           business_id: string
           category: string
@@ -576,7 +589,9 @@ export type Database = {
           description: string
           experience_level: Database["public"]["Enums"]["experience_level"]
           expires_at: string | null
+          flag_reason: string | null
           id: string
+          is_flagged: boolean | null
           job_type: Database["public"]["Enums"]["job_type"]
           location: string | null
           posted_at: string | null
@@ -591,6 +606,7 @@ export type Database = {
           views_count: number | null
         }
         Insert: {
+          admin_notes?: string | null
           applications_count?: number | null
           business_id: string
           category: string
@@ -598,7 +614,9 @@ export type Database = {
           description: string
           experience_level: Database["public"]["Enums"]["experience_level"]
           expires_at?: string | null
+          flag_reason?: string | null
           id?: string
+          is_flagged?: boolean | null
           job_type: Database["public"]["Enums"]["job_type"]
           location?: string | null
           posted_at?: string | null
@@ -613,6 +631,7 @@ export type Database = {
           views_count?: number | null
         }
         Update: {
+          admin_notes?: string | null
           applications_count?: number | null
           business_id?: string
           category?: string
@@ -620,7 +639,9 @@ export type Database = {
           description?: string
           experience_level?: Database["public"]["Enums"]["experience_level"]
           expires_at?: string | null
+          flag_reason?: string | null
           id?: string
+          is_flagged?: boolean | null
           job_type?: Database["public"]["Enums"]["job_type"]
           location?: string | null
           posted_at?: string | null

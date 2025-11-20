@@ -27,6 +27,8 @@ import AdminClaims from "./pages/admin/Claims";
 import AdminBusinesses from "./pages/admin/Businesses";
 import AdminUsers from "./pages/admin/Users";
 import AdminAdvertisements from "./pages/admin/Advertisements";
+import AdminJobs from "./pages/admin/Jobs";
+import AdminSubscriptions from "./pages/admin/Subscriptions";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -163,6 +165,22 @@ const App = () => (
             element={
               <ProtectedRoute requireRole="admin">
                 <AdminAdvertisements />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/jobs"
+            element={
+              <ProtectedRoute requireRole="admin">
+                <AdminJobs />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/subscriptions"
+            element={
+              <ProtectedRoute requireRole="admin">
+                <AdminSubscriptions />
               </ProtectedRoute>
             }
           />
