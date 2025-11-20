@@ -431,8 +431,12 @@ const BusinessJobs = ({ businesses }: { businesses: any[] }) => {
                     <TrendingUp className="mr-2 h-4 w-4" />
                     View Performance
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate(`/job-applications/${job.id}`)}>
+                  <DropdownMenuItem onClick={() => navigate(`/hiring-pipeline/${job.id}`)}>
                     <Users className="mr-2 h-4 w-4" />
+                    Hiring Pipeline
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate(`/job-applications/${job.id}`)}>
+                    <Briefcase className="mr-2 h-4 w-4" />
                     View Applications
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate(`/post-job?edit=${job.id}`)}>

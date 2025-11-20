@@ -31,6 +31,7 @@ import AdminJobs from "./pages/admin/Jobs";
 import AdminSubscriptions from "./pages/admin/Subscriptions";
 import JobPerformance from "./pages/JobPerformance";
 import BusinessAnalytics from "./pages/BusinessAnalytics";
+import HiringPipeline from "./pages/HiringPipeline";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -135,6 +136,14 @@ const App = () => (
               element={
                 <ProtectedRoute requireRole="business_owner">
                   <BusinessAnalytics />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/hiring-pipeline/:jobId"
+              element={
+                <ProtectedRoute requireRole="business_owner">
+                  <HiringPipeline />
                 </ProtectedRoute>
               }
             />
