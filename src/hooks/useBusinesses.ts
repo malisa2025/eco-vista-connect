@@ -26,7 +26,7 @@ export const useBusinesses = (params: UseBusinessesParams = {}) => {
       }
 
       if (params.search) {
-        query = query.or(`name.ilike.%${params.search}%,description.ilike.%${params.search}%`);
+        query = query.or(`name.ilike.%${params.search}%,description.ilike.%${params.search}%,phone.ilike.%${params.search}%`);
       }
 
       // Apply sorting
