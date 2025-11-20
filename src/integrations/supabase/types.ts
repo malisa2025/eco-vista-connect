@@ -516,6 +516,42 @@ export type Database = {
           },
         ]
       }
+      email_preferences: {
+        Row: {
+          application_notifications: boolean | null
+          created_at: string | null
+          digest_emails: boolean | null
+          id: string
+          interview_reminders: boolean | null
+          job_alert_emails: boolean | null
+          marketing_emails: boolean | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          application_notifications?: boolean | null
+          created_at?: string | null
+          digest_emails?: boolean | null
+          id?: string
+          interview_reminders?: boolean | null
+          job_alert_emails?: boolean | null
+          marketing_emails?: boolean | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          application_notifications?: boolean | null
+          created_at?: string | null
+          digest_emails?: boolean | null
+          id?: string
+          interview_reminders?: boolean | null
+          job_alert_emails?: boolean | null
+          marketing_emails?: boolean | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       favorites: {
         Row: {
           business_id: string
@@ -965,6 +1001,39 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          link: string | null
+          message: string
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          link?: string | null
+          message: string
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          link?: string | null
+          message?: string
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       payment_transactions: {
         Row: {
           advertisement_id: string
@@ -1264,6 +1333,16 @@ export type Database = {
       check_job_seeker_subscription: {
         Args: { p_user_id: string }
         Returns: boolean
+      }
+      create_notification: {
+        Args: {
+          p_link?: string
+          p_message: string
+          p_title: string
+          p_type: string
+          p_user_id: string
+        }
+        Returns: string
       }
       expire_old_jobs: { Args: never; Returns: undefined }
       get_admin_stats: {

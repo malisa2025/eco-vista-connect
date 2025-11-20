@@ -15,6 +15,7 @@ import ProfileCompletenessBar from '@/components/profile/ProfileCompletenessBar'
 import SkillsManager from '@/components/profile/SkillsManager';
 import PreferencesSection from '@/components/profile/PreferencesSection';
 import LinksSection from '@/components/profile/LinksSection';
+import { EmailPreferences } from '@/components/profile/EmailPreferences';
 
 const Profile = () => {
   const { profile, roles, updateProfile, user } = useAuth();
@@ -116,13 +117,14 @@ const Profile = () => {
             <Card>
               <CardContent className="pt-6">
                 <Tabs value={activeTab} onValueChange={setActiveTab}>
-                  <TabsList className="grid w-full grid-cols-6">
+                  <TabsList className="grid w-full grid-cols-7 text-xs md:text-sm">
                     <TabsTrigger value="overview">Overview</TabsTrigger>
                     <TabsTrigger value="basic">Basic</TabsTrigger>
-                    <TabsTrigger value="professional">Professional</TabsTrigger>
-                    <TabsTrigger value="education">Education</TabsTrigger>
-                    <TabsTrigger value="preferences">Preferences</TabsTrigger>
+                    <TabsTrigger value="professional">Pro</TabsTrigger>
+                    <TabsTrigger value="education">Edu</TabsTrigger>
+                    <TabsTrigger value="preferences">Prefs</TabsTrigger>
                     <TabsTrigger value="links">Links</TabsTrigger>
+                    <TabsTrigger value="notifications">Notify</TabsTrigger>
                   </TabsList>
 
                   <TabsContent value="overview" className="space-y-4 mt-6">
@@ -266,6 +268,10 @@ const Profile = () => {
                       onResumeUrlChange={(url) => setFormData({ ...formData, resume_url: url })}
                     />
                     <Button onClick={handleSave}>Save Changes</Button>
+                  </TabsContent>
+
+                  <TabsContent value="notifications" className="space-y-4 mt-6">
+                    <EmailPreferences />
                   </TabsContent>
                 </Tabs>
               </CardContent>
