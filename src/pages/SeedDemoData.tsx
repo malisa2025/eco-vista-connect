@@ -13,7 +13,8 @@ export default function SeedDemoData() {
   const [seedStatus, setSeedStatus] = useState<{
     jobs: boolean;
     ads: boolean;
-  }>({ jobs: false, ads: false });
+    galleries: boolean;
+  }>({ jobs: false, ads: false, galleries: false });
 
   const seedJobs = async () => {
     try {
@@ -110,6 +111,81 @@ export default function SeedDemoData() {
     }
   };
 
+  const seedBusinessGalleries = async () => {
+    try {
+      const { data: businesses } = await supabase
+        .from('businesses')
+        .select('id, category, name');
+
+      if (!businesses || businesses.length === 0) {
+        throw new Error('No businesses found');
+      }
+
+      // Map images based on category
+      const updates = businesses.map((business) => {
+        let galleryImages: string[] = [];
+        let logoUrl = '';
+
+        if (business.category === 'Retail' || business.category === 'Fashion') {
+          galleryImages = [
+            '/demo/fashion-hero.jpg',
+            '/demo/fashion-logo.jpg',
+            '/demo/tech-hero.jpg',
+          ];
+          logoUrl = '/demo/fashion-logo.jpg';
+        } else if (business.category === 'Food & Beverage' || business.category === 'Restaurant') {
+          galleryImages = [
+            '/demo/restaurant-hero.jpg',
+            '/demo/restaurant-logo.jpg',
+            '/demo/fashion-hero.jpg',
+          ];
+          logoUrl = '/demo/restaurant-logo.jpg';
+        } else if (business.category === 'Technology') {
+          galleryImages = [
+            '/demo/tech-hero.jpg',
+            '/demo/tech-logo.jpg',
+            '/demo/restaurant-hero.jpg',
+          ];
+          logoUrl = '/demo/tech-logo.jpg';
+        } else {
+          // Default mix for other categories
+          galleryImages = [
+            '/demo/fashion-hero.jpg',
+            '/demo/restaurant-hero.jpg',
+            '/demo/tech-hero.jpg',
+          ];
+          logoUrl = '/demo/fashion-logo.jpg';
+        }
+
+        return {
+          id: business.id,
+          gallery_images: galleryImages,
+          image_url: galleryImages[0],
+          logo_url: logoUrl,
+        };
+      });
+
+      // Update all businesses
+      for (const update of updates) {
+        const { error } = await supabase
+          .from('businesses')
+          .update({
+            gallery_images: update.gallery_images,
+            image_url: update.image_url,
+            logo_url: update.logo_url,
+          })
+          .eq('id', update.id);
+
+        if (error) throw error;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error seeding galleries:', error);
+      throw error;
+    }
+  };
+
   const seedAdvertisements = async () => {
     try {
       const { data: businesses } = await supabase
@@ -192,9 +268,13 @@ export default function SeedDemoData() {
       await seedAdvertisements();
       setSeedStatus((prev) => ({ ...prev, ads: true }));
 
+      // Seed business galleries
+      await seedBusinessGalleries();
+      setSeedStatus((prev) => ({ ...prev, galleries: true }));
+
       toast({
         title: 'Success!',
-        description: 'Demo data has been seeded successfully',
+        description: 'Demo data including galleries has been seeded successfully',
       });
     } catch (error) {
       toast({
@@ -236,6 +316,14 @@ export default function SeedDemoData() {
                   <p className="text-sm text-muted-foreground">3 sample ads</p>
                 </div>
                 {seedStatus.ads && <CheckCircle2 className="h-5 w-5 text-green-600" />}
+              </div>
+
+              <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+                <div>
+                  <h3 className="font-semibold">Business Galleries</h3>
+                  <p className="text-sm text-muted-foreground">Add image galleries to all businesses</p>
+                </div>
+                {seedStatus.galleries && <CheckCircle2 className="h-5 w-5 text-green-600" />}
               </div>
 
               <Button
