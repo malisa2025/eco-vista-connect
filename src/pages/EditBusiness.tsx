@@ -247,6 +247,8 @@ export default function EditBusiness() {
                       heroImage={formData.image_url}
                       onImagesChange={(images) => handleInputChange('gallery_images', images)}
                       onHeroImageChange={(url) => handleInputChange('image_url', url)}
+                      autoSave={true}
+                      businessId={id}
                     />
 
                     <VideoUploader
