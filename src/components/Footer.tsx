@@ -13,10 +13,10 @@ const Footer = () => {
               <div className="w-10 h-10 rounded-xl gradient-hero flex items-center justify-center">
                 <Building2 className="h-6 w-6 text-white" />
               </div>
-              <span className="text-2xl font-display font-bold">AshantiConnect</span>
+              <span className="text-2xl font-display font-bold">GHKonect</span>
             </div>
             <p className="text-muted-foreground mb-6 max-w-md">
-              The Digital Front Door for Every Business. Connecting businesses with customers across Ashanti Region and Ghana.
+              The Digital Front Door for Every Business. Connecting businesses with customers across all the regions in Ghana.
             </p>
           </div>
 
@@ -78,7 +78,7 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-border/50 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-muted-foreground">
-            © {currentYear} AshantiConnect. All rights reserved.
+            © {currentYear} GHKonect. All rights reserved.
           </p>
           <div className="flex gap-6">
             <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-smooth">

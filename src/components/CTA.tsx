@@ -16,7 +16,7 @@ const CTA = () => {
               </div>
               
               <h2 className="font-display mb-6">
-                Join Thousands of Businesses on AshantiConnect
+                Join Thousands of Businesses on GHKonect
               </h2>
               
               <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
