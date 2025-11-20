@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Building2, Menu, User, Heart, LogOut, LayoutDashboard, MessageCircle, TrendingUp } from "lucide-react";
+import { Building2, Menu, User, Heart, LogOut, LayoutDashboard, MessageCircle, TrendingUp, Bookmark, Bell } from "lucide-react";
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -114,6 +114,18 @@ const Navbar = () => {
                       <Heart className="mr-2 h-4 w-4" />
                       Favorites
                     </DropdownMenuItem>
+                    {!hasRole('business_owner') && !hasRole('admin') && (
+                      <>
+                        <DropdownMenuItem onClick={() => navigate('/saved-jobs')}>
+                          <Bookmark className="mr-2 h-4 w-4" />
+                          Saved Jobs
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => navigate('/job-alerts')}>
+                          <Bell className="mr-2 h-4 w-4" />
+                          Job Alerts
+                        </DropdownMenuItem>
+                      </>
+                    )}
                     {hasRole('business_owner') && (
                       <DropdownMenuItem onClick={() => navigate('/my-businesses')}>
                         <Building2 className="mr-2 h-4 w-4" />

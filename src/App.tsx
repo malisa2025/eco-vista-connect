@@ -20,6 +20,8 @@ import MyApplications from "./pages/MyApplications";
 import JobApplications from "./pages/JobApplications";
 import AdAnalytics from "./pages/AdAnalytics";
 import Favorites from "./pages/Favorites";
+import SavedJobs from "./pages/SavedJobs";
+import JobAlerts from "./pages/JobAlerts";
 import Inbox from "./pages/Inbox";
 import PurchaseAd from "./pages/PurchaseAd";
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -50,6 +52,22 @@ const App = () => (
                 <Route path="/jobs" element={<Jobs />} />
                 <Route path="/jobs/:id" element={<JobDetail />} />
                 <Route path="/subscribe-job-seeker" element={<SubscribeJobSeeker />} />
+                <Route
+                  path="/saved-jobs"
+                  element={
+                    <ProtectedRoute>
+                      <SavedJobs />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/job-alerts"
+                  element={
+                    <ProtectedRoute>
+                      <JobAlerts />
+                    </ProtectedRoute>
+                  }
+                />
                 <Route
                   path="/my-applications"
                   element={

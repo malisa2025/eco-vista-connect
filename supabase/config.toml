@@ -3,3 +3,6 @@ project_id = "oxaghzctrjemldcezcqq"
 [functions.verify-paystack-payment]
 
 [functions.send-notification-email]
+
+[functions.generate-job-recommendations]
+verify_jwt = false

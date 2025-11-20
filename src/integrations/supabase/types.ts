@@ -595,6 +595,54 @@ export type Database = {
           },
         ]
       }
+      job_alerts: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          experience_level: string | null
+          frequency: string | null
+          id: string
+          is_active: boolean | null
+          job_type: string | null
+          keywords: string | null
+          last_sent_at: string | null
+          location: string | null
+          name: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          experience_level?: string | null
+          frequency?: string | null
+          id?: string
+          is_active?: boolean | null
+          job_type?: string | null
+          keywords?: string | null
+          last_sent_at?: string | null
+          location?: string | null
+          name: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          experience_level?: string | null
+          frequency?: string | null
+          id?: string
+          is_active?: boolean | null
+          job_type?: string | null
+          keywords?: string | null
+          last_sent_at?: string | null
+          location?: string | null
+          name?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       job_applications: {
         Row: {
           application_duration: number | null
@@ -966,33 +1014,66 @@ export type Database = {
       }
       profiles: {
         Row: {
+          availability: string | null
           avatar_url: string | null
           bio: string | null
           created_at: string | null
+          education: string | null
           email: string | null
+          experience_years: number | null
           full_name: string | null
+          github_url: string | null
           id: string
+          linkedin_url: string | null
           phone: string | null
+          portfolio_url: string | null
+          preferred_job_types: string[] | null
+          preferred_locations: string[] | null
+          resume_url: string | null
+          salary_expectation: string | null
+          skills: string[] | null
           updated_at: string | null
         }
         Insert: {
+          availability?: string | null
           avatar_url?: string | null
           bio?: string | null
           created_at?: string | null
+          education?: string | null
           email?: string | null
+          experience_years?: number | null
           full_name?: string | null
+          github_url?: string | null
           id: string
+          linkedin_url?: string | null
           phone?: string | null
+          portfolio_url?: string | null
+          preferred_job_types?: string[] | null
+          preferred_locations?: string[] | null
+          resume_url?: string | null
+          salary_expectation?: string | null
+          skills?: string[] | null
           updated_at?: string | null
         }
         Update: {
+          availability?: string | null
           avatar_url?: string | null
           bio?: string | null
           created_at?: string | null
+          education?: string | null
           email?: string | null
+          experience_years?: number | null
           full_name?: string | null
+          github_url?: string | null
           id?: string
+          linkedin_url?: string | null
           phone?: string | null
+          portfolio_url?: string | null
+          preferred_job_types?: string[] | null
+          preferred_locations?: string[] | null
+          resume_url?: string | null
+          salary_expectation?: string | null
+          skills?: string[] | null
           updated_at?: string | null
         }
         Relationships: []
@@ -1066,6 +1147,35 @@ export type Database = {
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      saved_jobs: {
+        Row: {
+          created_at: string | null
+          id: string
+          job_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          job_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          job_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_jobs_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
             referencedColumns: ["id"]
           },
         ]

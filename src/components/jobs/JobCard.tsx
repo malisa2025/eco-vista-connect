@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Building2, MapPin, Clock, Users, Video } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router-dom";
+import SaveJobButton from "./SaveJobButton";
 
 interface JobCardProps {
   job: {
@@ -67,10 +68,13 @@ const JobCard = ({ job }: JobCardProps) => {
           </div>
 
           <div className="flex-1 min-w-0">
-            {/* Job Title */}
-            <h3 className="text-lg font-bold mb-1 group-hover:text-primary transition-smooth truncate">
-              {job.title}
-            </h3>
+            {/* Job Title with Save Button */}
+            <div className="flex items-start justify-between gap-2 mb-1">
+              <h3 className="text-lg font-bold group-hover:text-primary transition-smooth truncate flex-1">
+                {job.title}
+              </h3>
+              <SaveJobButton jobId={job.id} />
+            </div>
 
             {/* Company Name */}
             <p className="text-sm text-muted-foreground mb-3">
