@@ -14,6 +14,140 @@ export type Database = {
   }
   public: {
     Tables: {
+      ad_clicks: {
+        Row: {
+          advertisement_id: string
+          clicked_at: string | null
+          id: string
+          ip_address: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          advertisement_id: string
+          clicked_at?: string | null
+          id?: string
+          ip_address?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          advertisement_id?: string
+          clicked_at?: string | null
+          id?: string
+          ip_address?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ad_clicks_advertisement_id_fkey"
+            columns: ["advertisement_id"]
+            isOneToOne: false
+            referencedRelation: "advertisements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ad_spots: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          location: Database["public"]["Enums"]["ad_spot_location"]
+          max_ads: number | null
+          name: string
+          price_per_day: number
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          location: Database["public"]["Enums"]["ad_spot_location"]
+          max_ads?: number | null
+          name: string
+          price_per_day: number
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          location?: Database["public"]["Enums"]["ad_spot_location"]
+          max_ads?: number | null
+          name?: string
+          price_per_day?: number
+        }
+        Relationships: []
+      }
+      advertisements: {
+        Row: {
+          ad_spot_id: string
+          business_id: string
+          created_at: string | null
+          description: string | null
+          end_date: string
+          id: string
+          image_url: string
+          impressions: number | null
+          link_url: string | null
+          start_date: string
+          status: Database["public"]["Enums"]["ad_status"] | null
+          stripe_payment_id: string | null
+          title: string
+          total_cost: number
+          updated_at: string | null
+        }
+        Insert: {
+          ad_spot_id: string
+          business_id: string
+          created_at?: string | null
+          description?: string | null
+          end_date: string
+          id?: string
+          image_url: string
+          impressions?: number | null
+          link_url?: string | null
+          start_date: string
+          status?: Database["public"]["Enums"]["ad_status"] | null
+          stripe_payment_id?: string | null
+          title: string
+          total_cost: number
+          updated_at?: string | null
+        }
+        Update: {
+          ad_spot_id?: string
+          business_id?: string
+          created_at?: string | null
+          description?: string | null
+          end_date?: string
+          id?: string
+          image_url?: string
+          impressions?: number | null
+          link_url?: string | null
+          start_date?: string
+          status?: Database["public"]["Enums"]["ad_status"] | null
+          stripe_payment_id?: string | null
+          title?: string
+          total_cost?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "advertisements_ad_spot_id_fkey"
+            columns: ["ad_spot_id"]
+            isOneToOne: false
+            referencedRelation: "ad_spots"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "advertisements_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_categories: {
         Row: {
           created_at: string | null
@@ -177,6 +311,9 @@ export type Database = {
           region: string
           review_count: number | null
           updated_at: string | null
+          video_duration: number | null
+          video_thumbnail_url: string | null
+          video_url: string | null
           website: string | null
         }
         Insert: {
@@ -200,6 +337,9 @@ export type Database = {
           region: string
           review_count?: number | null
           updated_at?: string | null
+          video_duration?: number | null
+          video_thumbnail_url?: string | null
+          video_url?: string | null
           website?: string | null
         }
         Update: {
@@ -223,9 +363,44 @@ export type Database = {
           region?: string
           review_count?: number | null
           updated_at?: string | null
+          video_duration?: number | null
+          video_thumbnail_url?: string | null
+          video_url?: string | null
           website?: string | null
         }
         Relationships: []
+      }
+      conversations: {
+        Row: {
+          business_id: string
+          created_at: string | null
+          id: string
+          last_message_at: string | null
+          user_id: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string | null
+          id?: string
+          last_message_at?: string | null
+          user_id: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string | null
+          id?: string
+          last_message_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       favorites: {
         Row: {
@@ -252,6 +427,41 @@ export type Database = {
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          sender_id: string
+        }
+        Insert: {
+          content: string
+          conversation_id: string
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          sender_id: string
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
             referencedColumns: ["id"]
           },
         ]
@@ -397,6 +607,13 @@ export type Database = {
       }
     }
     Enums: {
+      ad_spot_location:
+        | "home_hero"
+        | "home_sidebar"
+        | "business_list_top"
+        | "business_detail_sidebar"
+        | "search_results"
+      ad_status: "draft" | "pending_payment" | "active" | "paused" | "expired"
       app_role: "user" | "business_owner" | "admin"
       claim_status: "pending" | "approved" | "rejected"
       claim_type: "new_business" | "claim_existing"
@@ -527,6 +744,14 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      ad_spot_location: [
+        "home_hero",
+        "home_sidebar",
+        "business_list_top",
+        "business_detail_sidebar",
+        "search_results",
+      ],
+      ad_status: ["draft", "pending_payment", "active", "paused", "expired"],
       app_role: ["user", "business_owner", "admin"],
       claim_status: ["pending", "approved", "rejected"],
       claim_type: ["new_business", "claim_existing"],
