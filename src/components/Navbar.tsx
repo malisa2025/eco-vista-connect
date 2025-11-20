@@ -55,6 +55,12 @@ const Navbar = () => {
               Businesses
             </button>
             <button 
+              onClick={() => navigate('/business-news')}
+              className="text-sm font-medium hover:text-primary transition-smooth"
+            >
+              Business News
+            </button>
+            <button 
               onClick={() => navigate('/jobs')}
               className="text-sm font-medium hover:text-primary transition-smooth"
             >
@@ -182,6 +188,12 @@ const Navbar = () => {
                 className="text-sm font-medium hover:text-primary transition-smooth py-2 text-left"
               >
                 Businesses
+              </button>
+              <button 
+                onClick={() => { navigate('/business-news'); setIsOpen(false); }}
+                className="text-sm font-medium hover:text-primary transition-smooth py-2 text-left"
+              >
+                Business News
               </button>
               <button 
                 onClick={() => { navigate('/jobs'); setIsOpen(false); }}

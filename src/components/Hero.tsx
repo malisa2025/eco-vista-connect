@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Search } from "lucide-react";
 import heroBg from "@/assets/hero-bg.jpg";
+import { CompactNewsPlayer } from "@/components/CompactNewsPlayer";
 
 const Hero = () => {
   return (
@@ -17,7 +18,9 @@ const Hero = () => {
 
       {/* Content */}
       <div className="container relative z-10 mx-auto px-4 py-20">
-        <div className="max-w-3xl animate-fade-in-up">
+        <div className="grid lg:grid-cols-[1fr,400px] gap-8 items-start">
+          {/* Left Column - Content */}
+          <div className="max-w-3xl animate-fade-in-up">
           <div className="inline-block mb-6 px-4 py-2 bg-primary/10 border border-primary/20 rounded-full">
             <span className="text-sm font-medium text-primary">Enterprise Business Listing Platform</span>
           </div>
@@ -57,6 +60,12 @@ const Hero = () => {
             </div>
           </div>
         </div>
+
+        {/* Right Column - News Player */}
+        <div className="hidden lg:block animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
+          <CompactNewsPlayer />
+        </div>
+      </div>
       </div>
 
       {/* Decorative Elements */}
