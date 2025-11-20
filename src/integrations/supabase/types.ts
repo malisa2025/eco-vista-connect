@@ -475,6 +475,175 @@ export type Database = {
           },
         ]
       }
+      job_applications: {
+        Row: {
+          applied_at: string | null
+          cover_letter: string
+          id: string
+          job_id: string
+          notes: string | null
+          resume_url: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["application_status"] | null
+          user_id: string
+          video_url: string | null
+        }
+        Insert: {
+          applied_at?: string | null
+          cover_letter: string
+          id?: string
+          job_id: string
+          notes?: string | null
+          resume_url?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["application_status"] | null
+          user_id: string
+          video_url?: string | null
+        }
+        Update: {
+          applied_at?: string | null
+          cover_letter?: string
+          id?: string
+          job_id?: string
+          notes?: string | null
+          resume_url?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["application_status"] | null
+          user_id?: string
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_applications_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_seeker_subscriptions: {
+        Row: {
+          amount: number
+          auto_renew: boolean | null
+          created_at: string | null
+          end_date: string
+          id: string
+          payment_method: string | null
+          payment_reference: string | null
+          start_date: string | null
+          status: Database["public"]["Enums"]["subscription_status"] | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          auto_renew?: boolean | null
+          created_at?: string | null
+          end_date: string
+          id?: string
+          payment_method?: string | null
+          payment_reference?: string | null
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["subscription_status"] | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          auto_renew?: boolean | null
+          created_at?: string | null
+          end_date?: string
+          id?: string
+          payment_method?: string | null
+          payment_reference?: string | null
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["subscription_status"] | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      jobs: {
+        Row: {
+          applications_count: number | null
+          business_id: string
+          category: string
+          created_at: string | null
+          description: string
+          experience_level: Database["public"]["Enums"]["experience_level"]
+          expires_at: string | null
+          id: string
+          job_type: Database["public"]["Enums"]["job_type"]
+          location: string | null
+          posted_at: string | null
+          require_video: boolean | null
+          requirements: string | null
+          responsibilities: string | null
+          salary_range: string | null
+          status: Database["public"]["Enums"]["job_status"] | null
+          title: string
+          updated_at: string | null
+          video_prompt: string | null
+          views_count: number | null
+        }
+        Insert: {
+          applications_count?: number | null
+          business_id: string
+          category: string
+          created_at?: string | null
+          description: string
+          experience_level: Database["public"]["Enums"]["experience_level"]
+          expires_at?: string | null
+          id?: string
+          job_type: Database["public"]["Enums"]["job_type"]
+          location?: string | null
+          posted_at?: string | null
+          require_video?: boolean | null
+          requirements?: string | null
+          responsibilities?: string | null
+          salary_range?: string | null
+          status?: Database["public"]["Enums"]["job_status"] | null
+          title: string
+          updated_at?: string | null
+          video_prompt?: string | null
+          views_count?: number | null
+        }
+        Update: {
+          applications_count?: number | null
+          business_id?: string
+          category?: string
+          created_at?: string | null
+          description?: string
+          experience_level?: Database["public"]["Enums"]["experience_level"]
+          expires_at?: string | null
+          id?: string
+          job_type?: Database["public"]["Enums"]["job_type"]
+          location?: string | null
+          posted_at?: string | null
+          require_video?: boolean | null
+          requirements?: string | null
+          responsibilities?: string | null
+          salary_range?: string | null
+          status?: Database["public"]["Enums"]["job_status"] | null
+          title?: string
+          updated_at?: string | null
+          video_prompt?: string | null
+          views_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "jobs_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           content: string
@@ -663,6 +832,53 @@ export type Database = {
           },
         ]
       }
+      subscription_payments: {
+        Row: {
+          amount: number
+          created_at: string | null
+          id: string
+          metadata: Json | null
+          paid_at: string | null
+          payment_method: string | null
+          payment_reference: string
+          status: string | null
+          subscription_id: string | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          paid_at?: string | null
+          payment_method?: string | null
+          payment_reference: string
+          status?: string | null
+          subscription_id?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          paid_at?: string | null
+          payment_method?: string | null
+          payment_reference?: string
+          status?: string | null
+          subscription_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_payments_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "job_seeker_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string | null
@@ -693,6 +909,11 @@ export type Database = {
         Args: { target_date?: string }
         Returns: undefined
       }
+      check_job_seeker_subscription: {
+        Args: { p_user_id: string }
+        Returns: boolean
+      }
+      expire_old_jobs: { Args: never; Returns: undefined }
       get_admin_stats: {
         Args: never
         Returns: {
@@ -729,8 +950,18 @@ export type Database = {
         | "search_results"
       ad_status: "draft" | "pending_payment" | "active" | "paused" | "expired"
       app_role: "user" | "business_owner" | "admin"
+      application_status:
+        | "pending"
+        | "reviewed"
+        | "shortlisted"
+        | "rejected"
+        | "accepted"
       claim_status: "pending" | "approved" | "rejected"
       claim_type: "new_business" | "claim_existing"
+      experience_level: "entry" | "mid" | "senior" | "executive"
+      job_status: "draft" | "active" | "closed" | "expired"
+      job_type: "full_time" | "part_time" | "contract" | "internship"
+      subscription_status: "active" | "expired" | "cancelled"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -867,8 +1098,19 @@ export const Constants = {
       ],
       ad_status: ["draft", "pending_payment", "active", "paused", "expired"],
       app_role: ["user", "business_owner", "admin"],
+      application_status: [
+        "pending",
+        "reviewed",
+        "shortlisted",
+        "rejected",
+        "accepted",
+      ],
       claim_status: ["pending", "approved", "rejected"],
       claim_type: ["new_business", "claim_existing"],
+      experience_level: ["entry", "mid", "senior", "executive"],
+      job_status: ["draft", "active", "closed", "expired"],
+      job_type: ["full_time", "part_time", "contract", "internship"],
+      subscription_status: ["active", "expired", "cancelled"],
     },
   },
 } as const
