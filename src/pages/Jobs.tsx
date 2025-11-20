@@ -6,10 +6,14 @@ import JobCard from "@/components/jobs/JobCard";
 import JobFilters from "@/components/jobs/JobFilters";
 import CategoryPills from "@/components/CategoryPills";
 import AdSlot from "@/components/AdSlot";
+import JobRecommendations from "@/components/jobs/JobRecommendations";
+import CreateAlertDialog from "@/components/jobs/CreateAlertDialog";
 import { usePublicJobs } from "@/hooks/useJobs";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Jobs = () => {
+  const { user } = useAuth();
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
   const [location, setLocation] = useState("");
@@ -42,13 +46,16 @@ const Jobs = () => {
         {/* Hero Section */}
         <section className="gradient-hero py-16 text-white">
           <div className="container mx-auto px-4">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                <Briefcase className="h-8 w-8" />
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                  <Briefcase className="h-8 w-8" />
+                </div>
+                <h1 className="text-4xl md:text-5xl font-display font-bold">
+                  Find Your Next Opportunity
+                </h1>
               </div>
-              <h1 className="text-4xl md:text-5xl font-display font-bold">
-                Find Your Next Opportunity
-              </h1>
+              {user && <CreateAlertDialog />}
             </div>
             <p className="text-lg text-white/90 max-w-2xl">
               Browse quality job listings from businesses across Ghana
@@ -69,6 +76,9 @@ const Jobs = () => {
         {/* Main Content */}
         <section className="py-12">
           <div className="container mx-auto px-4">
+            {/* Recommendations Section */}
+            <JobRecommendations />
+            
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
               {/* Filters Sidebar */}
               <aside className="lg:col-span-1">
