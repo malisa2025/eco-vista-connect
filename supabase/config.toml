@@ -18,3 +18,5 @@ verify_jwt = false
 
 [functions.send-hiring-digest]
 verify_jwt = false
+
+[functions.upload-to-cloudflare]

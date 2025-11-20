@@ -24,6 +24,7 @@ import SavedJobs from "./pages/SavedJobs";
 import JobAlerts from "./pages/JobAlerts";
 import Notifications from "./pages/Notifications";
 import Inbox from "./pages/Inbox";
+import EditBusiness from "./pages/EditBusiness";
 import PurchaseAd from "./pages/PurchaseAd";
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminClaims from "./pages/admin/Claims";
@@ -48,8 +49,9 @@ const App = () => (
         <BrowserRouter>
           <Routes>
                 <Route path="/" element={<Index />} />
-                <Route path="/businesses" element={<Businesses />} />
-                <Route path="/businesses/:id" element={<BusinessDetail />} />
+        <Route path="/businesses" element={<Businesses />} />
+        <Route path="/businesses/:id" element={<BusinessDetail />} />
+        <Route path="/businesses/:id/edit" element={<ProtectedRoute><EditBusiness /></ProtectedRoute>} />
                 <Route path="/jobs" element={<Jobs />} />
                 <Route path="/jobs/:id" element={<JobDetail />} />
                 <Route path="/subscribe-job-seeker" element={<SubscribeJobSeeker />} />
