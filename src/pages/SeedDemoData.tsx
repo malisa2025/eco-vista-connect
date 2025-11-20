@@ -18,91 +18,12 @@ export default function SeedDemoData() {
 
   const seedJobs = async () => {
     try {
-      // Get first business for demo
-      const { data: businesses } = await supabase
-        .from('businesses')
-        .select('id')
-        .limit(5);
+      const { data, error } = await supabase.functions.invoke('seed-demo-data', {
+        body: { action: 'jobs' },
+      });
 
-      if (!businesses || businesses.length === 0) {
-        throw new Error('No businesses found. Please add businesses first.');
-      }
-
-      const demoJobs = [
-        {
-          business_id: businesses[0].id,
-          title: 'Senior Software Engineer',
-          description: 'Join our dynamic team to build cutting-edge e-commerce solutions. We are looking for a talented software engineer with expertise in modern web technologies.',
-          category: 'Technology',
-          job_type: 'full_time' as const,
-          experience_level: 'senior' as const,
-          location: 'Accra, Greater Accra',
-          salary_range: 'GHS 8,000 - 15,000/month',
-          requirements: '• 5+ years of experience in software development\n• Proficiency in React, Node.js, and TypeScript\n• Experience with cloud platforms (AWS/Azure)\n• Strong problem-solving skills\n• Excellent communication abilities',
-          responsibilities: '• Design and develop scalable web applications\n• Lead technical decisions and architecture\n• Mentor junior developers\n• Collaborate with cross-functional teams\n• Write clean, maintainable code',
-          status: 'active' as const,
-          posted_at: new Date().toISOString(),
-        },
-        {
-          business_id: businesses[1]?.id || businesses[0].id,
-          title: 'Digital Marketing Manager',
-          description: 'Drive our digital marketing strategy and grow our online presence. Perfect for a creative marketer with a data-driven mindset.',
-          category: 'Marketing',
-          job_type: 'full_time' as const,
-          experience_level: 'mid' as const,
-          location: 'Kumasi, Ashanti',
-          salary_range: 'GHS 5,000 - 9,000/month',
-          requirements: '• 3+ years in digital marketing\n• Experience with SEO, SEM, and social media\n• Google Analytics and Ads certification\n• Content creation skills\n• Strong analytical mindset',
-          responsibilities: '• Develop and execute digital marketing campaigns\n• Manage social media platforms\n• Analyze campaign performance\n• Optimize conversion rates\n• Collaborate with design team',
-          status: 'active' as const,
-          posted_at: new Date().toISOString(),
-        },
-        {
-          business_id: businesses[2]?.id || businesses[0].id,
-          title: 'Head Chef',
-          description: 'Lead our kitchen team and create exceptional dining experiences. We are seeking a passionate chef with fine dining experience.',
-          category: 'Hospitality',
-          job_type: 'full_time' as const,
-          experience_level: 'senior' as const,
-          location: 'Airport Residential Area, Accra',
-          salary_range: 'GHS 6,000 - 12,000/month',
-          requirements: '• 7+ years culinary experience\n• Fine dining background\n• Menu planning and costing\n• Team leadership skills\n• Food safety certification',
-          responsibilities: '• Oversee kitchen operations\n• Create innovative menu items\n• Train and manage kitchen staff\n• Ensure food quality and safety\n• Control food costs and inventory',
-          status: 'active' as const,
-          posted_at: new Date().toISOString(),
-        },
-        {
-          business_id: businesses[3]?.id || businesses[0].id,
-          title: 'Data Analyst',
-          description: 'Transform data into actionable insights. Join our analytics team and drive data-driven decision making.',
-          category: 'Technology',
-          job_type: 'full_time' as const,
-          experience_level: 'mid' as const,
-          location: 'Kumasi, Ashanti',
-          salary_range: 'GHS 5,500 - 9,500/month',
-          requirements: '• Bachelor\'s in Statistics, Computer Science, or related field\n• 2-4 years data analysis experience\n• Proficiency in SQL, Python, or R\n• Experience with visualization tools\n• Strong analytical skills',
-          responsibilities: '• Analyze complex datasets\n• Create data visualizations\n• Identify trends and patterns\n• Present findings to stakeholders\n• Collaborate with business teams',
-          status: 'active' as const,
-          posted_at: new Date().toISOString(),
-        },
-        {
-          business_id: businesses[4]?.id || businesses[0].id,
-          title: 'Sales Representative',
-          description: 'Join our sales team and help grow our market presence. Ideal for motivated individuals with excellent communication skills.',
-          category: 'Sales',
-          job_type: 'full_time' as const,
-          experience_level: 'entry' as const,
-          location: 'Kumasi, Ashanti',
-          salary_range: 'GHS 2,500 - 5,000/month + Commission',
-          requirements: '• Bachelor\'s degree or equivalent\n• 1-2 years sales experience\n• Excellent communication skills\n• Self-motivated and target-driven\n• Valid driver\'s license',
-          responsibilities: '• Identify new business opportunities\n• Build client relationships\n• Achieve sales targets\n• Prepare sales reports\n• Attend trade shows',
-          status: 'active' as const,
-          posted_at: new Date().toISOString(),
-        },
-      ];
-
-      const { error } = await supabase.from('jobs').insert(demoJobs);
       if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || 'Failed to seed jobs');
 
       return true;
     } catch (error) {
@@ -113,71 +34,12 @@ export default function SeedDemoData() {
 
   const seedBusinessGalleries = async () => {
     try {
-      const { data: businesses } = await supabase
-        .from('businesses')
-        .select('id, category, name');
-
-      if (!businesses || businesses.length === 0) {
-        throw new Error('No businesses found');
-      }
-
-      // Map images based on category
-      const updates = businesses.map((business) => {
-        let galleryImages: string[] = [];
-        let logoUrl = '';
-
-        if (business.category === 'Retail' || business.category === 'Fashion') {
-          galleryImages = [
-            '/demo/fashion-hero.jpg',
-            '/demo/fashion-logo.jpg',
-            '/demo/tech-hero.jpg',
-          ];
-          logoUrl = '/demo/fashion-logo.jpg';
-        } else if (business.category === 'Food & Beverage' || business.category === 'Restaurant') {
-          galleryImages = [
-            '/demo/restaurant-hero.jpg',
-            '/demo/restaurant-logo.jpg',
-            '/demo/fashion-hero.jpg',
-          ];
-          logoUrl = '/demo/restaurant-logo.jpg';
-        } else if (business.category === 'Technology') {
-          galleryImages = [
-            '/demo/tech-hero.jpg',
-            '/demo/tech-logo.jpg',
-            '/demo/restaurant-hero.jpg',
-          ];
-          logoUrl = '/demo/tech-logo.jpg';
-        } else {
-          // Default mix for other categories
-          galleryImages = [
-            '/demo/fashion-hero.jpg',
-            '/demo/restaurant-hero.jpg',
-            '/demo/tech-hero.jpg',
-          ];
-          logoUrl = '/demo/fashion-logo.jpg';
-        }
-
-        return {
-          id: business.id,
-          gallery_images: galleryImages,
-          image_url: galleryImages[0],
-          logo_url: logoUrl,
-        };
+      const { data, error } = await supabase.functions.invoke('seed-demo-data', {
+        body: { action: 'galleries' },
       });
 
-      // Update all businesses
-      for (const update of updates) {
-        const { error } = await supabase
-          .from('businesses')
-          .update({
-            gallery_images: update.gallery_images,
-            image_url: update.image_url,
-            logo_url: update.logo_url,
-          })
-          .eq('id', update.id);
-
-        if (error) throw error;
-      }
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || 'Failed to seed galleries');
 
       return true;
     } catch (error) {
@@ -188,67 +50,12 @@ export default function SeedDemoData() {
 
   const seedAdvertisements = async () => {
     try {
-      const { data: businesses } = await supabase
-        .from('businesses')
-        .select('id')
-        .limit(3);
+      const { data, error } = await supabase.functions.invoke('seed-demo-data', {
+        body: { action: 'advertisements' },
+      });
 
-      const { data: adSpots } = await supabase
-        .from('ad_spots')
-        .select('id, price_per_day')
-        .limit(3);
-
-      if (!businesses || !adSpots || businesses.length === 0 || adSpots.length === 0) {
-        throw new Error('Missing businesses or ad spots');
-      }
-
-      const demoAds = [
-        {
-          business_id: businesses[0].id,
-          ad_spot_id: adSpots[0].id,
-          title: 'Grand Opening Special - 50% Off!',
-          description: 'Visit us this weekend for amazing deals and exclusive offers',
-          image_url: '/demo/fashion-hero.jpg',
-          link_url: '/businesses',
-          start_date: new Date().toISOString().split('T')[0],
-          end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-          total_cost: adSpots[0].price_per_day * 30,
-          status: 'active' as const,
-          payment_status: 'paid',
-          paid_at: new Date().toISOString(),
-        },
-        {
-          business_id: businesses[1]?.id || businesses[0].id,
-          ad_spot_id: adSpots[1]?.id || adSpots[0].id,
-          title: 'Premium Services Now Available',
-          description: 'Experience excellence with our new premium offerings',
-          image_url: '/demo/tech-hero.jpg',
-          link_url: '/businesses',
-          start_date: new Date().toISOString().split('T')[0],
-          end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-          total_cost: (adSpots[1]?.price_per_day || adSpots[0].price_per_day) * 30,
-          status: 'active' as const,
-          payment_status: 'paid',
-          paid_at: new Date().toISOString(),
-        },
-        {
-          business_id: businesses[2]?.id || businesses[0].id,
-          ad_spot_id: adSpots[2]?.id || adSpots[0].id,
-          title: 'Fresh Arrivals Daily',
-          description: 'Shop the latest products at unbeatable prices',
-          image_url: '/demo/restaurant-hero.jpg',
-          link_url: '/businesses',
-          start_date: new Date().toISOString().split('T')[0],
-          end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-          total_cost: (adSpots[2]?.price_per_day || adSpots[0].price_per_day) * 30,
-          status: 'active' as const,
-          payment_status: 'paid',
-          paid_at: new Date().toISOString(),
-        },
-      ];
-
-      const { error } = await supabase.from('advertisements').insert(demoAds);
       if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || 'Failed to seed advertisements');
 
       return true;
     } catch (error) {
@@ -320,15 +127,15 @@ export default function SeedDemoData() {
   const handleSeedAll = async () => {
     setIsSeeding(true);
     try {
-      await seedJobs();
-      setSeedStatus((prev) => ({ ...prev, jobs: true }));
+      const { data, error } = await supabase.functions.invoke('seed-demo-data', {
+        body: { action: 'all' },
+      });
+
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || 'Failed to seed all data');
+
+      setSeedStatus({ jobs: true, ads: true, galleries: true });
       
-      await seedAdvertisements();
-      setSeedStatus((prev) => ({ ...prev, ads: true }));
-
-      await seedBusinessGalleries();
-      setSeedStatus((prev) => ({ ...prev, galleries: true }));
-
       toast({
         title: 'Success!',
         description: 'All demo data has been seeded successfully',
