@@ -14,6 +14,10 @@ import RegisterBusiness from "./pages/RegisterBusiness";
 import MyBusinesses from "./pages/MyBusinesses";
 import Jobs from "./pages/Jobs";
 import PostJob from "./pages/PostJob";
+import JobDetail from "./pages/JobDetail";
+import SubscribeJobSeeker from "./pages/SubscribeJobSeeker";
+import MyApplications from "./pages/MyApplications";
+import JobApplications from "./pages/JobApplications";
 import AdAnalytics from "./pages/AdAnalytics";
 import Favorites from "./pages/Favorites";
 import Inbox from "./pages/Inbox";
@@ -39,6 +43,24 @@ const App = () => (
                 <Route path="/businesses" element={<Businesses />} />
                 <Route path="/businesses/:id" element={<BusinessDetail />} />
                 <Route path="/jobs" element={<Jobs />} />
+                <Route path="/jobs/:id" element={<JobDetail />} />
+                <Route path="/subscribe-job-seeker" element={<SubscribeJobSeeker />} />
+                <Route
+                  path="/my-applications"
+                  element={
+                    <ProtectedRoute>
+                      <MyApplications />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/job-applications/:jobId"
+                  element={
+                    <ProtectedRoute requireRole="business_owner">
+                      <JobApplications />
+                    </ProtectedRoute>
+                  }
+                />
                 <Route path="/auth" element={<Auth />} />
             <Route
               path="/inbox"
