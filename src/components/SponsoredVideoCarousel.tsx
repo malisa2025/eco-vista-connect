@@ -71,6 +71,39 @@ export const SponsoredVideoCarousel = ({ className }: { className?: string }) =>
     return () => observer.disconnect();
   }, []);
 
+  // Embla carousel event listeners
+  useEffect(() => {
+    if (!emblaApi) return;
+
+    const onScroll = () => {
+      // Pause all videos when carousel starts scrolling
+      videoRefs.current.forEach(video => {
+        if (video && !video.paused) {
+          video.pause();
+        }
+      });
+    };
+
+    const onSettle = () => {
+      // Carousel has settled on a new slide
+      const currentSlide = emblaApi.selectedScrollSnap();
+      const firstVideoOfSlide = currentSlide * 3;
+      
+      // Small delay to ensure video is ready
+      setTimeout(() => {
+        setCurrentPlayingIndex(firstVideoOfSlide);
+      }, 100);
+    };
+
+    emblaApi.on('scroll', onScroll);
+    emblaApi.on('settle', onSettle);
+
+    return () => {
+      emblaApi.off('scroll', onScroll);
+      emblaApi.off('settle', onSettle);
+    };
+  }, [emblaApi]);
+
   // Auto-play logic
   useEffect(() => {
     if (!isInView || videoAds.length === 0) return;
@@ -81,9 +114,16 @@ export const SponsoredVideoCarousel = ({ className }: { className?: string }) =>
 
     if (!video) return;
 
+    // Pause all other videos first
+    videoRefs.current.forEach((v, idx) => {
+      if (v && idx !== currentPlayingIndex && !v.paused) {
+        v.pause();
+      }
+    });
+
     const playVideo = async () => {
       try {
-        video.muted = true; // Ensure muted before play
+        video.muted = isMuted; // Respect current mute state
         video.currentTime = 0;
         await video.play();
       } catch (error) {
@@ -103,18 +143,12 @@ export const SponsoredVideoCarousel = ({ className }: { className?: string }) =>
           setCurrentPlayingIndex(currentPlayingIndex + 1);
         } else if (currentPlayingIndex < videoAds.length - 1) {
           // All 3 videos played, move to next slide
-          console.log('🔄 Carousel moving to next slide');
           emblaApi?.scrollNext();
-          setTimeout(() => {
-            setCurrentPlayingIndex(currentSlideStartIndex + 3);
-          }, 500);
+          // Don't set index here - let onSettle handle it
         } else {
           // Loop back to beginning
-          console.log('🔄 Carousel looping back to start');
           emblaApi?.scrollTo(0);
-          setTimeout(() => {
-            setCurrentPlayingIndex(0);
-          }, 500);
+          // Don't set index here - let onSettle handle it
         }
       }
     };
@@ -125,7 +159,7 @@ export const SponsoredVideoCarousel = ({ className }: { className?: string }) =>
       video.removeEventListener("timeupdate", handleTimeUpdate);
       video.pause();
     };
-  }, [currentPlayingIndex, isInView, videoAds.length, emblaApi]);
+  }, [currentPlayingIndex, isInView, videoAds.length, emblaApi, isMuted]);
 
   const handleVideoClick = async (ad: VideoAd, index: number) => {
     // Track click
