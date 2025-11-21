@@ -33,6 +33,7 @@ import AdminUsers from "./pages/admin/Users";
 import AdminAdvertisements from "./pages/admin/Advertisements";
 import AdminJobs from "./pages/admin/Jobs";
 import AdminSubscriptions from "./pages/admin/Subscriptions";
+import AdminPartners from "./pages/admin/Partners";
 import JobPerformance from "./pages/JobPerformance";
 import BusinessAnalytics from "./pages/BusinessAnalytics";
 import HiringPipeline from "./pages/HiringPipeline";
@@ -240,6 +241,14 @@ const App = () => (
             element={
               <ProtectedRoute requireRole="admin">
                 <AdminSubscriptions />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/partners"
+            element={
+              <ProtectedRoute requireRole="admin">
+                <AdminPartners />
               </ProtectedRoute>
             }
           />
