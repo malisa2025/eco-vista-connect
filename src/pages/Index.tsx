@@ -17,7 +17,7 @@ const Index = () => {
       <Navbar />
       <main>
         <Hero />
-        <SponsoredVideoCarousel className="container mx-auto px-4 my-8" />
+        <SponsoredVideoCarousel className="container mx-auto px-4 mt-2 mb-8" />
         <Features />
         <FeaturedBusinesses />
         <AdSlot location="home_sidebar" className="container mx-auto px-4 my-8" />
