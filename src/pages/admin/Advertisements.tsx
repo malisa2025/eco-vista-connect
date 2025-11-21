@@ -17,7 +17,8 @@ const AdminAdvertisements = () => {
   const [filters, setFilters] = useState({
     status: 'all',
     location: 'all',
-    search: ''
+    search: '',
+    hasVideo: false
   });
   const [selectedAd, setSelectedAd] = useState<any>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
@@ -27,7 +28,7 @@ const AdminAdvertisements = () => {
   const { data: stats, isLoading: statsLoading } = useAdminAdvertisementStats();
   const { updateAdStatus } = useAdMutations();
 
-  const handleFilterChange = (key: string, value: string) => {
+  const handleFilterChange = (key: string, value: string | boolean) => {
     setFilters(prev => ({ ...prev, [key]: value }));
   };
 

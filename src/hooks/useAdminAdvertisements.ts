@@ -6,6 +6,7 @@ interface AdFilters {
   status: string;
   location: string;
   search: string;
+  hasVideo: boolean;
 }
 
 export const useAdminAdvertisements = (filters: AdFilters) => {
@@ -64,7 +65,7 @@ export const useAdminAdvertisements = (filters: AdFilters) => {
     refetchInterval: 30000, // Auto-refresh every 30 seconds
   });
 
-  // Apply search filter on client side
+  // Apply search and video filter on client side
   const filteredAds = useMemo(() => {
     if (!rawAds) return [];
     
@@ -78,8 +79,13 @@ export const useAdminAdvertisements = (filters: AdFilters) => {
       );
     }
     
+    // Apply video filter
+    if (filters.hasVideo) {
+      filtered = filtered.filter(ad => ad.video_url !== null && ad.video_url !== '');
+    }
+    
     return filtered;
-  }, [rawAds, filters.search]);
+  }, [rawAds, filters.search, filters.hasVideo]);
 
   // Apply sorting
   const sortedAds = useMemo(() => {
