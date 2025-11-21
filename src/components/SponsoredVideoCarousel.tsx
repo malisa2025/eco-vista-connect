@@ -80,6 +80,7 @@ export const SponsoredVideoCarousel = ({ className }: { className?: string }) =>
 
     const playVideo = async () => {
       try {
+        video.muted = true; // Ensure muted before play
         video.currentTime = 0;
         await video.play();
       } catch (error) {
@@ -137,9 +138,12 @@ export const SponsoredVideoCarousel = ({ className }: { className?: string }) =>
 
   const toggleMute = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setIsMuted(!isMuted);
+    const newMutedState = !isMuted;
+    setIsMuted(newMutedState);
     videoRefs.current.forEach((video) => {
-      if (video) video.muted = !isMuted;
+      if (video) {
+        video.muted = newMutedState;
+      }
     });
   };
 
@@ -188,8 +192,9 @@ export const SponsoredVideoCarousel = ({ className }: { className?: string }) =>
                             ref={(el) => (videoRefs.current[globalIndex] = el)}
                             src={ad.video_url}
                             poster={ad.video_thumbnail_url || undefined}
-                            muted={isMuted}
+                            muted
                             playsInline
+                            preload="metadata"
                             className="w-full h-full object-cover"
                           />
                           
