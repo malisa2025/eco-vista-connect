@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { MapPin, Search, X } from "lucide-react";
+import { MapPin, Search, X, ChevronLeft, ChevronRight } from "lucide-react";
+import useEmblaCarousel from "embla-carousel-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -35,6 +36,12 @@ const filterRanges = [
 const RegionsShowcase = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("all");
+  const [emblaRef, emblaApi] = useEmblaCarousel({ 
+    loop: false, 
+    align: "start",
+    dragFree: true,
+    containScroll: "trimSnaps"
+  });
   const navigate = useNavigate();
 
   const handleRegionClick = (regionName: string) => {
@@ -133,37 +140,69 @@ const RegionsShowcase = () => {
         </div>
 
         {filteredRegions.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-            {filteredRegions.map((region, index) => (
-            <Card
-              key={region.name}
-              className={`cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-elegant group animate-fade-in bg-gradient-to-br ${region.color} border-border/50 hover:border-primary/50`}
-              style={{ animationDelay: `${index * 0.05}s` }}
-              onClick={() => handleRegionClick(region.name)}
+          <div className="relative group">
+            {/* Navigation Buttons */}
+            <Button
+              variant="outline"
+              size="icon"
+              className="absolute left-0 top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg bg-background/95 backdrop-blur-sm"
+              onClick={() => emblaApi?.scrollPrev()}
             >
-              <CardContent className="p-6 text-center">
-                <div className="mb-4 flex justify-center">
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                    <MapPin className="w-6 h-6 text-primary" />
+              <ChevronLeft className="w-5 h-5" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg bg-background/95 backdrop-blur-sm"
+              onClick={() => emblaApi?.scrollNext()}
+            >
+              <ChevronRight className="w-5 h-5" />
+            </Button>
+
+            {/* Horizontal Scroll Container */}
+            <div className="overflow-hidden" ref={emblaRef}>
+              <div className="flex gap-4">
+                {filteredRegions.map((region, index) => (
+                  <div
+                    key={region.name}
+                    className="flex-[0_0_280px] min-w-0"
+                  >
+                    <Card
+                      className={`h-full cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-elegant group/card animate-fade-in bg-gradient-to-br ${region.color} border-border/50 hover:border-primary/50`}
+                      style={{ animationDelay: `${index * 0.05}s` }}
+                      onClick={() => handleRegionClick(region.name)}
+                    >
+                      <CardContent className="p-6 text-center h-full flex flex-col justify-center">
+                        <div className="mb-4 flex justify-center">
+                          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center group-hover/card:bg-primary/20 transition-colors">
+                            <MapPin className="w-6 h-6 text-primary" />
+                          </div>
+                        </div>
+                        <h3 className="text-lg font-semibold mb-2 text-foreground">
+                          {region.name}
+                        </h3>
+                        <p className="text-3xl font-bold text-primary mb-1">
+                          {region.businessCount.toLocaleString()}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          businesses
+                        </p>
+                        <div className="mt-3 opacity-0 group-hover/card:opacity-100 transition-opacity duration-300">
+                          <span className="text-sm text-primary font-medium">
+                            Explore →
+                          </span>
+                        </div>
+                      </CardContent>
+                    </Card>
                   </div>
-                </div>
-                <h3 className="text-lg font-semibold mb-2 text-foreground">
-                  {region.name}
-                </h3>
-                <p className="text-3xl font-bold text-primary mb-1">
-                  {region.businessCount.toLocaleString()}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  businesses
-                </p>
-                <div className="mt-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <span className="text-sm text-primary font-medium">
-                    Explore →
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-            ))}
+                ))}
+              </div>
+            </div>
+            
+            {/* Scroll Hint */}
+            <div className="text-center mt-4 text-sm text-muted-foreground">
+              ← Scroll to explore more regions →
+            </div>
           </div>
         ) : (
           <div className="text-center py-16 animate-fade-in">

@@ -15,7 +15,7 @@ interface VideoAd {
   description: string | null;
 }
 
-const PREVIEW_DURATION = 30; // seconds
+const PREVIEW_DURATION = 15; // seconds - reduced for faster transitions
 
 export const SponsoredVideoCarousel = ({ className }: { className?: string }) => {
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, align: "start" });
@@ -199,8 +199,14 @@ export const SponsoredVideoCarousel = ({ className }: { className?: string }) =>
                             poster={ad.video_thumbnail_url || undefined}
                             muted
                             playsInline
-                            preload="metadata"
+                            preload="auto"
                             className="w-full h-full object-cover"
+                            onError={() => {
+                              console.log('Video failed to load, skipping to next');
+                              if (globalIndex < videoAds.length - 1) {
+                                setCurrentPlayingIndex(globalIndex + 1);
+                              }
+                            }}
                           />
                           
                           {/* Video sequence indicator */}
