@@ -122,6 +122,19 @@ const Hero = () => {
                       </div>
                     </button>
                   ))}
+                  
+                  {/* View all results button */}
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setShowResults(false);
+                      navigate(`/businesses?search=${encodeURIComponent(searchQuery.trim())}`);
+                    }}
+                    className="w-full px-4 py-3 flex items-center justify-center gap-2 border-t border-border hover:bg-accent transition-colors text-sm font-medium text-primary"
+                  >
+                    <span>View all results for "{searchQuery}"</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </button>
                 </div>
               )}
             </div>
