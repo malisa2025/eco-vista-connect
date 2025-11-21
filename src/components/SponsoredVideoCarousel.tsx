@@ -29,13 +29,14 @@ export const SponsoredVideoCarousel = ({ className }: { className?: string }) =>
 
   useEffect(() => {
     const fetchVideoAds = async () => {
+      const today = new Date().toISOString().split('T')[0]; // Get YYYY-MM-DD format
       const { data, error } = await supabase
         .from("advertisements")
         .select("id, title, video_url, video_thumbnail_url, link_url, description")
         .eq("status", "active")
         .not("video_url", "is", null)
-        .gte("end_date", new Date().toISOString())
-        .lte("start_date", new Date().toISOString());
+        .gte("end_date", today)
+        .lte("start_date", today);
 
       if (data && !error) {
         setVideoAds(data as VideoAd[]);
