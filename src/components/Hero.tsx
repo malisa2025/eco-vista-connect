@@ -50,7 +50,7 @@ const Hero = () => {
   const handleBusinessClick = (businessId: string) => {
     setShowResults(false);
     setSearchQuery("");
-    navigate(`/business/${businessId}`);
+    navigate(`/businesses/${businessId}`);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
