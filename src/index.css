@@ -123,6 +123,16 @@ All colors MUST be HSL.
 }
 
 @layer utilities {
+  /* Hide scrollbar */
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
   .gradient-hero {
     background: var(--gradient-hero);
   }
