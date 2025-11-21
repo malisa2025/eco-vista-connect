@@ -89,10 +89,10 @@ export const SponsoredVideoCarousel = ({ className }: { className?: string }) =>
       const currentSlide = emblaApi.selectedScrollSnap();
       const firstVideoOfSlide = currentSlide * 3;
       
-      // Small delay to ensure video is ready
+      // Longer delay to ensure video element is ready after transition
       setTimeout(() => {
         setCurrentPlayingIndex(firstVideoOfSlide);
-      }, 100);
+      }, 300);
     };
 
     emblaApi.on('scroll', onScroll);
@@ -123,11 +123,24 @@ export const SponsoredVideoCarousel = ({ className }: { className?: string }) =>
 
     const playVideo = async () => {
       try {
-        video.muted = isMuted; // Respect current mute state
+        video.muted = isMuted;
         video.currentTime = 0;
+        
+        // Wait for video to be ready before playing
+        if (video.readyState < 3) {
+          await new Promise<void>((resolve) => {
+            const onCanPlay = () => {
+              video.removeEventListener('canplay', onCanPlay);
+              resolve();
+            };
+            video.addEventListener('canplay', onCanPlay);
+            video.load(); // Force reload if needed
+          });
+        }
+        
         await video.play();
       } catch (error) {
-        console.log("Auto-play prevented:", error);
+        console.error("Video play failed:", error);
       }
     };
 
