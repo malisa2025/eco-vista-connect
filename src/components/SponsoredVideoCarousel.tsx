@@ -203,6 +203,20 @@ export const SponsoredVideoCarousel = ({ className }: { className?: string }) =>
                             className="w-full h-full object-cover"
                           />
                           
+                          {/* Video sequence indicator */}
+                          <div className="absolute top-2 left-2 z-10">
+                            <Badge 
+                              variant={isPlaying ? "default" : "secondary"}
+                              className={`text-xs font-semibold ${
+                                isPlaying 
+                                  ? 'animate-pulse shadow-lg' 
+                                  : 'opacity-70'
+                              }`}
+                            >
+                              {indexInSlide + 1}/3
+                            </Badge>
+                          </div>
+
                           {!isPlaying && (
                             <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                               <Play className="h-12 w-12 text-white" />
