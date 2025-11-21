@@ -86,6 +86,24 @@ export const useBusinessAds = (businessId?: string) => {
   });
 };
 
+interface CreateAdminAdInput {
+  business_id: string;
+  ad_spot_id: string;
+  title: string;
+  description?: string;
+  image_url: string;
+  video_url?: string;
+  video_thumbnail_url?: string;
+  video_duration?: number;
+  link_url?: string;
+  start_date: string;
+  end_date: string;
+  total_cost: number;
+  status: 'draft' | 'active' | 'paused';
+  payment_status?: 'pending' | 'success';
+  payment_reference?: string;
+}
+
 export const useAdMutations = () => {
   const queryClient = useQueryClient();
 
@@ -175,5 +193,31 @@ export const useAdMutations = () => {
     },
   });
 
-  return { createAd, updateAdStatus, recordAdClick, recordAdImpression };
+  const createAdminAd = useMutation({
+    mutationFn: async (ad: CreateAdminAdInput) => {
+      const { data, error } = await supabase
+        .from('advertisements')
+        .insert({
+          ...ad,
+          payment_status: ad.payment_status || 'success',
+          paid_at: ad.payment_status === 'success' ? new Date().toISOString() : null,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['business-ads'] });
+      queryClient.invalidateQueries({ queryKey: ['active-ads'] });
+      toast.success('Advertisement created successfully by admin');
+    },
+    onError: (error) => {
+      console.error('Admin ad creation error:', error);
+      toast.error('Failed to create advertisement');
+    },
+  });
+
+  return { createAd, updateAdStatus, recordAdClick, recordAdImpression, createAdminAd };
 };

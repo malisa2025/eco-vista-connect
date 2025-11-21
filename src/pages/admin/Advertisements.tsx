@@ -7,10 +7,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { TrendingUp, ArrowUpDown, Eye, Pause, Play } from 'lucide-react';
+import { TrendingUp, ArrowUpDown, Eye, Pause, Play, Plus } from 'lucide-react';
 import AdFilters from '@/components/admin/AdFilters';
 import AdStatsCards from '@/components/admin/AdStatsCards';
 import AdDetailsModal from '@/components/admin/AdDetailsModal';
+import CreateAdDialog from '@/components/admin/CreateAdDialog';
 
 const AdminAdvertisements = () => {
   const [filters, setFilters] = useState({
@@ -20,6 +21,7 @@ const AdminAdvertisements = () => {
   });
   const [selectedAd, setSelectedAd] = useState<any>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
   const { ads, isLoading, refetch, sortConfig, handleSort } = useAdminAdvertisements(filters);
   const { data: stats, isLoading: statsLoading } = useAdminAdvertisementStats();
@@ -60,12 +62,18 @@ const AdminAdvertisements = () => {
       <Navbar />
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="max-w-7xl mx-auto">
-          <div className="mb-8">
-            <h1 className="text-4xl font-display font-bold mb-2 flex items-center gap-2">
-              <TrendingUp className="h-8 w-8" />
-              Advertisements Management
-            </h1>
-            <p className="text-muted-foreground">View and manage all advertisements with detailed analytics</p>
+          <div className="mb-8 flex justify-between items-start">
+            <div>
+              <h1 className="text-4xl font-display font-bold mb-2 flex items-center gap-2">
+                <TrendingUp className="h-8 w-8" />
+                Advertisements Management
+              </h1>
+              <p className="text-muted-foreground">View and manage all advertisements with detailed analytics</p>
+            </div>
+            <Button onClick={() => setIsCreateDialogOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Create New Ad
+            </Button>
           </div>
 
           <AdStatsCards 
@@ -245,6 +253,12 @@ const AdminAdvertisements = () => {
         ad={selectedAd}
         open={isDetailsOpen}
         onOpenChange={setIsDetailsOpen}
+      />
+
+      <CreateAdDialog
+        open={isCreateDialogOpen}
+        onOpenChange={setIsCreateDialogOpen}
+        onSuccess={refetch}
       />
     </div>
   );
