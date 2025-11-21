@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowRight, Search } from "lucide-react";
 import heroBg from "@/assets/hero-bg.jpg";
-import { CompactNewsPlayer } from "@/components/CompactNewsPlayer";
+import { BusinessVideoCarousel } from "@/components/BusinessVideoCarousel";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -97,9 +97,9 @@ const Hero = () => {
           </div>
         </div>
 
-        {/* Right Column - News Player */}
+        {/* Right Column - Video Carousel */}
         <div className="hidden lg:block animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
-          <CompactNewsPlayer />
+          <BusinessVideoCarousel />
         </div>
       </div>
       </div>
