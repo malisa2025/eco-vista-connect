@@ -18,7 +18,7 @@ const Hero = () => {
   };
 
   return (
-    <section className="relative min-h-[65vh] flex items-center overflow-hidden">
+    <section className="relative min-h-[65vh] flex items-start pt-8 overflow-hidden">
       {/* Background Image with Overlay */}
       <div className="absolute inset-0 z-0">
         <img 
@@ -30,7 +30,7 @@ const Hero = () => {
       </div>
 
       {/* Content */}
-      <div className="container relative z-10 mx-auto px-4 py-12">
+      <div className="container relative z-10 mx-auto px-4 pb-12">
         <div className="grid lg:grid-cols-[1fr,400px] gap-8 items-start">
           {/* Left Column - Content */}
           <div className="max-w-3xl animate-fade-in-up">
