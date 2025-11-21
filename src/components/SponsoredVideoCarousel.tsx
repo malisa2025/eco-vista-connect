@@ -15,7 +15,7 @@ interface VideoAd {
   description: string | null;
 }
 
-const PREVIEW_DURATION = 60; // 1 minute in seconds
+const PREVIEW_DURATION = 30; // seconds
 
 export const SponsoredVideoCarousel = ({ className }: { className?: string }) => {
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, align: "start" });
@@ -30,7 +30,6 @@ export const SponsoredVideoCarousel = ({ className }: { className?: string }) =>
   useEffect(() => {
     const fetchVideoAds = async () => {
       const today = new Date().toISOString().split('T')[0];
-      console.log('🎥 Fetching video ads for date:', today);
       
       const { data, error } = await supabase
         .from("advertisements")
@@ -40,10 +39,7 @@ export const SponsoredVideoCarousel = ({ className }: { className?: string }) =>
         .gte("end_date", today)
         .lte("start_date", today);
 
-      console.log('🎥 Query result:', { data, error, count: data?.length });
-
       if (data && !error) {
-        console.log('🎥 Sample video URL:', data[0]?.video_url);
         setVideoAds(data as VideoAd[]);
         
         // Track impressions
@@ -77,34 +73,21 @@ export const SponsoredVideoCarousel = ({ className }: { className?: string }) =>
 
   // Auto-play logic
   useEffect(() => {
-    if (!isInView || videoAds.length === 0) {
-      console.log('🎥 Auto-play skipped:', { isInView, videoAdsLength: videoAds.length });
-      return;
-    }
+    if (!isInView || videoAds.length === 0) return;
 
     const currentSlideStartIndex = Math.floor(currentPlayingIndex / 3) * 3;
     const indexInSlide = currentPlayingIndex % 3;
     const video = videoRefs.current[currentPlayingIndex];
 
-    if (!video) {
-      console.log('🎥 No video ref found for index:', currentPlayingIndex);
-      return;
-    }
-
-    console.log('🎥 Attempting to play video:', { 
-      index: currentPlayingIndex, 
-      src: video.src,
-      readyState: video.readyState 
-    });
+    if (!video) return;
 
     const playVideo = async () => {
       try {
         video.muted = true; // Ensure muted before play
         video.currentTime = 0;
         await video.play();
-        console.log('🎥 Video playing successfully');
       } catch (error) {
-        console.error("🎥 Auto-play error:", error);
+        console.log("Auto-play prevented:", error);
       }
     };
 
@@ -120,12 +103,14 @@ export const SponsoredVideoCarousel = ({ className }: { className?: string }) =>
           setCurrentPlayingIndex(currentPlayingIndex + 1);
         } else if (currentPlayingIndex < videoAds.length - 1) {
           // All 3 videos played, move to next slide
+          console.log('🔄 Carousel moving to next slide');
           emblaApi?.scrollNext();
           setTimeout(() => {
             setCurrentPlayingIndex(currentSlideStartIndex + 3);
           }, 500);
         } else {
           // Loop back to beginning
+          console.log('🔄 Carousel looping back to start');
           emblaApi?.scrollTo(0);
           setTimeout(() => {
             setCurrentPlayingIndex(0);
