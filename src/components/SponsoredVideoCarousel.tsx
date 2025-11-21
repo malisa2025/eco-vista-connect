@@ -29,8 +29,7 @@ export const SponsoredVideoCarousel = ({ className }: { className?: string }) =>
 
   useEffect(() => {
     const fetchVideoAds = async () => {
-      const today = new Date().toISOString().split('T')[0]; // Get YYYY-MM-DD format
-      console.log('Fetching video ads for date:', today);
+      const today = new Date().toISOString().split('T')[0];
       
       const { data, error } = await supabase
         .from("advertisements")
@@ -40,11 +39,8 @@ export const SponsoredVideoCarousel = ({ className }: { className?: string }) =>
         .gte("end_date", today)
         .lte("start_date", today);
 
-      console.log('Video ads query result:', { data, error, count: data?.length });
-
       if (data && !error) {
         setVideoAds(data as VideoAd[]);
-        console.log('Set video ads:', data.length);
         
         // Track impressions
         data.forEach((ad) => {
@@ -53,8 +49,6 @@ export const SponsoredVideoCarousel = ({ className }: { className?: string }) =>
             user_agent: navigator.userAgent,
           });
         });
-      } else if (error) {
-        console.error('Error fetching video ads:', error);
       }
     };
 
@@ -156,12 +150,7 @@ export const SponsoredVideoCarousel = ({ className }: { className?: string }) =>
     });
   };
 
-  if (videoAds.length === 0) {
-    console.log('No video ads to display, returning null');
-    return null;
-  }
-
-  console.log('Rendering sponsored video carousel with', videoAds.length, 'ads');
+  if (videoAds.length === 0) return null;
 
   // Group videos into slides of 3
   const slides = [];
