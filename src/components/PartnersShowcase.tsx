@@ -60,14 +60,14 @@ export const PartnersShowcase = () => {
                   <img
                     src={partner.logo_url}
                     alt={`${partner.name} logo`}
-                    className="h-12 md:h-14 w-auto object-contain grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300 group-hover:scale-105"
+                    className="h-12 md:h-14 w-auto object-contain opacity-90 group-hover:opacity-100 transition-all duration-300 group-hover:scale-105"
                   />
                 </a>
               ) : (
                 <img
                   src={partner.logo_url}
                   alt={`${partner.name} logo`}
-                  className="h-12 md:h-14 w-auto object-contain grayscale opacity-70 hover:grayscale-0 hover:opacity-100 transition-all duration-300"
+                  className="h-12 md:h-14 w-auto object-contain opacity-90 hover:opacity-100 transition-all duration-300 hover:scale-105"
                 />
               )}
             </div>
