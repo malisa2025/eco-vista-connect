@@ -213,7 +213,7 @@ export const SponsoredVideoCarousel = ({ className }: { className?: string }) =>
                                   : 'opacity-70'
                               }`}
                             >
-                              {indexInSlide + 1}/3
+                              {indexInSlide + 1}/{slide.length}
                             </Badge>
                           </div>
 
