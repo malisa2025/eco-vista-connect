@@ -9,6 +9,7 @@ import CTA from "@/components/CTA";
 import Footer from "@/components/Footer";
 import AdSlot from "@/components/AdSlot";
 import { SponsoredVideoCarousel } from "@/components/SponsoredVideoCarousel";
+import { PartnersShowcase } from "@/components/PartnersShowcase";
 
 
 const Index = () => {
@@ -17,6 +18,7 @@ const Index = () => {
       <Navbar />
       <main>
         <Hero />
+        <PartnersShowcase />
         <SponsoredVideoCarousel className="container mx-auto px-4 mt-0 mb-6" />
         <Features />
         <FeaturedBusinesses />
