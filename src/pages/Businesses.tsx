@@ -6,7 +6,7 @@ import BusinessList from "@/components/BusinessList";
 import BusinessFilters from "@/components/BusinessFilters";
 import CategoryPills from "@/components/CategoryPills";
 import { useBusinesses } from "@/hooks/useBusinesses";
-import AdSlot from "@/components/AdSlot";
+import VerticalSponsoredVideos from "@/components/VerticalSponsoredVideos";
 import { Building2 } from "lucide-react";
 
 const Businesses = () => {
@@ -105,10 +105,10 @@ const Businesses = () => {
                 />
               </div>
 
-              {/* Sidebar with Ad */}
+              {/* Sidebar with Sponsored Videos */}
               <div className="lg:col-span-1">
                 <div className="sticky top-24 space-y-6">
-                  <AdSlot location="business_list_top" className="w-full" />
+                  <VerticalSponsoredVideos limit={5} />
                 </div>
               </div>
             </div>
