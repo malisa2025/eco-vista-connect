@@ -126,12 +126,11 @@ Deno.serve(async (req) => {
       const { data: businesses, error: bizError } = await supabase
         .from('businesses')
         .select('id')
-        .limit(3);
+        .limit(5);
 
       const { data: adSpots, error: spotsError } = await supabase
         .from('ad_spots')
-        .select('id, price_per_day')
-        .limit(3);
+        .select('id, location, price_per_day');
 
       if (bizError || !businesses || businesses.length === 0) {
         throw new Error('No businesses available for ads');
@@ -141,52 +140,159 @@ Deno.serve(async (req) => {
         throw new Error('No ad spots available');
       }
 
-      const demoAds = [
+      const homeHeroSpot = adSpots.find(spot => spot.location === 'home_hero');
+      const sidebarSpot = adSpots.find(spot => spot.location === 'home_sidebar');
+      const businessListSpot = adSpots.find(spot => spot.location === 'business_list_top');
+
+      // Video ads for home_hero carousel
+      const videoAds = [
         {
           business_id: businesses[0].id,
-          ad_spot_id: adSpots[0].id,
-          title: 'Grand Opening Special - 50% Off!',
-          description: 'Celebrate with us! Limited time offer.',
-          image_url: '/demo/fashion-hero.jpg',
-          link_url: '#',
+          ad_spot_id: homeHeroSpot?.id,
+          title: 'Taste of Ghana - Authentic Cuisine',
+          description: 'Experience the rich flavors of Ghanaian cuisine at our award-winning restaurant',
+          image_url: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800',
+          video_url: 'https://customer-2p6sx6trhhf4rpgy.cloudflarestream.com/d29d16dd888b8c173bc2aba21962048a/downloads/default.mp4',
+          video_thumbnail_url: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800',
+          video_duration: 60,
+          link_url: '/business-news',
           start_date: new Date().toISOString().split('T')[0],
           end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-          total_cost: adSpots[0].price_per_day * 30,
+          total_cost: (homeHeroSpot?.price_per_day || 100) * 30,
           status: 'active',
           payment_status: 'success',
           paid_at: new Date().toISOString(),
+          payment_reference: 'DEMO_VIDEO_' + Math.random().toString(36).substr(2, 9)
         },
         {
           business_id: businesses[1].id,
-          ad_spot_id: adSpots[1].id,
-          title: 'Premium Services Now Available',
-          description: 'Experience excellence with our new premium offerings.',
-          image_url: '/demo/tech-hero.jpg',
-          link_url: '#',
+          ad_spot_id: homeHeroSpot?.id,
+          title: 'Fashion Forward Ghana',
+          description: 'Discover the latest trends in Ghanaian fashion and style',
+          image_url: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=800',
+          video_url: 'https://customer-2p6sx6trhhf4rpgy.cloudflarestream.com/d29d16dd888b8c173bc2aba21962048a/downloads/default.mp4',
+          video_thumbnail_url: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=800',
+          video_duration: 60,
+          link_url: '/business-news',
           start_date: new Date().toISOString().split('T')[0],
           end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-          total_cost: adSpots[1].price_per_day * 30,
+          total_cost: (homeHeroSpot?.price_per_day || 100) * 30,
           status: 'active',
           payment_status: 'success',
           paid_at: new Date().toISOString(),
+          payment_reference: 'DEMO_VIDEO_' + Math.random().toString(36).substr(2, 9)
         },
         {
           business_id: businesses[2].id,
-          ad_spot_id: adSpots[2].id,
-          title: 'Fresh Arrivals Daily',
-          description: 'Check out our latest products and deals.',
-          image_url: '/demo/restaurant-hero.jpg',
-          link_url: '#',
+          ad_spot_id: homeHeroSpot?.id,
+          title: 'Tech Innovation Hub',
+          description: 'Leading the way in technology and innovation across West Africa',
+          image_url: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800',
+          video_url: 'https://customer-2p6sx6trhhf4rpgy.cloudflarestream.com/d29d16dd888b8c173bc2aba21962048a/downloads/default.mp4',
+          video_thumbnail_url: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800',
+          video_duration: 60,
+          link_url: '/business-news',
           start_date: new Date().toISOString().split('T')[0],
           end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-          total_cost: adSpots[2].price_per_day * 30,
+          total_cost: (homeHeroSpot?.price_per_day || 100) * 30,
           status: 'active',
           payment_status: 'success',
           paid_at: new Date().toISOString(),
+          payment_reference: 'DEMO_VIDEO_' + Math.random().toString(36).substr(2, 9)
+        },
+        {
+          business_id: businesses[3]?.id || businesses[0].id,
+          ad_spot_id: homeHeroSpot?.id,
+          title: 'Wellness & Spa Retreat',
+          description: 'Relax and rejuvenate at Ghana\'s premier wellness center',
+          image_url: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=800',
+          video_url: 'https://customer-2p6sx6trhhf4rpgy.cloudflarestream.com/d29d16dd888b8c173bc2aba21962048a/downloads/default.mp4',
+          video_thumbnail_url: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=800',
+          video_duration: 60,
+          link_url: '/business-news',
+          start_date: new Date().toISOString().split('T')[0],
+          end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          total_cost: (homeHeroSpot?.price_per_day || 100) * 30,
+          status: 'active',
+          payment_status: 'success',
+          paid_at: new Date().toISOString(),
+          payment_reference: 'DEMO_VIDEO_' + Math.random().toString(36).substr(2, 9)
+        },
+        {
+          business_id: businesses[4]?.id || businesses[1].id,
+          ad_spot_id: homeHeroSpot?.id,
+          title: 'Arts & Culture Gallery',
+          description: 'Celebrating Ghanaian art, culture, and heritage',
+          image_url: 'https://images.unsplash.com/photo-1577083552431-6e5fd01988ec?w=800',
+          video_url: 'https://customer-2p6sx6trhhf4rpgy.cloudflarestream.com/d29d16dd888b8c173bc2aba21962048a/downloads/default.mp4',
+          video_thumbnail_url: 'https://images.unsplash.com/photo-1577083552431-6e5fd01988ec?w=800',
+          video_duration: 60,
+          link_url: '/business-news',
+          start_date: new Date().toISOString().split('T')[0],
+          end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          total_cost: (homeHeroSpot?.price_per_day || 100) * 30,
+          status: 'active',
+          payment_status: 'success',
+          paid_at: new Date().toISOString(),
+          payment_reference: 'DEMO_VIDEO_' + Math.random().toString(36).substr(2, 9)
+        },
+        {
+          business_id: businesses[0].id,
+          ad_spot_id: homeHeroSpot?.id,
+          title: 'Fitness & Sports Center',
+          description: 'Your journey to better health starts here',
+          image_url: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800',
+          video_url: 'https://customer-2p6sx6trhhf4rpgy.cloudflarestream.com/d29d16dd888b8c173bc2aba21962048a/downloads/default.mp4',
+          video_thumbnail_url: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800',
+          video_duration: 60,
+          link_url: '/business-news',
+          start_date: new Date().toISOString().split('T')[0],
+          end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          total_cost: (homeHeroSpot?.price_per_day || 100) * 30,
+          status: 'active',
+          payment_status: 'success',
+          paid_at: new Date().toISOString(),
+          payment_reference: 'DEMO_VIDEO_' + Math.random().toString(36).substr(2, 9)
         },
       ];
 
-      const { error: adsError } = await supabase.from('advertisements').insert(demoAds);
+      // Regular image ads for sidebar and other locations
+      const imageAds = [
+        {
+          business_id: businesses[1].id,
+          ad_spot_id: sidebarSpot?.id,
+          title: 'Featured Restaurant',
+          description: 'Best dining experience in Accra',
+          image_url: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800',
+          link_url: '#',
+          start_date: new Date().toISOString().split('T')[0],
+          end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          total_cost: (sidebarSpot?.price_per_day || 50) * 30,
+          status: 'active',
+          payment_status: 'success',
+          paid_at: new Date().toISOString(),
+          payment_reference: 'DEMO_IMG_' + Math.random().toString(36).substr(2, 9)
+        },
+        {
+          business_id: businesses[2].id,
+          ad_spot_id: businessListSpot?.id,
+          title: 'Shop Local',
+          description: 'Support local businesses',
+          image_url: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800',
+          link_url: '#',
+          start_date: new Date().toISOString().split('T')[0],
+          end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          total_cost: (businessListSpot?.price_per_day || 50) * 30,
+          status: 'active',
+          payment_status: 'success',
+          paid_at: new Date().toISOString(),
+          payment_reference: 'DEMO_IMG_' + Math.random().toString(36).substr(2, 9)
+        },
+      ];
+
+      const allAds = [...videoAds, ...imageAds];
+
+      const { error: adsError } = await supabase.from('advertisements').insert(allAds);
       
       if (adsError) {
         console.error('Error inserting ads:', adsError);

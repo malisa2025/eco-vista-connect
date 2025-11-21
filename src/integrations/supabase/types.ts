@@ -134,6 +134,9 @@ export type Database = {
           title: string
           total_cost: number
           updated_at: string | null
+          video_duration: number | null
+          video_thumbnail_url: string | null
+          video_url: string | null
         }
         Insert: {
           ad_spot_id: string
@@ -154,6 +157,9 @@ export type Database = {
           title: string
           total_cost: number
           updated_at?: string | null
+          video_duration?: number | null
+          video_thumbnail_url?: string | null
+          video_url?: string | null
         }
         Update: {
           ad_spot_id?: string
@@ -174,6 +180,9 @@ export type Database = {
           title?: string
           total_cost?: number
           updated_at?: string | null
+          video_duration?: number | null
+          video_thumbnail_url?: string | null
+          video_url?: string | null
         }
         Relationships: [
           {
