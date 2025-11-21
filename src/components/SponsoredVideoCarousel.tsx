@@ -61,7 +61,7 @@ export const SponsoredVideoCarousel = ({ className }: { className?: string }) =>
       ([entry]) => {
         setIsInView(entry.isIntersecting);
       },
-      { threshold: 0.5 }
+      { threshold: 0.1 } // Lower threshold to trigger earlier
     );
 
     if (containerRef.current) {
@@ -70,6 +70,20 @@ export const SponsoredVideoCarousel = ({ className }: { className?: string }) =>
 
     return () => observer.disconnect();
   }, []);
+
+  // Play first video immediately when component is ready
+  useEffect(() => {
+    if (videoAds.length > 0 && videoRefs.current[0]) {
+      const firstVideo = videoRefs.current[0];
+      if (firstVideo) {
+        firstVideo.muted = isMuted;
+        firstVideo.currentTime = 0;
+        firstVideo.play().catch((error) => {
+          console.log("Initial autoplay blocked, waiting for user interaction");
+        });
+      }
+    }
+  }, [videoAds.length, isMuted]);
 
   // Embla carousel event listeners
   useEffect(() => {
@@ -238,7 +252,7 @@ export const SponsoredVideoCarousel = ({ className }: { className?: string }) =>
                             poster={ad.video_thumbnail_url || undefined}
                             muted={true}
                             playsInline
-                            preload="metadata"
+                            preload={globalIndex === currentPlayingIndex ? "auto" : "metadata"}
                             className="w-full h-full object-cover"
                             onError={() => {
                               console.log('Video failed to load, skipping to next');
