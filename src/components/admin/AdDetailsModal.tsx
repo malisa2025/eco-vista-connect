@@ -23,15 +23,31 @@ const AdDetailsModal = ({ ad, open, onOpenChange }: AdDetailsModalProps) => {
         </DialogHeader>
         
         <div className="space-y-6">
-          {/* Ad Image */}
+          {/* Ad Media - Video or Image */}
           <div className="w-full">
             <AspectRatio ratio={16 / 9} className="bg-muted rounded-lg overflow-hidden">
-              <img
-                src={ad.image_url}
-                alt={ad.title}
-                className="object-cover w-full h-full"
-              />
+              {ad.video_url ? (
+                <video
+                  src={ad.video_url}
+                  poster={ad.video_thumbnail_url || ad.image_url}
+                  controls
+                  className="w-full h-full object-cover"
+                >
+                  Your browser does not support the video tag.
+                </video>
+              ) : (
+                <img
+                  src={ad.image_url}
+                  alt={ad.title}
+                  className="object-cover w-full h-full"
+                />
+              )}
             </AspectRatio>
+            {ad.video_url && ad.video_duration && (
+              <div className="mt-2 text-sm text-muted-foreground">
+                Video Duration: {Math.floor(ad.video_duration / 60)}:{(ad.video_duration % 60).toString().padStart(2, '0')}
+              </div>
+            )}
           </div>
 
           {/* Basic Info */}

@@ -53,3 +53,18 @@ export const useBusinesses = (params: UseBusinessesParams = {}) => {
     },
   });
 };
+
+export const useAllBusinessesForAdmin = () => {
+  return useQuery({
+    queryKey: ['all-businesses-admin'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('businesses')
+        .select('id, name, logo_url')
+        .order('name');
+      
+      if (error) throw error;
+      return data;
+    },
+  });
+};
