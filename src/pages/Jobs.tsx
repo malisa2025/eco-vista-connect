@@ -8,6 +8,7 @@ import CategoryPills from "@/components/CategoryPills";
 import AdSlot from "@/components/AdSlot";
 import JobRecommendations from "@/components/jobs/JobRecommendations";
 import CreateAlertDialog from "@/components/jobs/CreateAlertDialog";
+import VerticalSponsoredVideos from "@/components/VerticalSponsoredVideos";
 import { usePublicJobs } from "@/hooks/useJobs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/AuthContext";
@@ -138,10 +139,10 @@ const Jobs = () => {
                 )}
               </div>
 
-              {/* Ad Sidebar */}
+              {/* Sponsored Videos Sidebar */}
               <aside className="lg:col-span-1">
-                <div className="sticky top-20">
-                  <AdSlot location="business_list_top" />
+                <div className="sticky top-20 space-y-4">
+                  <VerticalSponsoredVideos limit={5} />
                 </div>
               </aside>
             </div>
