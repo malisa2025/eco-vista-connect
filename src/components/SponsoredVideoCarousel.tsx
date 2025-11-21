@@ -30,6 +30,7 @@ export const SponsoredVideoCarousel = ({ className }: { className?: string }) =>
   useEffect(() => {
     const fetchVideoAds = async () => {
       const today = new Date().toISOString().split('T')[0];
+      console.log('🎥 Fetching video ads for date:', today);
       
       const { data, error } = await supabase
         .from("advertisements")
@@ -39,7 +40,10 @@ export const SponsoredVideoCarousel = ({ className }: { className?: string }) =>
         .gte("end_date", today)
         .lte("start_date", today);
 
+      console.log('🎥 Query result:', { data, error, count: data?.length });
+
       if (data && !error) {
+        console.log('🎥 Sample video URL:', data[0]?.video_url);
         setVideoAds(data as VideoAd[]);
         
         // Track impressions
@@ -73,21 +77,34 @@ export const SponsoredVideoCarousel = ({ className }: { className?: string }) =>
 
   // Auto-play logic
   useEffect(() => {
-    if (!isInView || videoAds.length === 0) return;
+    if (!isInView || videoAds.length === 0) {
+      console.log('🎥 Auto-play skipped:', { isInView, videoAdsLength: videoAds.length });
+      return;
+    }
 
     const currentSlideStartIndex = Math.floor(currentPlayingIndex / 3) * 3;
     const indexInSlide = currentPlayingIndex % 3;
     const video = videoRefs.current[currentPlayingIndex];
 
-    if (!video) return;
+    if (!video) {
+      console.log('🎥 No video ref found for index:', currentPlayingIndex);
+      return;
+    }
+
+    console.log('🎥 Attempting to play video:', { 
+      index: currentPlayingIndex, 
+      src: video.src,
+      readyState: video.readyState 
+    });
 
     const playVideo = async () => {
       try {
         video.muted = true; // Ensure muted before play
         video.currentTime = 0;
         await video.play();
+        console.log('🎥 Video playing successfully');
       } catch (error) {
-        console.log("Auto-play prevented:", error);
+        console.error("🎥 Auto-play error:", error);
       }
     };
 
