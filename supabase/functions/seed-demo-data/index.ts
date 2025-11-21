@@ -21,6 +21,26 @@ Deno.serve(async (req) => {
 
     let result = { success: false, message: '' };
 
+    if (action === 'delete_advertisements') {
+      console.log('Deleting all advertisements...');
+      
+      const { error: deleteError } = await supabase
+        .from('advertisements')
+        .delete()
+        .not('id', 'is', null);
+      
+      if (deleteError) {
+        console.error('Error deleting advertisements:', deleteError);
+        throw deleteError;
+      }
+      
+      console.log('All advertisements deleted successfully');
+      return new Response(
+        JSON.stringify({ success: true, message: 'All advertisements deleted successfully' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     if (action === 'jobs' || action === 'all') {
       console.log('Starting to seed jobs...');
       

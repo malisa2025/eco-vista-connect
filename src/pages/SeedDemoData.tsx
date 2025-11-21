@@ -10,6 +10,7 @@ import Footer from '@/components/Footer';
 export default function SeedDemoData() {
   const { toast } = useToast();
   const [isSeeding, setIsSeeding] = useState(false);
+  const [isDeletingAds, setIsDeletingAds] = useState(false);
   const [seedStatus, setSeedStatus] = useState<{
     jobs: boolean;
     ads: boolean;
@@ -124,6 +125,32 @@ export default function SeedDemoData() {
     }
   };
 
+  const handleDeleteAds = async () => {
+    setIsDeletingAds(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('seed-demo-data', {
+        body: { action: 'delete_advertisements' },
+      });
+
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || 'Failed to delete advertisements');
+
+      setSeedStatus((prev) => ({ ...prev, ads: false }));
+      toast({
+        title: 'Success!',
+        description: 'All advertisements have been deleted',
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to delete ads',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsDeletingAds(false);
+    }
+  };
+
   const handleSeedAll = async () => {
     setIsSeeding(true);
     try {
@@ -193,15 +220,27 @@ export default function SeedDemoData() {
                   </div>
                   {seedStatus.ads && <CheckCircle2 className="h-5 w-5 text-green-600" />}
                 </div>
-                <Button
-                  onClick={handleSeedAds}
-                  disabled={isSeeding || seedStatus.ads}
-                  variant="outline"
-                  size="sm"
-                  className="w-full"
-                >
-                  {seedStatus.ads ? 'Ads Seeded' : 'Seed Ads Only'}
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={handleSeedAds}
+                    disabled={isSeeding || isDeletingAds || seedStatus.ads}
+                    variant="outline"
+                    size="sm"
+                    className="flex-1"
+                  >
+                    {seedStatus.ads ? 'Ads Seeded' : 'Seed Ads Only'}
+                  </Button>
+                  <Button
+                    onClick={handleDeleteAds}
+                    disabled={isSeeding || isDeletingAds}
+                    variant="destructive"
+                    size="sm"
+                    className="flex-1"
+                  >
+                    {isDeletingAds && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Delete All Ads
+                  </Button>
+                </div>
               </div>
 
               <div className="space-y-3 p-4 bg-muted/50 rounded-lg">
