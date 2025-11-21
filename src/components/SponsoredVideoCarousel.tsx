@@ -85,14 +85,10 @@ export const SponsoredVideoCarousel = ({ className }: { className?: string }) =>
     };
 
     const onSettle = () => {
-      // Carousel has settled on a new slide
+      // Carousel has settled, play first video of new slide immediately
       const currentSlide = emblaApi.selectedScrollSnap();
       const firstVideoOfSlide = currentSlide * 3;
-      
-      // Longer delay to ensure video element is ready after transition
-      setTimeout(() => {
-        setCurrentPlayingIndex(firstVideoOfSlide);
-      }, 300);
+      setCurrentPlayingIndex(firstVideoOfSlide);
     };
 
     emblaApi.on('scroll', onScroll);
@@ -125,22 +121,18 @@ export const SponsoredVideoCarousel = ({ className }: { className?: string }) =>
       try {
         video.muted = isMuted;
         video.currentTime = 0;
-        
-        // Wait for video to be ready before playing
-        if (video.readyState < 3) {
-          await new Promise<void>((resolve) => {
-            const onCanPlay = () => {
-              video.removeEventListener('canplay', onCanPlay);
-              resolve();
-            };
-            video.addEventListener('canplay', onCanPlay);
-            video.load(); // Force reload if needed
-          });
-        }
-        
         await video.play();
+        console.log(`Playing video ${currentPlayingIndex}`);
       } catch (error) {
-        console.error("Video play failed:", error);
+        console.error(`Video ${currentPlayingIndex} play failed:`, error);
+        // If autoplay fails, try again after a brief moment
+        setTimeout(async () => {
+          try {
+            await video.play();
+          } catch (retryError) {
+            console.log("Retry failed - user interaction may be required");
+          }
+        }, 500);
       }
     };
 
@@ -244,9 +236,9 @@ export const SponsoredVideoCarousel = ({ className }: { className?: string }) =>
                             ref={(el) => (videoRefs.current[globalIndex] = el)}
                             src={ad.video_url}
                             poster={ad.video_thumbnail_url || undefined}
-                            muted
+                            muted={true}
                             playsInline
-                            preload="auto"
+                            preload="metadata"
                             className="w-full h-full object-cover"
                             onError={() => {
                               console.log('Video failed to load, skipping to next');
