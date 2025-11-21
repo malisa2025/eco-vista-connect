@@ -91,7 +91,7 @@ export default function SeedDemoData() {
       setSeedStatus((prev) => ({ ...prev, ads: true }));
       toast({
         title: 'Success!',
-        description: '3 demo advertisements have been added',
+        description: '11 demo advertisements have been added (9 videos + 2 images)',
       });
     } catch (error) {
       toast({
@@ -189,7 +189,7 @@ export default function SeedDemoData() {
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="font-semibold">Demo Advertisements</h3>
-                    <p className="text-sm text-muted-foreground">3 sample ads</p>
+                    <p className="text-sm text-muted-foreground">11 sample ads (9 videos + 2 images)</p>
                   </div>
                   {seedStatus.ads && <CheckCircle2 className="h-5 w-5 text-green-600" />}
                 </div>
