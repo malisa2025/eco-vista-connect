@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { TrendingUp, ArrowUpDown, Eye, Pause, Play, Plus } from 'lucide-react';
+import { TrendingUp, ArrowUpDown, Eye, Pause, Play, Plus, Video } from 'lucide-react';
 import AdFilters from '@/components/admin/AdFilters';
 import AdStatsCards from '@/components/admin/AdStatsCards';
 import AdDetailsModal from '@/components/admin/AdDetailsModal';
@@ -174,7 +174,20 @@ const AdminAdvertisements = () => {
 
                         return (
                           <TableRow key={ad.id}>
-                            <TableCell className="font-medium max-w-[200px] truncate">{ad.title}</TableCell>
+                            <TableCell className="font-medium max-w-[200px]">
+                              <div className="flex items-center gap-2">
+                                <span className="truncate">{ad.title}</span>
+                                {ad.video_url && (
+                                  <Badge 
+                                    variant="secondary" 
+                                    className="shrink-0 flex items-center gap-1 text-xs"
+                                  >
+                                    <Video className="h-3 w-3" />
+                                    <span className="hidden sm:inline">Video</span>
+                                  </Badge>
+                                )}
+                              </div>
+                            </TableCell>
                             <TableCell>{ad.businesses?.name}</TableCell>
                             <TableCell>
                               <div className="space-y-1">
