@@ -38,15 +38,7 @@ const Hero = () => {
             <span className="text-sm font-medium text-primary">Enterprise Business Listing Platform</span>
           </div>
           
-          <h1 className="font-display mb-4 bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">
-            The Digital Front Door for Every Business
-          </h1>
-          
-          <p className="text-xl md:text-2xl text-muted-foreground mb-6 leading-relaxed">
-            Connecting businesses with customers across all the regions in Ghana through our powerful directory, advertising, and community platform.
-          </p>
-
-          <form onSubmit={handleSearch} className="mb-4">
+          <form onSubmit={handleSearch} className="mb-6">
             <div className="flex gap-2 max-w-2xl bg-background/95 backdrop-blur-sm rounded-lg p-2 shadow-lg border border-border/50">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
@@ -63,6 +55,14 @@ const Hero = () => {
               </Button>
             </div>
           </form>
+
+          <h1 className="font-display mb-4 bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">
+            The Digital Front Door for Every Business
+          </h1>
+          
+          <p className="text-xl md:text-2xl text-muted-foreground mb-6 leading-relaxed">
+            Connecting businesses with customers across all the regions in Ghana through our powerful directory, advertising, and community platform.
+          </p>
 
           <div className="flex flex-col sm:flex-row gap-4 mb-6">
             <Button size="lg" className="group shadow-glow hover:shadow-xl transition-smooth text-lg px-8 py-6">
