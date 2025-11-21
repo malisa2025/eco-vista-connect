@@ -1,20 +1,61 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowRight, Search } from "lucide-react";
+import { ArrowRight, Search, Building2, MapPin } from "lucide-react";
 import heroBg from "@/assets/hero-bg.jpg";
 import { CompactNewsPlayer } from "@/components/CompactNewsPlayer";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { useBusinesses } from "@/hooks/useBusinesses";
 
 const Hero = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [showResults, setShowResults] = useState(false);
+  const [debouncedQuery, setDebouncedQuery] = useState("");
   const navigate = useNavigate();
+  const searchRef = useRef<HTMLDivElement>(null);
+
+  // Debounce search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedQuery(searchQuery);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Fetch businesses for autocomplete
+  const { data: businesses } = useBusinesses({
+    search: debouncedQuery,
+    limit: 5
+  });
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowResults(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
+      setShowResults(false);
       navigate(`/businesses?search=${encodeURIComponent(searchQuery.trim())}`);
     }
+  };
+
+  const handleBusinessClick = (businessId: string) => {
+    setShowResults(false);
+    setSearchQuery("");
+    navigate(`/business/${businessId}`);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    setShowResults(e.target.value.length > 0);
   };
 
   return (
@@ -39,20 +80,50 @@ const Hero = () => {
           </div>
           
           <form onSubmit={handleSearch} className="mb-6">
-            <div className="flex gap-2 max-w-2xl bg-background/95 backdrop-blur-sm rounded-lg p-2 shadow-lg border border-border/50">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                <Input
-                  type="text"
-                  placeholder="Search by business name or phone number..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 h-12 text-base border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
-                />
+            <div ref={searchRef} className="relative max-w-2xl">
+              <div className="flex gap-2 bg-background/95 backdrop-blur-sm rounded-lg p-2 shadow-lg border border-border/50">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                  <Input
+                    type="text"
+                    placeholder="Search by business name or phone number..."
+                    value={searchQuery}
+                    onChange={handleInputChange}
+                    className="pl-10 h-12 text-base border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
+                  />
+                </div>
+                <Button type="submit" size="lg" className="h-12 px-8">
+                  Search
+                </Button>
               </div>
-              <Button type="submit" size="lg" className="h-12 px-8">
-                Search
-              </Button>
+
+              {/* Autocomplete Results */}
+              {showResults && debouncedQuery && businesses && businesses.length > 0 && (
+                <div className="absolute top-full mt-2 w-full bg-background border border-border rounded-lg shadow-xl z-50 overflow-hidden">
+                  {businesses.map((business) => (
+                    <button
+                      key={business.id}
+                      onClick={() => handleBusinessClick(business.id)}
+                      className="w-full px-4 py-3 flex items-start gap-3 hover:bg-accent transition-colors text-left"
+                    >
+                      <Building2 className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-foreground truncate">{business.name}</div>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <MapPin className="h-3 w-3" />
+                          <span className="truncate">{business.region}</span>
+                          {business.category && (
+                            <>
+                              <span>•</span>
+                              <span className="truncate">{business.category}</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </form>
 
