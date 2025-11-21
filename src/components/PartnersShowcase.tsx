@@ -1,60 +1,33 @@
 import { Badge } from '@/components/ui/badge';
-
-interface Partner {
-  name: string;
-  logo: string;
-  url?: string;
-}
-
-const partners: Partner[] = [
-  { 
-    name: "Ghana Chamber of Commerce", 
-    logo: "/demo/tech-logo.jpg",
-    url: "https://www.ghanachamber.org"
-  },
-  { 
-    name: "Ghana Export Promotion Authority", 
-    logo: "/demo/fashion-logo.jpg",
-    url: "https://www.gepaghana.org"
-  },
-  { 
-    name: "Ghana Police Service", 
-    logo: "/demo/restaurant-logo.jpg",
-    url: "https://police.gov.gh"
-  },
-  { 
-    name: "Bank of Ghana", 
-    logo: "/demo/tech-logo.jpg",
-    url: "https://www.bog.gov.gh"
-  },
-  { 
-    name: "Ghana Revenue Authority", 
-    logo: "/demo/fashion-logo.jpg",
-    url: "https://gra.gov.gh"
-  },
-  { 
-    name: "Ministry of Trade and Industry", 
-    logo: "/demo/restaurant-logo.jpg"
-  },
-  { 
-    name: "Ghana Investment Promotion Centre", 
-    logo: "/demo/tech-logo.jpg"
-  },
-  { 
-    name: "GCB Bank", 
-    logo: "/demo/fashion-logo.jpg"
-  },
-  { 
-    name: "Ecobank Ghana", 
-    logo: "/demo/restaurant-logo.jpg"
-  },
-  { 
-    name: "Ghana Standards Authority", 
-    logo: "/demo/tech-logo.jpg"
-  },
-];
+import { usePartners } from '@/hooks/usePartners';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export const PartnersShowcase = () => {
+  const { data: partners, isLoading } = usePartners();
+
+  if (isLoading) {
+    return (
+      <section className="py-12 bg-muted/30 border-y border-border/50">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col items-center mb-8">
+            <Skeleton className="h-6 w-24 mb-4" />
+            <Skeleton className="h-8 w-64 mb-2" />
+            <Skeleton className="h-4 w-96" />
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8">
+            {[...Array(10)].map((_, i) => (
+              <Skeleton key={i} className="h-20 w-full" />
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (!partners || partners.length === 0) {
+    return null;
+  }
+
   return (
     <section className="py-12 bg-muted/30 border-y border-border/50">
       <div className="container mx-auto px-4">
@@ -75,27 +48,27 @@ export const PartnersShowcase = () => {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 items-center justify-items-center">
           {partners.map((partner, index) => (
             <div 
-              key={partner.name}
+              key={partner.id}
               className="animate-fade-in"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
-              {partner.url ? (
+              {partner.website_url ? (
                 <a 
-                  href={partner.url}
+                  href={partner.website_url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="block group"
                   aria-label={partner.name}
                 >
                   <img
-                    src={partner.logo}
+                    src={partner.logo_url}
                     alt={`${partner.name} logo`}
                     className="h-16 md:h-20 w-auto object-contain grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300 group-hover:scale-105"
                   />
                 </a>
               ) : (
                 <img
-                  src={partner.logo}
+                  src={partner.logo_url}
                   alt={`${partner.name} logo`}
                   className="h-16 md:h-20 w-auto object-contain grayscale opacity-70 hover:grayscale-0 hover:opacity-100 transition-all duration-300"
                 />
