@@ -55,19 +55,52 @@ export const useUpdateApplicationStatus = () => {
     mutationFn: async ({
       applicationId,
       status,
+      jobId,
     }: {
       applicationId: string;
       status: 'pending' | 'reviewed' | 'shortlisted' | 'rejected' | 'accepted';
+      jobId?: string;
     }) => {
       const { error } = await supabase
         .from('job_applications')
-        .update({ status })
+        .update({ 
+          status,
+          reviewed_at: status === 'reviewed' ? new Date().toISOString() : undefined,
+        })
         .eq('id', applicationId);
 
       if (error) throw error;
+
+      // Track usage when applicant is reviewed
+      if (status === 'reviewed' && jobId) {
+        const { data: job } = await supabase
+          .from('jobs')
+          .select('business_id')
+          .eq('id', jobId)
+          .single();
+
+        if (job) {
+          const { data: subscription } = await supabase
+            .from('business_subscriptions')
+            .select('id')
+            .eq('business_id', job.business_id)
+            .eq('status', 'active')
+            .gte('end_date', new Date().toISOString())
+            .single();
+
+          if (subscription) {
+            await supabase.rpc('increment_subscription_usage', {
+              p_subscription_id: subscription.id,
+              p_field: 'applicants_reviewed',
+              p_increment: 1,
+            });
+          }
+        }
+      }
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['pipeline'] });
+      queryClient.invalidateQueries({ queryKey: ['business-subscription'] });
       toast({
         title: 'Status Updated',
         description: 'Application status has been updated successfully.',

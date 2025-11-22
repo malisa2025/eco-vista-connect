@@ -73,7 +73,7 @@ const HiringPipeline = () => {
     applicationId: string,
     newStatus: 'pending' | 'reviewed' | 'shortlisted' | 'rejected' | 'accepted'
   ) => {
-    updateStatus.mutate({ applicationId, status: newStatus });
+    updateStatus.mutate({ applicationId, status: newStatus, jobId });
   };
 
   const handleAddTag = async () => {
@@ -163,33 +163,56 @@ const HiringPipeline = () => {
           </div>
         </div>
 
-        {/* Pipeline Columns */}
-        <ScrollArea className="w-full">
-          <div className="flex gap-4 pb-4">
-            {statuses.map((status) => {
-              const statusApplications = applications?.filter(
-                (app) => app.status === status.key
-              ) || [];
+        {/* Empty State */}
+        {applications?.length === 0 && (
+          <Card className="p-12">
+            <div className="text-center space-y-4">
+              <div className="mx-auto w-16 h-16 rounded-full bg-muted flex items-center justify-center">
+                <UserCheck className="h-8 w-8 text-muted-foreground" />
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold mb-2">No Applications Yet</h3>
+                <p className="text-muted-foreground max-w-md mx-auto">
+                  Share your job posting to start receiving applications. Once candidates apply, 
+                  you can manage them through this pipeline.
+                </p>
+              </div>
+              <Button asChild>
+                <Link to={`/jobs/${jobId}`}>View Job Posting</Link>
+              </Button>
+            </div>
+          </Card>
+        )}
 
-              return (
-                <PipelineColumn
-                  key={status.key}
-                  status={status.key}
-                  title={status.label}
-                  applications={statusApplications}
-                  onViewDetails={(app) => {
-                    if (compareMode) {
-                      toggleCompareSelection(app);
-                    } else {
-                      setSelectedApplication(app);
-                    }
-                  }}
-                  onDrop={handleDrop}
-                />
-              );
-            })}
-          </div>
-        </ScrollArea>
+        {/* Pipeline Columns */}
+        {applications && applications.length > 0 && (
+          <ScrollArea className="w-full">
+            <div className="flex gap-4 pb-4">
+              {statuses.map((status) => {
+                const statusApplications = applications?.filter(
+                  (app) => app.status === status.key
+                ) || [];
+
+                return (
+                  <PipelineColumn
+                    key={status.key}
+                    status={status.key}
+                    title={status.label}
+                    applications={statusApplications}
+                    onViewDetails={(app) => {
+                      if (compareMode) {
+                        toggleCompareSelection(app);
+                      } else {
+                        setSelectedApplication(app);
+                      }
+                    }}
+                    onDrop={handleDrop}
+                  />
+                );
+              })}
+            </div>
+          </ScrollArea>
+        )}
 
         {/* Application Detail Modal */}
         <Dialog
