@@ -241,7 +241,7 @@ export default function LeadDashboard() {
             <LeadFilters onFilterChange={setFilters} />
           ) : (
             <Card className="p-4 bg-muted/50 border-dashed">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
                   <Lock className="h-4 w-4 text-muted-foreground" />
                   <p className="text-sm text-muted-foreground">Advanced filters available on Pro plan</p>
@@ -253,20 +253,32 @@ export default function LeadDashboard() {
             </Card>
           )}
 
-          <Tabs defaultValue="kanban" className="mt-6">
-            <TabsList>
-              <TabsTrigger value="kanban">Kanban View</TabsTrigger>
-              <TabsTrigger value="list">List View</TabsTrigger>
-            </TabsList>
+          {totalLeads === 0 ? (
+            <Card className="p-12 text-center mt-6">
+              <h3 className="text-lg font-semibold mb-2">No leads yet</h3>
+              <p className="text-muted-foreground mb-6">
+                Start capturing leads by creating your first lead form or adding the contact button to your business page
+              </p>
+              <Button onClick={() => navigate(`/businesses/${businessId}`)}>
+                View Business Page
+              </Button>
+            </Card>
+          ) : (
+            <Tabs defaultValue="kanban" className="mt-6">
+              <TabsList className="grid w-full grid-cols-2 max-w-[400px]">
+                <TabsTrigger value="kanban">Kanban</TabsTrigger>
+                <TabsTrigger value="list">List</TabsTrigger>
+              </TabsList>
 
-            <TabsContent value="kanban">
-              <LeadKanbanBoard businessId={businessId || ''} leads={leads || []} />
-            </TabsContent>
+              <TabsContent value="kanban">
+                <LeadKanbanBoard businessId={businessId || ''} leads={leads || []} />
+              </TabsContent>
 
-            <TabsContent value="list">
-              <LeadListView leads={leads || []} />
-            </TabsContent>
-          </Tabs>
+              <TabsContent value="list">
+                <LeadListView leads={leads || []} />
+              </TabsContent>
+            </Tabs>
+          )}
         </div>
       </div>
       <Footer />
