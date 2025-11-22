@@ -14,13 +14,39 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { user, profile, hasRole, signOut } = useAuth();
-  const { subscription } = useBusinessSubscription(user?.id || "");
+  
+  // Get user's primary business
+  const { data: primaryBusinessId } = useQuery({
+    queryKey: ['primary-business', user?.id],
+    queryFn: async () => {
+      if (!user?.id || !hasRole('business_owner')) return null;
+      
+      const { data, error } = await supabase
+        .from('business_owners')
+        .select('business_id')
+        .eq('user_id', user.id)
+        .eq('is_primary', true)
+        .maybeSingle();
+      
+      if (error) {
+        console.error('Error fetching primary business:', error);
+        return null;
+      }
+      
+      return data?.business_id || null;
+    },
+    enabled: !!user?.id && hasRole('business_owner'),
+  });
+  
+  const { subscription } = useBusinessSubscription(primaryBusinessId || "");
 
   const isHome = location.pathname === '/';
 
