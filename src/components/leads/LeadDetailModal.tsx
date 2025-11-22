@@ -58,27 +58,31 @@ export function LeadDetailModal({ leadId, businessId, open, onOpenChange }: Lead
       const { data, error } = await supabase.functions.invoke('generate-lead-score', {
         body: { leadId }
       });
-      
+
       if (error) throw error;
-      
-      if (data?.score) {
+
+      if (data?.score !== undefined) {
         setLeadScore(data.score);
-        await supabase
+        
+        // Update the lead in the database
+        const { error: updateError } = await supabase
           .from('business_leads')
           .update({ score: data.score })
           .eq('id', leadId);
-        
+
+        if (updateError) throw updateError;
+
+        queryClient.invalidateQueries({ queryKey: ['lead', leadId] });
         queryClient.invalidateQueries({ queryKey: ['business-leads'] });
-        queryClient.invalidateQueries({ queryKey: ['lead-detail', leadId] });
-        toast.success(`Lead score updated: ${data.score}/100`);
+        toast.success("Lead score generated successfully");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error generating lead score:', error);
-      toast.error('Failed to generate lead score');
+      toast.error("Failed to generate lead score");
     } finally {
       setIsGeneratingScore(false);
     }
-  }, [leadId, queryClient]);
+  }, [leadId]);
 
   // Auto-generate score when modal opens if score is missing
   useEffect(() => {
