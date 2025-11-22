@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Building2, MapPin, Clock, Users, Video } from "lucide-react";
+import { Building2, MapPin, Clock, Users, Video, TrendingUp } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import SaveJobButton from "./SaveJobButton";
@@ -16,6 +16,8 @@ interface JobCardProps {
     posted_at: string | null;
     applications_count: number | null;
     require_video: boolean | null;
+    is_boosted?: boolean | null;
+    boosted_until?: string | null;
     businesses: {
       name: string;
       logo_url: string | null;
@@ -25,6 +27,8 @@ interface JobCardProps {
 
 const JobCard = ({ job }: JobCardProps) => {
   const navigate = useNavigate();
+  
+  const isBoosted = job.is_boosted && job.boosted_until && new Date(job.boosted_until) > new Date();
 
   const jobTypeColors: Record<string, string> = {
     full_time: "bg-secondary/10 text-secondary border-secondary/20",
@@ -49,7 +53,7 @@ const JobCard = ({ job }: JobCardProps) => {
 
   return (
     <Card 
-      className="cursor-pointer hover:shadow-card transition-smooth group"
+      className={`cursor-pointer hover:shadow-card transition-smooth group ${isBoosted ? 'border-primary border-2' : ''}`}
       onClick={() => navigate(`/jobs/${job.id}`)}
     >
       <CardContent className="p-6">
@@ -70,9 +74,17 @@ const JobCard = ({ job }: JobCardProps) => {
           <div className="flex-1 min-w-0">
             {/* Job Title with Save Button */}
             <div className="flex items-start justify-between gap-2 mb-1">
-              <h3 className="text-lg font-bold group-hover:text-primary transition-smooth truncate flex-1">
-                {job.title}
-              </h3>
+              <div className="flex items-center gap-2 flex-1">
+                <h3 className="text-lg font-bold group-hover:text-primary transition-smooth truncate">
+                  {job.title}
+                </h3>
+                {isBoosted && (
+                  <Badge className="bg-primary shrink-0">
+                    <TrendingUp className="h-3 w-3 mr-1" />
+                    Boosted
+                  </Badge>
+                )}
+              </div>
               <SaveJobButton jobId={job.id} />
             </div>
 
