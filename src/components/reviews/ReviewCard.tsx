@@ -6,6 +6,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Star, ThumbsUp, Edit, Trash2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import ReviewAuthenticityIndicator from './ReviewAuthenticityIndicator';
+import FlagReviewButton from './FlagReviewButton';
 
 interface ReviewCardProps {
   review: {
@@ -16,6 +18,9 @@ interface ReviewCardProps {
     comment: string;
     helpful_count: number;
     created_at: string;
+    authenticity_score?: number;
+    is_verified_purchase?: boolean;
+    flagged_as_fake?: boolean;
     profiles: {
       full_name: string | null;
       avatar_url: string | null;
@@ -54,13 +59,18 @@ const ReviewCard = ({ review, onEdit, onDelete, onHelpful, isHelpful }: ReviewCa
           <div className="flex-1 space-y-3">
             <div className="flex items-start justify-between">
               <div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <h4 className="font-semibold">
                     {review.profiles?.full_name || 'Anonymous User'}
                   </h4>
                   <Badge variant="secondary" className="text-xs">
                     {formatDistanceToNow(new Date(review.created_at), { addSuffix: true })}
                   </Badge>
+                  <ReviewAuthenticityIndicator
+                    authenticityScore={review.authenticity_score}
+                    isVerifiedPurchase={review.is_verified_purchase}
+                    flaggedAsFake={review.flagged_as_fake}
+                  />
                 </div>
                 <div className="flex items-center gap-1 mt-1">
                   {[...Array(5)].map((_, i) => (
@@ -107,6 +117,7 @@ const ReviewCard = ({ review, onEdit, onDelete, onHelpful, isHelpful }: ReviewCa
                 <ThumbsUp className="h-4 w-4 mr-1" />
                 Helpful ({review.helpful_count})
               </Button>
+              <FlagReviewButton reviewId={review.id} variant="outline" size="sm" />
             </div>
           </div>
         </div>

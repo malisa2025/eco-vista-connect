@@ -23,3 +23,9 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.upload-to-cloudflare]
+
+[functions.generate-search-suggestions]
+verify_jwt = false
+
+[functions.analyze-review-authenticity]
+verify_jwt = false
