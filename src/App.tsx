@@ -36,6 +36,9 @@ import AdminSubscriptions from "./pages/admin/Subscriptions";
 import AdminPartners from "./pages/admin/Partners";
 import AdminVerifications from "./pages/admin/Verifications";
 import AdminReviewModeration from "./pages/admin/ReviewModeration";
+import AdminSubscriptionPlansManager from "./pages/admin/SubscriptionPlansManager";
+import AdminPromoCodesManager from "./pages/admin/PromoCodesManager";
+import ResumeDatabase from "./pages/ResumeDatabase";
 import JobPerformance from "./pages/JobPerformance";
 import BusinessAnalytics from "./pages/BusinessAnalytics";
 import HiringPipeline from "./pages/HiringPipeline";
@@ -278,6 +281,23 @@ const App = () => (
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/admin/subscription-plans"
+            element={
+              <ProtectedRoute requireRole="admin">
+                <AdminSubscriptionPlansManager />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/promo-codes"
+            element={
+              <ProtectedRoute requireRole="admin">
+                <AdminPromoCodesManager />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/resume-database" element={<ProtectedRoute requireRole="business_owner"><ResumeDatabase /></ProtectedRoute>} />
           <Route path="/seed-demo-data" element={<SeedDemoData />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

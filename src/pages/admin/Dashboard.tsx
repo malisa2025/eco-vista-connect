@@ -1,7 +1,7 @@
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Building2, Users, MessageSquare, ClipboardCheck, Handshake } from 'lucide-react';
+import { Building2, Users, MessageSquare, ClipboardCheck, Handshake, CreditCard, Tag } from 'lucide-react';
 import { useAdminStats, useRecentActivity } from '@/hooks/useAdminStats';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -145,6 +145,18 @@ const AdminDashboard = () => {
                   <Button className="w-full" variant="outline">
                     <MessageSquare className="h-4 w-4 mr-2" />
                     Review Moderation
+                  </Button>
+                </Link>
+                <Link to="/admin/subscription-plans">
+                  <Button className="w-full" variant="outline">
+                    <CreditCard className="h-4 w-4 mr-2" />
+                    Subscription Plans
+                  </Button>
+                </Link>
+                <Link to="/admin/promo-codes">
+                  <Button className="w-full" variant="outline">
+                    <Tag className="h-4 w-4 mr-2" />
+                    Promo Codes
                   </Button>
                 </Link>
               </CardContent>
