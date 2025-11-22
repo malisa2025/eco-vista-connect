@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      ad_benchmarks: {
+        Row: {
+          avg_conversion_rate: number | null
+          avg_cost_per_click: number | null
+          avg_ctr: number | null
+          category: string
+          id: string
+          region: string | null
+          sample_size: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          avg_conversion_rate?: number | null
+          avg_cost_per_click?: number | null
+          avg_ctr?: number | null
+          category: string
+          id?: string
+          region?: string | null
+          sample_size?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          avg_conversion_rate?: number | null
+          avg_cost_per_click?: number | null
+          avg_ctr?: number | null
+          category?: string
+          id?: string
+          region?: string | null
+          sample_size?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       ad_clicks: {
         Row: {
           advertisement_id: string
@@ -45,6 +78,54 @@ export type Database = {
             columns: ["advertisement_id"]
             isOneToOne: false
             referencedRelation: "advertisements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ad_conversions: {
+        Row: {
+          advertisement_id: string
+          conversion_type: string
+          created_at: string | null
+          id: string
+          metadata: Json | null
+          user_id: string | null
+          value: number | null
+          variant_id: string | null
+        }
+        Insert: {
+          advertisement_id: string
+          conversion_type: string
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          user_id?: string | null
+          value?: number | null
+          variant_id?: string | null
+        }
+        Update: {
+          advertisement_id?: string
+          conversion_type?: string
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          user_id?: string | null
+          value?: number | null
+          variant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ad_conversions_advertisement_id_fkey"
+            columns: ["advertisement_id"]
+            isOneToOne: false
+            referencedRelation: "advertisements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ad_conversions_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "ad_variants"
             referencedColumns: ["id"]
           },
         ]
@@ -84,6 +165,47 @@ export type Database = {
           },
         ]
       }
+      ad_roi_tracking: {
+        Row: {
+          advertisement_id: string
+          conversions: number | null
+          created_at: string | null
+          date: string
+          id: string
+          roi_percentage: number | null
+          total_revenue: number | null
+          total_spend: number | null
+        }
+        Insert: {
+          advertisement_id: string
+          conversions?: number | null
+          created_at?: string | null
+          date: string
+          id?: string
+          roi_percentage?: number | null
+          total_revenue?: number | null
+          total_spend?: number | null
+        }
+        Update: {
+          advertisement_id?: string
+          conversions?: number | null
+          created_at?: string | null
+          date?: string
+          id?: string
+          roi_percentage?: number | null
+          total_revenue?: number | null
+          total_spend?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ad_roi_tracking_advertisement_id_fkey"
+            columns: ["advertisement_id"]
+            isOneToOne: false
+            referencedRelation: "advertisements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ad_spots: {
         Row: {
           created_at: string | null
@@ -113,6 +235,62 @@ export type Database = {
           price_per_day?: number
         }
         Relationships: []
+      }
+      ad_variants: {
+        Row: {
+          advertisement_id: string
+          clicks: number | null
+          conversions: number | null
+          created_at: string | null
+          cta_text: string | null
+          description: string | null
+          id: string
+          image_url: string
+          impressions: number | null
+          is_winner: boolean | null
+          title: string
+          traffic_allocation: number | null
+          variant_name: string
+        }
+        Insert: {
+          advertisement_id: string
+          clicks?: number | null
+          conversions?: number | null
+          created_at?: string | null
+          cta_text?: string | null
+          description?: string | null
+          id?: string
+          image_url: string
+          impressions?: number | null
+          is_winner?: boolean | null
+          title: string
+          traffic_allocation?: number | null
+          variant_name: string
+        }
+        Update: {
+          advertisement_id?: string
+          clicks?: number | null
+          conversions?: number | null
+          created_at?: string | null
+          cta_text?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string
+          impressions?: number | null
+          is_winner?: boolean | null
+          title?: string
+          traffic_allocation?: number | null
+          variant_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ad_variants_advertisement_id_fkey"
+            columns: ["advertisement_id"]
+            isOneToOne: false
+            referencedRelation: "advertisements"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       advertisements: {
         Row: {
@@ -351,6 +529,90 @@ export type Database = {
           },
         ]
       }
+      business_leads: {
+        Row: {
+          assigned_to: string | null
+          business_id: string
+          company: string | null
+          created_at: string | null
+          email: string
+          form_id: string | null
+          id: string
+          ip_address: string | null
+          message: string | null
+          metadata: Json | null
+          name: string
+          phone: string | null
+          score: number | null
+          source: string | null
+          status: string | null
+          updated_at: string | null
+          user_agent: string | null
+          utm_campaign: string | null
+          utm_medium: string | null
+          utm_source: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          business_id: string
+          company?: string | null
+          created_at?: string | null
+          email: string
+          form_id?: string | null
+          id?: string
+          ip_address?: string | null
+          message?: string | null
+          metadata?: Json | null
+          name: string
+          phone?: string | null
+          score?: number | null
+          source?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          business_id?: string
+          company?: string | null
+          created_at?: string | null
+          email?: string
+          form_id?: string | null
+          id?: string
+          ip_address?: string | null
+          message?: string | null
+          metadata?: Json | null
+          name?: string
+          phone?: string | null
+          score?: number | null
+          source?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_leads_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_leads_form_id_fkey"
+            columns: ["form_id"]
+            isOneToOne: false
+            referencedRelation: "lead_forms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_owners: {
         Row: {
           business_id: string
@@ -415,6 +677,81 @@ export type Database = {
           },
         ]
       }
+      business_subscriptions: {
+        Row: {
+          admin_notes: string | null
+          amount: number
+          auto_renew: boolean | null
+          business_id: string
+          cancellation_reason: string | null
+          cancelled_at: string | null
+          created_at: string | null
+          current_usage: Json | null
+          end_date: string
+          id: string
+          lifetime_value: number | null
+          payment_method: string | null
+          payment_reference: string | null
+          plan_id: string
+          start_date: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          amount: number
+          auto_renew?: boolean | null
+          business_id: string
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          created_at?: string | null
+          current_usage?: Json | null
+          end_date: string
+          id?: string
+          lifetime_value?: number | null
+          payment_method?: string | null
+          payment_reference?: string | null
+          plan_id: string
+          start_date?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          amount?: number
+          auto_renew?: boolean | null
+          business_id?: string
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          created_at?: string | null
+          current_usage?: Json | null
+          end_date?: string
+          id?: string
+          lifetime_value?: number | null
+          payment_method?: string | null
+          payment_reference?: string | null
+          plan_id?: string
+          start_date?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_subscriptions_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_views: {
         Row: {
           business_id: string
@@ -456,15 +793,19 @@ export type Database = {
           id: string
           image_url: string | null
           is_featured: boolean | null
+          is_premium: boolean | null
+          is_sponsored: boolean | null
           is_verified: boolean | null
           latitude: number | null
           logo_url: string | null
           longitude: number | null
           name: string
           phone: string | null
+          premium_until: string | null
           rating: number | null
           region: string
           review_count: number | null
+          sponsored_until: string | null
           trust_score: number | null
           updated_at: string | null
           verification_documents: Json | null
@@ -487,15 +828,19 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_featured?: boolean | null
+          is_premium?: boolean | null
+          is_sponsored?: boolean | null
           is_verified?: boolean | null
           latitude?: number | null
           logo_url?: string | null
           longitude?: number | null
           name: string
           phone?: string | null
+          premium_until?: string | null
           rating?: number | null
           region: string
           review_count?: number | null
+          sponsored_until?: string | null
           trust_score?: number | null
           updated_at?: string | null
           verification_documents?: Json | null
@@ -518,15 +863,19 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_featured?: boolean | null
+          is_premium?: boolean | null
+          is_sponsored?: boolean | null
           is_verified?: boolean | null
           latitude?: number | null
           logo_url?: string | null
           longitude?: number | null
           name?: string
           phone?: string | null
+          premium_until?: string | null
           rating?: number | null
           region?: string
           review_count?: number | null
+          sponsored_until?: string | null
           trust_score?: number | null
           updated_at?: string | null
           verification_documents?: Json | null
@@ -940,6 +1289,8 @@ export type Database = {
         Row: {
           admin_notes: string | null
           applications_count: number | null
+          boost_payment_reference: string | null
+          boosted_until: string | null
           business_id: string
           category: string
           created_at: string | null
@@ -948,6 +1299,7 @@ export type Database = {
           expires_at: string | null
           flag_reason: string | null
           id: string
+          is_boosted: boolean | null
           is_flagged: boolean | null
           job_type: Database["public"]["Enums"]["job_type"]
           location: string | null
@@ -965,6 +1317,8 @@ export type Database = {
         Insert: {
           admin_notes?: string | null
           applications_count?: number | null
+          boost_payment_reference?: string | null
+          boosted_until?: string | null
           business_id: string
           category: string
           created_at?: string | null
@@ -973,6 +1327,7 @@ export type Database = {
           expires_at?: string | null
           flag_reason?: string | null
           id?: string
+          is_boosted?: boolean | null
           is_flagged?: boolean | null
           job_type: Database["public"]["Enums"]["job_type"]
           location?: string | null
@@ -990,6 +1345,8 @@ export type Database = {
         Update: {
           admin_notes?: string | null
           applications_count?: number | null
+          boost_payment_reference?: string | null
+          boosted_until?: string | null
           business_id?: string
           category?: string
           created_at?: string | null
@@ -998,6 +1355,7 @@ export type Database = {
           expires_at?: string | null
           flag_reason?: string | null
           id?: string
+          is_boosted?: boolean | null
           is_flagged?: boolean | null
           job_type?: Database["public"]["Enums"]["job_type"]
           location?: string | null
@@ -1015,6 +1373,144 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "jobs_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lead_activities: {
+        Row: {
+          activity_type: string
+          content: string | null
+          created_at: string | null
+          created_by: string
+          id: string
+          lead_id: string
+          metadata: Json | null
+        }
+        Insert: {
+          activity_type: string
+          content?: string | null
+          created_at?: string | null
+          created_by: string
+          id?: string
+          lead_id: string
+          metadata?: Json | null
+        }
+        Update: {
+          activity_type?: string
+          content?: string | null
+          created_at?: string | null
+          created_by?: string
+          id?: string
+          lead_id?: string
+          metadata?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_activities_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "business_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lead_forms: {
+        Row: {
+          business_id: string
+          created_at: string | null
+          description: string | null
+          email_notifications: boolean | null
+          fields: Json
+          form_type: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          notification_emails: string[] | null
+          redirect_url: string | null
+          spam_protection: boolean | null
+          success_message: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          business_id: string
+          created_at?: string | null
+          description?: string | null
+          email_notifications?: boolean | null
+          fields: Json
+          form_type?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          notification_emails?: string[] | null
+          redirect_url?: string | null
+          spam_protection?: boolean | null
+          success_message?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          business_id?: string
+          created_at?: string | null
+          description?: string | null
+          email_notifications?: boolean | null
+          fields?: Json
+          form_type?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          notification_emails?: string[] | null
+          redirect_url?: string | null
+          spam_protection?: boolean | null
+          success_message?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_forms_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lead_response_templates: {
+        Row: {
+          body: string
+          business_id: string
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          subject: string | null
+          template_type: string | null
+        }
+        Insert: {
+          body: string
+          business_id: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          subject?: string | null
+          template_type?: string | null
+        }
+        Update: {
+          body?: string
+          business_id?: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          subject?: string | null
+          template_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_response_templates_business_id_fkey"
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
@@ -1236,6 +1732,51 @@ export type Database = {
         }
         Relationships: []
       }
+      promo_codes: {
+        Row: {
+          code: string
+          created_at: string | null
+          created_by: string | null
+          discount_type: string
+          discount_value: number
+          id: string
+          is_active: boolean | null
+          max_uses: number | null
+          target_plans: string[] | null
+          used_count: number | null
+          valid_from: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          created_by?: string | null
+          discount_type: string
+          discount_value: number
+          id?: string
+          is_active?: boolean | null
+          max_uses?: number | null
+          target_plans?: string[] | null
+          used_count?: number | null
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          created_by?: string | null
+          discount_type?: string
+          discount_value?: number
+          id?: string
+          is_active?: boolean | null
+          max_uses?: number | null
+          target_plans?: string[] | null
+          used_count?: number | null
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Relationships: []
+      }
       review_flags: {
         Row: {
           admin_notes: string | null
@@ -1450,6 +1991,48 @@ export type Database = {
         }
         Relationships: []
       }
+      subscription_invoices: {
+        Row: {
+          amount: number
+          created_at: string | null
+          due_date: string
+          id: string
+          invoice_number: string
+          paid_at: string | null
+          payment_reference: string | null
+          pdf_url: string | null
+          status: string | null
+          subscription_id: string
+          subscription_type: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          due_date: string
+          id?: string
+          invoice_number: string
+          paid_at?: string | null
+          payment_reference?: string | null
+          pdf_url?: string | null
+          status?: string | null
+          subscription_id: string
+          subscription_type: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          due_date?: string
+          id?: string
+          invoice_number?: string
+          paid_at?: string | null
+          payment_reference?: string | null
+          pdf_url?: string | null
+          status?: string | null
+          subscription_id?: string
+          subscription_type?: string
+        }
+        Relationships: []
+      }
       subscription_payments: {
         Row: {
           amount: number
@@ -1496,6 +2079,84 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      subscription_plans: {
+        Row: {
+          billing_period: string
+          created_at: string | null
+          discount_percentage: number | null
+          display_order: number | null
+          features: Json
+          id: string
+          is_active: boolean | null
+          limits: Json
+          name: string
+          popular: boolean | null
+          price: number
+          slug: string
+          target_audience: string
+        }
+        Insert: {
+          billing_period: string
+          created_at?: string | null
+          discount_percentage?: number | null
+          display_order?: number | null
+          features: Json
+          id?: string
+          is_active?: boolean | null
+          limits: Json
+          name: string
+          popular?: boolean | null
+          price: number
+          slug: string
+          target_audience: string
+        }
+        Update: {
+          billing_period?: string
+          created_at?: string | null
+          discount_percentage?: number | null
+          display_order?: number | null
+          features?: Json
+          id?: string
+          is_active?: boolean | null
+          limits?: Json
+          name?: string
+          popular?: boolean | null
+          price?: number
+          slug?: string
+          target_audience?: string
+        }
+        Relationships: []
+      }
+      subscription_usage_logs: {
+        Row: {
+          action: string
+          created_at: string | null
+          id: string
+          metadata: Json | null
+          resource_id: string | null
+          subscription_id: string
+          subscription_type: string
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          resource_id?: string | null
+          subscription_id: string
+          subscription_type: string
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          resource_id?: string | null
+          subscription_id?: string
+          subscription_type?: string
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {
@@ -1581,6 +2242,10 @@ export type Database = {
       calculate_trust_score: {
         Args: { p_business_id: string }
         Returns: number
+      }
+      check_business_subscription: {
+        Args: { p_business_id: string }
+        Returns: boolean
       }
       check_job_seeker_subscription: {
         Args: { p_user_id: string }
