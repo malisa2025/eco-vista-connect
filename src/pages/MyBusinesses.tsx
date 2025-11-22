@@ -5,11 +5,13 @@ import { useBusinessAds, useAdMutations } from '@/hooks/useAdvertisements';
 import RequestVerificationDialog from '@/components/business/RequestVerificationDialog';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { useBusinessSubscription } from '@/hooks/useBusinessSubscription';
+import { UsageMeter } from '@/components/subscriptions/UsageMeter';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Building2, Eye, Star, Edit, Plus, TrendingUp, MousePointerClick, Briefcase, Users, MoreVertical, Play, Pause, Trash2 } from 'lucide-react';
+import { Building2, Eye, Star, Edit, Plus, TrendingUp, MousePointerClick, Briefcase, Users, MoreVertical, Play, Pause, Trash2, Users2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useBusinessJobs, useJobStats, useJobMutations } from '@/hooks/useJobs';
 import {
@@ -35,8 +37,11 @@ const MyBusinesses = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { data: ownerships, isLoading } = useBusinessOwners(user?.id);
+  const { subscription } = useBusinessSubscription(user?.id || "");
 
   const businesses = ownerships?.map(o => o.businesses).filter(Boolean) || [];
+  const currentUsage = subscription?.current_usage as any || {};
+  const planLimits = subscription?.subscription_plans?.limits as any || {};
 
   if (isLoading) {
     return (
@@ -80,9 +85,54 @@ const MyBusinesses = () => {
               </CardContent>
             </Card>
           ) : (
-            <Tabs defaultValue="businesses" className="w-full">
-              <TabsList className="grid w-full max-w-2xl grid-cols-3 mb-8">
+            <>
+              {/* Subscription Status Card */}
+              {subscription && (
+                <Card className="mb-6 border-primary/20">
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="flex items-center gap-2">
+                          {subscription.subscription_plans?.name} Plan
+                          <Badge variant={subscription.status === "active" ? "default" : "secondary"}>
+                            {subscription.status}
+                          </Badge>
+                        </CardTitle>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Your current subscription and usage
+                        </p>
+                      </div>
+                      <Button variant="outline" onClick={() => navigate('/manage-subscription')}>
+                        Manage
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <UsageMeter
+                        label="Jobs Posted"
+                        current={currentUsage.jobs_posted || 0}
+                        limit={planLimits.jobs_per_month || 0}
+                      />
+                      <UsageMeter
+                        label="Featured Listings"
+                        current={currentUsage.featured_listings || 0}
+                        limit={planLimits.featured_listings || 0}
+                      />
+                      <UsageMeter
+                        label="AI Credits"
+                        current={currentUsage.ai_credits_used || 0}
+                        limit={planLimits.ai_credits || 0}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              <Tabs defaultValue="businesses" className="w-full">
+              <TabsList className="grid w-full max-w-2xl grid-cols-4 mb-8">
                 <TabsTrigger value="businesses">My Businesses</TabsTrigger>
+                <TabsTrigger value="leads">Leads</TabsTrigger>
                 <TabsTrigger value="advertisements">Advertisements</TabsTrigger>
                 <TabsTrigger value="jobs">Job Listings</TabsTrigger>
               </TabsList>
@@ -163,6 +213,37 @@ const MyBusinesses = () => {
                 ))}
               </TabsContent>
 
+              <TabsContent value="leads" className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Lead Management</CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                      View and manage leads captured from your business profiles
+                    </p>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {businesses.length > 0 ? (
+                      businesses.map((business: any) => (
+                        <div key={business.id} className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <h3 className="font-semibold">{business.name}</h3>
+                            <p className="text-sm text-muted-foreground">View leads for this business</p>
+                          </div>
+                          <Button onClick={() => navigate(`/leads/${business.id}`)}>
+                            <Users2 className="h-4 w-4 mr-2" />
+                            View Leads
+                          </Button>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-8 text-muted-foreground">
+                        No businesses found. Register a business to start capturing leads.
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
               <TabsContent value="advertisements" className="space-y-6">
                 <BusinessAdvertisements businesses={businesses} />
               </TabsContent>
@@ -171,6 +252,7 @@ const MyBusinesses = () => {
                 <BusinessJobs businesses={businesses} />
               </TabsContent>
             </Tabs>
+            </>
           )}
         </div>
       </main>

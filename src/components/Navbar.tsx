@@ -1,8 +1,10 @@
 import { Button } from "@/components/ui/button";
-import { Building2, Menu, User, Heart, LogOut, LayoutDashboard, MessageCircle, TrendingUp, Bookmark, Bell } from "lucide-react";
+import { Building2, Menu, User, Heart, LogOut, LayoutDashboard, MessageCircle, TrendingUp, Bookmark, Bell, CreditCard, Database, Users2 } from "lucide-react";
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { Badge } from "@/components/ui/badge";
+import { useBusinessSubscription } from "@/hooks/useBusinessSubscription";
 import { NotificationBell } from "./NotificationBell";
 import {
   DropdownMenu,
@@ -18,6 +20,7 @@ const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, profile, hasRole, signOut } = useAuth();
+  const { subscription } = useBusinessSubscription(user?.id || "");
 
   const isHome = location.pathname === '/';
 
@@ -135,15 +138,41 @@ const Navbar = () => {
                       </>
                     )}
                     {hasRole('business_owner') && (
-                      <DropdownMenuItem onClick={() => navigate('/my-businesses')}>
-                        <Building2 className="mr-2 h-4 w-4" />
-                        My Businesses
-                      </DropdownMenuItem>
+                      <>
+                        <DropdownMenuItem onClick={() => navigate('/my-businesses')}>
+                          <Building2 className="mr-2 h-4 w-4" />
+                          My Businesses
+                          {subscription && (
+                            <Badge variant="secondary" className="ml-auto text-xs">
+                              {subscription.subscription_plans?.name}
+                            </Badge>
+                          )}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => navigate('/purchase-ad')}>
+                          <TrendingUp className="mr-2 h-4 w-4" />
+                          Purchase Ad
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => navigate('/resume-database')}>
+                          <Database className="mr-2 h-4 w-4" />
+                          Resume Database
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => navigate('/subscription-plans')}>
+                          <CreditCard className="mr-2 h-4 w-4" />
+                          Subscription Plans
+                        </DropdownMenuItem>
+                        {subscription && (
+                          <DropdownMenuItem onClick={() => navigate('/manage-subscription')}>
+                            <CreditCard className="mr-2 h-4 w-4" />
+                            Manage Subscription
+                          </DropdownMenuItem>
+                        )}
+                      </>
                     )}
-                    {hasRole('business_owner') && (
-                      <DropdownMenuItem onClick={() => navigate('/purchase-ad')}>
-                        <TrendingUp className="mr-2 h-4 w-4" />
-                        Purchase Ad
+                    {!hasRole('business_owner') && !hasRole('admin') && (
+                      <DropdownMenuItem onClick={() => navigate('/subscription-plans')}>
+                        <CreditCard className="mr-2 h-4 w-4" />
+                        Upgrade to Pro
                       </DropdownMenuItem>
                     )}
                     {hasRole('admin') && (
@@ -235,8 +264,21 @@ const Navbar = () => {
                       Favorites
                     </Button>
                     {hasRole('business_owner') && (
-                      <Button variant="ghost" className="w-full" onClick={() => { navigate('/my-businesses'); setIsOpen(false); }}>
-                        My Businesses
+                      <>
+                        <Button variant="ghost" className="w-full" onClick={() => { navigate('/my-businesses'); setIsOpen(false); }}>
+                          My Businesses
+                        </Button>
+                        <Button variant="ghost" className="w-full" onClick={() => { navigate('/resume-database'); setIsOpen(false); }}>
+                          Resume Database
+                        </Button>
+                        <Button variant="ghost" className="w-full" onClick={() => { navigate('/subscription-plans'); setIsOpen(false); }}>
+                          Subscription Plans
+                        </Button>
+                      </>
+                    )}
+                    {!hasRole('business_owner') && !hasRole('admin') && (
+                      <Button variant="ghost" className="w-full" onClick={() => { navigate('/subscription-plans'); setIsOpen(false); }}>
+                        Upgrade to Pro
                       </Button>
                     )}
                     <Button variant="outline" className="w-full" onClick={() => { signOut(); setIsOpen(false); }}>

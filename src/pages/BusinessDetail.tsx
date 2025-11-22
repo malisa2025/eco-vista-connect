@@ -8,6 +8,9 @@ import Footer from "@/components/Footer";
 import VideoPlayer from "@/components/VideoPlayer";
 import ContactBusinessButton from "@/components/ContactBusinessButton";
 import AdSlot from "@/components/AdSlot";
+import { FloatingContactButton } from "@/components/leads/FloatingContactButton";
+import { ExitIntentPopup } from "@/components/leads/ExitIntentPopup";
+import { EmbeddedLeadForm } from "@/components/leads/EmbeddedLeadForm";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -205,6 +208,14 @@ const BusinessDetail = () => {
 
               {/* Message Business Button */}
               <ContactBusinessButton businessId={id!} />
+
+              {/* Lead Capture Form */}
+              <Card>
+                <CardContent className="pt-6">
+                  <h2 className="text-2xl font-bold mb-4">Get in Touch</h2>
+                  <EmbeddedLeadForm businessId={id!} />
+                </CardContent>
+              </Card>
             </div>
 
             {/* Sidebar */}
@@ -377,6 +388,12 @@ const BusinessDetail = () => {
           </div>
         </div>
       </main>
+
+      {/* Floating Contact Button */}
+      <FloatingContactButton businessId={id!} businessName={business.name} />
+
+      {/* Exit Intent Popup */}
+      <ExitIntentPopup businessId={id!} businessName={business.name} />
 
       <Footer />
     </div>
