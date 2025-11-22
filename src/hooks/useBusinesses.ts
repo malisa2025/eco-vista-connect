@@ -6,6 +6,7 @@ interface UseBusinessesParams {
   category?: string;
   search?: string;
   sortBy?: 'newest' | 'rating' | 'name';
+  openNow?: boolean;
   limit?: number;
 }
 
@@ -27,6 +28,23 @@ export const useBusinesses = (params: UseBusinessesParams = {}) => {
 
       if (params.search) {
         query = query.or(`name.ilike.%${params.search}%,description.ilike.%${params.search}%,phone.ilike.%${params.search}%`);
+      }
+
+      // Filter by open now status
+      if (params.openNow) {
+        // First get business_ids that are currently open from cache
+        const { data: openBusinesses } = await supabase
+          .from('business_status_cache')
+          .select('business_id')
+          .eq('is_open_now', true);
+        
+        if (openBusinesses && openBusinesses.length > 0) {
+          const openBusinessIds = openBusinesses.map(b => b.business_id);
+          query = query.in('id', openBusinessIds);
+        } else {
+          // If no businesses are open, return empty array
+          return [];
+        }
       }
 
       // Apply sorting

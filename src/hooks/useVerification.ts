@@ -71,7 +71,6 @@ export const useAdminVerification = () => {
       const { data, error } = await supabase
         .from('verification_requests')
         .select('*, businesses(name, logo_url), profiles(full_name, email)')
-        .eq('status', 'pending')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
