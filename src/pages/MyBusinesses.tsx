@@ -29,6 +29,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import BoostJobDialog from "@/components/jobs/BoostJobDialog";
 
 const MyBusinesses = () => {
   const navigate = useNavigate();
@@ -353,6 +354,8 @@ const BusinessJobs = ({ businesses }: { businesses: any[] }) => {
   const { data: stats } = useJobStats(businessIds);
   const { deleteJob } = useJobMutations();
   const [deleteJobId, setDeleteJobId] = useState<string | null>(null);
+  const [boostJobId, setBoostJobId] = useState<string | null>(null);
+  const [boostJobTitle, setBoostJobTitle] = useState<string>('');
 
   const handleDeleteConfirm = () => {
     if (deleteJobId) {
@@ -437,6 +440,13 @@ const BusinessJobs = ({ businesses }: { businesses: any[] }) => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => {
+                    setBoostJobId(job.id);
+                    setBoostJobTitle(job.title);
+                  }}>
+                    <TrendingUp className="mr-2 h-4 w-4" />
+                    Boost Job
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate(`/job-performance/${job.id}`)}>
                     <TrendingUp className="mr-2 h-4 w-4" />
                     View Performance
@@ -519,6 +529,18 @@ const BusinessJobs = ({ businesses }: { businesses: any[] }) => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <BoostJobDialog
+        open={!!boostJobId}
+        onOpenChange={(open) => {
+          if (!open) {
+            setBoostJobId(null);
+            setBoostJobTitle('');
+          }
+        }}
+        jobId={boostJobId || ''}
+        jobTitle={boostJobTitle}
+      />
     </div>
   );
 };

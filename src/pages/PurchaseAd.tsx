@@ -4,6 +4,7 @@ import { useBusinessOwners } from '@/hooks/useBusinessClaims';
 import { useAdSpots, useAdMutations } from '@/hooks/useAdvertisements';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { UpgradePrompt } from '@/components/subscriptions/UpgradePrompt';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -112,6 +113,11 @@ const PurchaseAd = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
+
+      <UpgradePrompt 
+        message="Upgrade to Business plan for premium advertisement placement"
+        features={["Top positioning in search results", "More visibility", "Higher CTR"]}
+      />
 
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
