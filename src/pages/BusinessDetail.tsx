@@ -18,6 +18,8 @@ import ReviewsList from "@/components/reviews/ReviewsList";
 import { useBusinessReviews, useUserReview, useReviewMutations, useUserHelpfulReviews } from "@/hooks/useBusinessReviews";
 import { useState } from "react";
 import FavoriteButton from "@/components/FavoriteButton";
+import VerificationBadge from "@/components/business/VerificationBadge";
+import { BusinessHoursDisplay } from "@/components/business/BusinessHoursStatus";
 import {
   ArrowLeft,
   Star,
@@ -120,11 +122,14 @@ const BusinessDetail = () => {
             </div>
           )}
           <div className="absolute top-6 right-6 flex gap-3">
-            {business.is_verified && (
-              <div className="bg-primary text-primary-foreground rounded-full p-3 shadow-lg">
-                <CheckCircle2 className="w-6 h-6" />
-              </div>
-            )}
+            <div className="bg-background/90 backdrop-blur-sm rounded-full px-3 py-1.5">
+              <VerificationBadge 
+                tier={(business.verification_tier as 'none' | 'basic' | 'government' | 'premium') || 'none'} 
+                trustScore={business.trust_score || 0}
+                showLabel
+                size="md"
+              />
+            </div>
             <div className="bg-background rounded-full shadow-lg">
               <FavoriteButton businessId={id!} size="lg" />
             </div>
@@ -268,13 +273,22 @@ const BusinessDetail = () => {
                           {business.website.replace(/^https?:\/\//, "")}
                         </a>
                       </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                     </div>
+                   )}
+                 </CardContent>
+               </Card>
 
-              {/* Quick Actions */}
-              <Card>
+               {/* Business Hours */}
+               {business.business_hours && (
+                 <Card>
+                   <CardContent className="pt-6">
+                     <BusinessHoursDisplay businessHours={business.business_hours} />
+                   </CardContent>
+                 </Card>
+               )}
+
+               {/* Quick Actions */}
+               <Card>
                 <CardContent className="pt-6 space-y-3">
                   {business.phone && (
                     <Button className="w-full" asChild>

@@ -383,6 +383,38 @@ export type Database = {
           },
         ]
       }
+      business_status_cache: {
+        Row: {
+          business_id: string
+          is_open_now: boolean | null
+          next_closes_at: string | null
+          next_opens_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          business_id: string
+          is_open_now?: boolean | null
+          next_closes_at?: string | null
+          next_opens_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          business_id?: string
+          is_open_now?: boolean | null
+          next_closes_at?: string | null
+          next_opens_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_status_cache_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: true
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_views: {
         Row: {
           business_id: string
@@ -433,7 +465,12 @@ export type Database = {
           rating: number | null
           region: string
           review_count: number | null
+          trust_score: number | null
           updated_at: string | null
+          verification_documents: Json | null
+          verification_tier: string | null
+          verified_at: string | null
+          verified_by: string | null
           video_duration: number | null
           video_thumbnail_url: string | null
           video_url: string | null
@@ -459,7 +496,12 @@ export type Database = {
           rating?: number | null
           region: string
           review_count?: number | null
+          trust_score?: number | null
           updated_at?: string | null
+          verification_documents?: Json | null
+          verification_tier?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
           video_duration?: number | null
           video_thumbnail_url?: string | null
           video_url?: string | null
@@ -485,7 +527,12 @@ export type Database = {
           rating?: number | null
           region?: string
           review_count?: number | null
+          trust_score?: number | null
           updated_at?: string | null
+          verification_documents?: Json | null
+          verification_tier?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
           video_duration?: number | null
           video_thumbnail_url?: string | null
           video_url?: string | null
@@ -1189,6 +1236,50 @@ export type Database = {
         }
         Relationships: []
       }
+      review_flags: {
+        Row: {
+          admin_notes: string | null
+          created_at: string | null
+          flagged_by: string
+          id: string
+          reason: string
+          review_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string | null
+          flagged_by: string
+          id?: string
+          reason: string
+          review_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string | null
+          flagged_by?: string
+          id?: string
+          reason?: string
+          review_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_flags_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       review_helpful: {
         Row: {
           created_at: string | null
@@ -1220,33 +1311,45 @@ export type Database = {
       }
       reviews: {
         Row: {
+          authenticity_score: number | null
           business_id: string
           comment: string
           created_at: string | null
+          flag_reason: string | null
+          flagged_as_fake: boolean | null
           helpful_count: number | null
           id: string
+          is_verified_purchase: boolean | null
           rating: number
           title: string
           updated_at: string | null
           user_id: string
         }
         Insert: {
+          authenticity_score?: number | null
           business_id: string
           comment: string
           created_at?: string | null
+          flag_reason?: string | null
+          flagged_as_fake?: boolean | null
           helpful_count?: number | null
           id?: string
+          is_verified_purchase?: boolean | null
           rating: number
           title: string
           updated_at?: string | null
           user_id: string
         }
         Update: {
+          authenticity_score?: number | null
           business_id?: string
           comment?: string
           created_at?: string | null
+          flag_reason?: string | null
+          flagged_as_fake?: boolean | null
           helpful_count?: number | null
           id?: string
+          is_verified_purchase?: boolean | null
           rating?: number
           title?: string
           updated_at?: string | null
@@ -1290,6 +1393,62 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      search_history: {
+        Row: {
+          clicked_business_id: string | null
+          created_at: string | null
+          id: string
+          search_query: string
+          user_id: string | null
+        }
+        Insert: {
+          clicked_business_id?: string | null
+          created_at?: string | null
+          id?: string
+          search_query: string
+          user_id?: string | null
+        }
+        Update: {
+          clicked_business_id?: string | null
+          created_at?: string | null
+          id?: string
+          search_query?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "search_history_clicked_business_id_fkey"
+            columns: ["clicked_business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      search_suggestions: {
+        Row: {
+          id: string
+          popularity_score: number | null
+          query: string
+          suggestions: Json
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          popularity_score?: number | null
+          query: string
+          suggestions: Json
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          popularity_score?: number | null
+          query?: string
+          suggestions?: Json
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       subscription_payments: {
         Row: {
@@ -1359,6 +1518,53 @@ export type Database = {
         }
         Relationships: []
       }
+      verification_requests: {
+        Row: {
+          admin_notes: string | null
+          business_id: string
+          created_at: string | null
+          documents: Json
+          id: string
+          requested_by: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string | null
+          tier_requested: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          business_id: string
+          created_at?: string | null
+          documents?: Json
+          id?: string
+          requested_by: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+          tier_requested: string
+        }
+        Update: {
+          admin_notes?: string | null
+          business_id?: string
+          created_at?: string | null
+          documents?: Json
+          id?: string
+          requested_by?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+          tier_requested?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "verification_requests_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -1371,6 +1577,10 @@ export type Database = {
       calculate_job_performance: {
         Args: { p_job_id: string }
         Returns: undefined
+      }
+      calculate_trust_score: {
+        Args: { p_business_id: string }
+        Returns: number
       }
       check_job_seeker_subscription: {
         Args: { p_user_id: string }
@@ -1413,6 +1623,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_business_open: { Args: { p_business_id: string }; Returns: boolean }
     }
     Enums: {
       ad_spot_location:

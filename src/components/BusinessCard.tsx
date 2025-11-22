@@ -3,6 +3,8 @@ import { Badge } from "@/components/ui/badge";
 import { Star, MapPin, Phone, Mail, Globe, CheckCircle2, Video } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import FavoriteButton from "./FavoriteButton";
+import VerificationBadge from "./business/VerificationBadge";
+import BusinessHoursStatus from "./business/BusinessHoursStatus";
 
 interface BusinessCardProps {
   id: string;
@@ -19,6 +21,8 @@ interface BusinessCardProps {
   rating: number;
   review_count: number;
   is_verified: boolean;
+  verification_tier?: string;
+  trust_score?: number;
 }
 
 const BusinessCard = ({
@@ -35,6 +39,8 @@ const BusinessCard = ({
   rating,
   review_count,
   is_verified,
+  verification_tier = 'none',
+  trust_score,
 }: BusinessCardProps) => {
   const navigate = useNavigate();
 
@@ -56,17 +62,20 @@ const BusinessCard = ({
           </div>
         )}
         <div className="absolute top-2 right-2 flex gap-2">
-          {is_verified && (
-            <div className="bg-primary text-primary-foreground rounded-full p-1.5 shadow-lg">
-              <CheckCircle2 className="w-4 h-4" />
-            </div>
-          )}
+          <VerificationBadge 
+            tier={(verification_tier as 'none' | 'basic' | 'government' | 'premium') || 'none'} 
+            trustScore={trust_score}
+            size="sm"
+          />
           <div className="bg-background/80 backdrop-blur-sm rounded-full">
             <FavoriteButton businessId={id} />
           </div>
         </div>
+        <div className="absolute bottom-2 left-2">
+          <BusinessHoursStatus businessId={id} />
+        </div>
         {video_url && (
-          <div className="absolute bottom-2 left-2">
+          <div className="absolute bottom-2 right-2">
             <Badge variant="secondary" className="gap-1">
               <Video className="w-3 h-3" />
               Video
