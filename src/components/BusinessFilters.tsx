@@ -1,18 +1,22 @@
-import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Search, X } from "lucide-react";
+import { X } from "lucide-react";
 import { useBusinessCategories } from "@/hooks/useBusinessCategories";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import SmartSearchInput from "@/components/search/SmartSearchInput";
 
 interface BusinessFiltersProps {
   search: string;
   category: string;
   region: string;
   sortBy: string;
+  openNow: boolean;
   onSearchChange: (value: string) => void;
   onCategoryChange: (value: string) => void;
   onRegionChange: (value: string) => void;
   onSortByChange: (value: string) => void;
+  onOpenNowChange: (value: boolean) => void;
   onClearFilters: () => void;
 }
 
@@ -27,26 +31,27 @@ const BusinessFilters = ({
   category,
   region,
   sortBy,
+  openNow,
   onSearchChange,
   onCategoryChange,
   onRegionChange,
   onSortByChange,
+  onOpenNowChange,
   onClearFilters,
 }: BusinessFiltersProps) => {
   const { data: categories, isLoading } = useBusinessCategories();
 
-  const hasActiveFilters = search || category || region || sortBy !== 'newest';
+  const hasActiveFilters = search || category || region || sortBy !== 'newest' || openNow;
 
   return (
     <div className="space-y-4">
       <div className="flex flex-col md:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            placeholder="Search businesses..."
+        <div className="flex-1">
+          <SmartSearchInput
             value={search}
-            onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-10"
+            onChange={onSearchChange}
+            onSelect={onSearchChange}
+            placeholder="Search businesses..."
           />
         </div>
 
@@ -99,6 +104,20 @@ const BusinessFilters = ({
             <X className="w-4 h-4" />
           </Button>
         )}
+      </div>
+
+      <div className="flex items-center space-x-2">
+        <Checkbox
+          id="openNow"
+          checked={openNow}
+          onCheckedChange={onOpenNowChange}
+        />
+        <Label
+          htmlFor="openNow"
+          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+        >
+          Open Now
+        </Label>
       </div>
     </div>
   );

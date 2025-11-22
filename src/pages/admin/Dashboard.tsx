@@ -135,6 +135,18 @@ const AdminDashboard = () => {
                     Manage Partners
                   </Button>
                 </Link>
+                <Link to="/admin/verifications">
+                  <Button className="w-full" variant="outline">
+                    <ClipboardCheck className="h-4 w-4 mr-2" />
+                    Business Verifications
+                  </Button>
+                </Link>
+                <Link to="/admin/review-moderation">
+                  <Button className="w-full" variant="outline">
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                    Review Moderation
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
           </div>

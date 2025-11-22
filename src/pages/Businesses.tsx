@@ -16,12 +16,14 @@ const Businesses = () => {
   const [category, setCategory] = useState(searchParams.get("category") || "all");
   const [region, setRegion] = useState(searchParams.get("region") || "all");
   const [sortBy, setSortBy] = useState(searchParams.get("sort") || "newest");
+  const [openNow, setOpenNow] = useState(searchParams.get("openNow") === "true");
 
   const { data: businesses, isLoading } = useBusinesses({
     search: search || undefined,
     category: category !== "all" ? category : undefined,
     region: region !== "all" ? region : undefined,
     sortBy: sortBy as any,
+    openNow: openNow || undefined,
   });
 
   useEffect(() => {
@@ -30,15 +32,17 @@ const Businesses = () => {
     if (category !== "all") params.category = category;
     if (region !== "all") params.region = region;
     if (sortBy !== "newest") params.sort = sortBy;
+    if (openNow) params.openNow = "true";
     
     setSearchParams(params);
-  }, [search, category, region, sortBy, setSearchParams]);
+  }, [search, category, region, sortBy, openNow, setSearchParams]);
 
   const handleClearFilters = () => {
     setSearch("");
     setCategory("all");
     setRegion("all");
     setSortBy("newest");
+    setOpenNow(false);
   };
 
   return (
@@ -80,10 +84,12 @@ const Businesses = () => {
                   category={category}
                   region={region}
                   sortBy={sortBy}
+                  openNow={openNow}
                   onSearchChange={setSearch}
                   onCategoryChange={setCategory}
                   onRegionChange={setRegion}
                   onSortByChange={setSortBy}
+                  onOpenNowChange={setOpenNow}
                   onClearFilters={handleClearFilters}
                 />
 

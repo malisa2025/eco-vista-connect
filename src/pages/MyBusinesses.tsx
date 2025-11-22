@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBusinessOwners } from '@/hooks/useBusinessClaims';
 import { useBusinessAds, useAdMutations } from '@/hooks/useAdvertisements';
+import RequestVerificationDialog from '@/components/business/RequestVerificationDialog';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -113,14 +114,19 @@ const MyBusinesses = () => {
                             </div>
                           </div>
                         </div>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => navigate(`/businesses/${business.id}/edit`)}
-                        >
-                          <Edit className="h-4 w-4 mr-2" />
-                          Edit
-                        </Button>
+                        <div className="flex items-center gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => navigate(`/businesses/${business.id}/edit`)}
+                          >
+                            <Edit className="h-4 w-4 mr-2" />
+                            Edit
+                          </Button>
+                          {!business.is_verified && (
+                            <RequestVerificationDialog businessId={business.id} />
+                          )}
+                        </div>
                       </div>
                     </CardHeader>
                     <CardContent>
