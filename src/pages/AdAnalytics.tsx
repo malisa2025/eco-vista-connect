@@ -6,6 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ABTestManager } from '@/components/ads/ABTestManager';
+import { CompetitorBenchmarks } from '@/components/ads/CompetitorBenchmarks';
+import { ROICalculator } from '@/components/ads/ROICalculator';
+import { ConversionTracker } from '@/components/ads/ConversionTracker';
+import { SmartRecommendations } from '@/components/ads/SmartRecommendations';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { 
@@ -237,11 +243,46 @@ export default function AdAnalytics() {
             </div>
           )}
 
-          {/* Charts */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            <ImpressionChart data={chartData} />
-            <CTRChart data={ctrChartData} />
-          </div>
+          {/* Tabs for Different Views */}
+          <Tabs defaultValue="overview" className="mb-8">
+            <TabsList className="grid w-full grid-cols-5">
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="ab-tests">A/B Tests</TabsTrigger>
+              <TabsTrigger value="roi">ROI</TabsTrigger>
+              <TabsTrigger value="benchmarks">Benchmarks</TabsTrigger>
+              <TabsTrigger value="recommendations">AI Insights</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="overview" className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <ImpressionChart data={chartData} />
+                <CTRChart data={ctrChartData} />
+              </div>
+              <ConversionTracker advertisementId={adId || ''} />
+            </TabsContent>
+
+            <TabsContent value="ab-tests">
+              <ABTestManager advertisementId={adId || ''} />
+            </TabsContent>
+
+            <TabsContent value="roi">
+              <ROICalculator advertisementId={adId || ''} totalSpend={summary.ad.total_cost} />
+            </TabsContent>
+
+            <TabsContent value="benchmarks">
+              <CompetitorBenchmarks
+                category={summary.ad.businesses.category}
+                region={summary.ad.businesses.region}
+                currentCTR={summary.ctr}
+                currentCPC={parseFloat(calculateCostPerClick(summary.ad.total_cost, summary.totalClicks).replace('GH₵', ''))}
+                currentConversionRate={0}
+              />
+            </TabsContent>
+
+            <TabsContent value="recommendations">
+              <SmartRecommendations advertisementId={adId || ''} />
+            </TabsContent>
+          </Tabs>
 
           {/* Campaign Details */}
           <Card>

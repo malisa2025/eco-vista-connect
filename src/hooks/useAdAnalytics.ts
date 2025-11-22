@@ -36,7 +36,7 @@ export const useAdPerformanceSummary = (adId: string) => {
         .from('advertisements')
         .select(`
           *,
-          businesses (name, logo_url),
+          businesses (name, logo_url, category, region),
           ad_spots (name, location, price_per_day)
         `)
         .eq('id', adId)
