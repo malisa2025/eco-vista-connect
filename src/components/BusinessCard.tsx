@@ -23,6 +23,8 @@ interface BusinessCardProps {
   is_verified: boolean;
   verification_tier?: string;
   trust_score?: number;
+  is_premium?: boolean;
+  is_sponsored?: boolean;
 }
 
 const BusinessCard = ({
@@ -41,12 +43,16 @@ const BusinessCard = ({
   is_verified,
   verification_tier = 'none',
   trust_score,
+  is_premium = false,
+  is_sponsored = false,
 }: BusinessCardProps) => {
   const navigate = useNavigate();
 
   return (
     <Card 
-      className="group cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1 overflow-hidden"
+      className={`group cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1 overflow-hidden ${
+        is_premium ? "border-2 border-yellow-500 shadow-yellow-500/20" : ""
+      } ${is_sponsored ? "bg-blue-50 dark:bg-blue-950/20" : ""}`}
       onClick={() => navigate(`/businesses/${id}`)}
     >
       <div className="relative h-48 overflow-hidden bg-gradient-to-br from-primary/10 to-secondary/10">

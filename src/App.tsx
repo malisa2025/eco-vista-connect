@@ -42,6 +42,10 @@ import HiringPipeline from "./pages/HiringPipeline";
 import SeedDemoData from "./pages/SeedDemoData";
 import NotFound from "./pages/NotFound";
 import BusinessNews from "./pages/BusinessNews";
+import SubscriptionPlans from "./pages/SubscriptionPlans";
+import BusinessSubscriptionCheckout from "./pages/BusinessSubscriptionCheckout";
+import ManageSubscription from "./pages/ManageSubscription";
+import LeadDashboard from "./pages/LeadDashboard";
 
 const queryClient = new QueryClient();
 
@@ -101,7 +105,11 @@ const App = () => (
                     </ProtectedRoute>
                   }
                 />
-                <Route path="/auth" element={<Auth />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/subscription-plans" element={<SubscriptionPlans />} />
+            <Route path="/business-subscription-checkout" element={<ProtectedRoute requireRole="business_owner"><BusinessSubscriptionCheckout /></ProtectedRoute>} />
+            <Route path="/manage-subscription" element={<ProtectedRoute><ManageSubscription /></ProtectedRoute>} />
+            <Route path="/leads/:businessId" element={<ProtectedRoute requireRole="business_owner"><LeadDashboard /></ProtectedRoute>} />
             <Route
               path="/inbox"
               element={
