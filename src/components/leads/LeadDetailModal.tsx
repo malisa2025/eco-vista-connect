@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -50,7 +50,9 @@ export function LeadDetailModal({ leadId, businessId, open, onOpenChange }: Lead
   }, [lead]);
 
   // Generate lead score using AI
-  const generateScore = async () => {
+  const generateScore = useCallback(async () => {
+    if (!leadId) return;
+    
     setIsGeneratingScore(true);
     try {
       const { data, error } = await supabase.functions.invoke('generate-lead-score', {
@@ -76,14 +78,14 @@ export function LeadDetailModal({ leadId, businessId, open, onOpenChange }: Lead
     } finally {
       setIsGeneratingScore(false);
     }
-  };
+  }, [leadId, queryClient]);
 
   // Auto-generate score when modal opens if score is missing
   useEffect(() => {
     if (open && lead && (!lead.score || lead.score === 0)) {
       generateScore();
     }
-  }, [open, lead?.id]);
+  }, [open, lead?.id, generateScore]);
 
   const handleStatusUpdate = async (newStatus: string) => {
     await updateLeadStatus.mutateAsync({ leadId, status: newStatus });
