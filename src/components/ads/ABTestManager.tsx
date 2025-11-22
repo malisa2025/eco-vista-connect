@@ -32,15 +32,15 @@ export function ABTestManager({ advertisementId }: ABTestManagerProps) {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 md:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 className="text-2xl font-bold">A/B Test Manager</h2>
-          <p className="text-muted-foreground">
+          <h2 className="text-xl md:text-2xl font-bold">A/B Test Manager</h2>
+          <p className="text-sm md:text-base text-muted-foreground">
             Test different ad variants to optimize performance
           </p>
         </div>
-        <Button onClick={() => setIsCreateOpen(true)}>
+        <Button onClick={() => setIsCreateOpen(true)} className="w-full sm:w-auto">
           <Plus className="mr-2 h-4 w-4" />
           Create Variant
         </Button>
@@ -69,22 +69,33 @@ export function ABTestManager({ advertisementId }: ABTestManagerProps) {
       )}
 
       <Tabs defaultValue="grid" className="w-full">
-        <TabsList>
-          <TabsTrigger value="grid">Grid View</TabsTrigger>
-          <TabsTrigger value="comparison">Comparison Chart</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 max-w-[400px]">
+          <TabsTrigger value="grid" className="text-xs md:text-sm">Grid</TabsTrigger>
+          <TabsTrigger value="comparison" className="text-xs md:text-sm">Comparison</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="grid" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {variants?.map((variant) => (
-              <VariantCard key={variant.id} variant={variant} />
-            ))}
-          </div>
+        <TabsContent value="grid" className="space-y-3 md:space-y-4 mt-4">
+          {variants && variants.length > 0 ? (
+            <div className="grid gap-3 md:gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {variants.map((variant) => (
+                <VariantCard key={variant.id} variant={variant} />
+              ))}
+            </div>
+          ) : (
+            <Card className="p-8 text-center">
+              <p className="text-muted-foreground mb-2">No variants yet</p>
+              <p className="text-sm text-muted-foreground">
+                Create your first variant to start A/B testing
+              </p>
+            </Card>
+          )}
         </TabsContent>
 
-        <TabsContent value="comparison">
+        <TabsContent value="comparison" className="mt-4">
           {variants && variants.length > 0 ? (
-            <VariantComparisonChart variants={variants} />
+            <div className="w-full overflow-x-auto">
+              <VariantComparisonChart variants={variants} />
+            </div>
           ) : (
             <Card className="p-8 text-center text-muted-foreground">
               No variants to compare yet

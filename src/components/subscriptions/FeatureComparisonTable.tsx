@@ -39,17 +39,17 @@ export function FeatureComparisonTable({ plans }: FeatureComparisonTableProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Detailed Feature Comparison</CardTitle>
+        <CardTitle className="text-base md:text-lg">Detailed Feature Comparison</CardTitle>
       </CardHeader>
       <CardContent>
         <Collapsible open={expanded} onOpenChange={setExpanded}>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[250px]">Feature</TableHead>
+                  <TableHead className="min-w-[150px] md:min-w-[250px] text-xs md:text-sm">Feature</TableHead>
                   {plans.map((plan) => (
-                    <TableHead key={plan.id} className="text-center">
+                    <TableHead key={plan.id} className="text-center min-w-[80px] md:min-w-[100px] text-xs md:text-sm">
                       {plan.name}
                     </TableHead>
                   ))}
@@ -58,17 +58,17 @@ export function FeatureComparisonTable({ plans }: FeatureComparisonTableProps) {
               <TableBody>
                 {/* Usage Limits Section */}
                 <TableRow className="bg-muted/50">
-                  <TableCell colSpan={plans.length + 1} className="font-semibold">
+                  <TableCell colSpan={plans.length + 1} className="font-semibold text-xs md:text-sm">
                     Usage Limits
                   </TableCell>
                 </TableRow>
                 {limitKeys.map((key) => (
                   <TableRow key={key}>
-                    <TableCell className="font-medium capitalize">
+                    <TableCell className="font-medium capitalize text-xs md:text-sm">
                       {key.replace(/_/g, " ")}
                     </TableCell>
                     {plans.map((plan) => (
-                      <TableCell key={plan.id} className="text-center">
+                      <TableCell key={plan.id} className="text-center text-xs md:text-sm">
                         {getLimit(plan, key) === -1 ? "Unlimited" : getLimit(plan, key)}
                       </TableCell>
                     ))}
@@ -77,19 +77,19 @@ export function FeatureComparisonTable({ plans }: FeatureComparisonTableProps) {
 
                 {/* Features Section */}
                 <TableRow className="bg-muted/50">
-                  <TableCell colSpan={plans.length + 1} className="font-semibold">
+                  <TableCell colSpan={plans.length + 1} className="font-semibold text-xs md:text-sm">
                     Features
                   </TableCell>
                 </TableRow>
                 {allFeatures.slice(0, expanded ? undefined : 5).map((feature) => (
                   <TableRow key={feature}>
-                    <TableCell className="font-medium">{feature}</TableCell>
+                    <TableCell className="font-medium text-xs md:text-sm">{feature}</TableCell>
                     {plans.map((plan) => (
                       <TableCell key={plan.id} className="text-center">
                         {hasFeature(plan, feature) ? (
-                          <Check className="h-5 w-5 text-green-600 mx-auto" />
+                          <Check className="h-4 w-4 md:h-5 md:w-5 text-green-600 mx-auto" />
                         ) : (
-                          <X className="h-5 w-5 text-red-600 mx-auto" />
+                          <X className="h-4 w-4 md:h-5 md:w-5 text-red-600 mx-auto" />
                         )}
                       </TableCell>
                     ))}
