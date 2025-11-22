@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAdDailyStats, useAdPerformanceSummary } from '@/hooks/useAdAnalytics';
+import { useBusinessSubscription } from '@/hooks/useBusinessSubscription';
 import { ImpressionChart } from '@/components/charts/ImpressionChart';
 import { CTRChart } from '@/components/charts/CTRChart';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,6 +14,7 @@ import { CompetitorBenchmarks } from '@/components/ads/CompetitorBenchmarks';
 import { ROICalculator } from '@/components/ads/ROICalculator';
 import { ConversionTracker } from '@/components/ads/ConversionTracker';
 import { SmartRecommendations } from '@/components/ads/SmartRecommendations';
+import { FeatureLockedModal } from '@/components/subscriptions/FeatureLockedModal';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { 
@@ -24,7 +27,8 @@ import {
   Download,
   AlertCircle,
   CheckCircle2,
-  Info
+  Info,
+  Lock
 } from 'lucide-react';
 import { analyzeAdPerformance, calculateCostPerClick, estimateReach } from '@/lib/adInsights';
 import { exportDailyStats } from '@/lib/exportCSV';
@@ -32,9 +36,58 @@ import { exportDailyStats } from '@/lib/exportCSV';
 export default function AdAnalytics() {
   const { adId } = useParams();
   const navigate = useNavigate();
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [lockedFeature, setLockedFeature] = useState<'ab-tests' | 'benchmarks' | 'ai-insights' | null>(null);
   
   const { data: dailyStats, isLoading: statsLoading } = useAdDailyStats(adId || '', 30);
   const { data: summary, isLoading: summaryLoading } = useAdPerformanceSummary(adId || '');
+  const { subscription } = useBusinessSubscription(summary?.ad.business_id || '');
+
+  const planName = subscription?.subscription_plans?.name || 'Free';
+  const canAccessABTests = ['Pro', 'Premium'].includes(planName);
+  const canAccessBenchmarks = ['Basic', 'Pro', 'Premium'].includes(planName);
+  const canAccessAI = ['Pro', 'Premium'].includes(planName);
+
+  const handleLockedFeatureClick = (feature: 'ab-tests' | 'benchmarks' | 'ai-insights') => {
+    setLockedFeature(feature);
+    setShowUpgradeModal(true);
+  };
+
+  const getUpgradeBenefits = (feature: string) => {
+    switch (feature) {
+      case 'ab-tests':
+        return [
+          "Run unlimited A/B tests",
+          "Automatic winner detection",
+          "Statistical significance analysis",
+          "Traffic allocation control",
+          "Performance comparison charts",
+        ];
+      case 'benchmarks':
+        return [
+          "Industry benchmark data",
+          "Competitor performance comparison",
+          "Regional performance insights",
+          "Category-specific metrics",
+          "Performance gap analysis",
+        ];
+      case 'ai-insights':
+        return [
+          "AI-powered recommendations",
+          "Automated optimization suggestions",
+          "Predictive performance analytics",
+          "Smart budget allocation",
+          "Content improvement tips",
+        ];
+      default:
+        return [];
+    }
+  };
+
+  const getRequiredPlan = (feature: string) => {
+    if (feature === 'benchmarks') return 'Basic';
+    return 'Pro';
+  };
 
   if (statsLoading || summaryLoading) {
     return (
@@ -247,10 +300,43 @@ export default function AdAnalytics() {
           <Tabs defaultValue="overview" className="mb-8">
             <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="ab-tests">A/B Tests</TabsTrigger>
+              <TabsTrigger 
+                value="ab-tests" 
+                disabled={!canAccessABTests}
+                onClick={(e) => {
+                  if (!canAccessABTests) {
+                    e.preventDefault();
+                    handleLockedFeatureClick('ab-tests');
+                  }
+                }}
+              >
+                A/B Tests {!canAccessABTests && <Lock className="h-3 w-3 ml-1" />}
+              </TabsTrigger>
               <TabsTrigger value="roi">ROI</TabsTrigger>
-              <TabsTrigger value="benchmarks">Benchmarks</TabsTrigger>
-              <TabsTrigger value="recommendations">AI Insights</TabsTrigger>
+              <TabsTrigger 
+                value="benchmarks"
+                disabled={!canAccessBenchmarks}
+                onClick={(e) => {
+                  if (!canAccessBenchmarks) {
+                    e.preventDefault();
+                    handleLockedFeatureClick('benchmarks');
+                  }
+                }}
+              >
+                Benchmarks {!canAccessBenchmarks && <Lock className="h-3 w-3 ml-1" />}
+              </TabsTrigger>
+              <TabsTrigger 
+                value="recommendations"
+                disabled={!canAccessAI}
+                onClick={(e) => {
+                  if (!canAccessAI) {
+                    e.preventDefault();
+                    handleLockedFeatureClick('ai-insights');
+                  }
+                }}
+              >
+                AI Insights {!canAccessAI && <Lock className="h-3 w-3 ml-1" />}
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="space-y-6">
@@ -262,7 +348,22 @@ export default function AdAnalytics() {
             </TabsContent>
 
             <TabsContent value="ab-tests">
-              <ABTestManager advertisementId={adId || ''} />
+              {canAccessABTests ? (
+                <ABTestManager advertisementId={adId || ''} />
+              ) : (
+                <Card className="p-8 text-center">
+                  <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+                    <Lock className="h-6 w-6 text-primary" />
+                  </div>
+                  <h3 className="text-xl font-bold mb-2">A/B Testing Requires Pro</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Run split tests to optimize your ad performance
+                  </p>
+                  <Button onClick={() => handleLockedFeatureClick('ab-tests')}>
+                    Upgrade to Pro
+                  </Button>
+                </Card>
+              )}
             </TabsContent>
 
             <TabsContent value="roi">
@@ -270,17 +371,47 @@ export default function AdAnalytics() {
             </TabsContent>
 
             <TabsContent value="benchmarks">
-              <CompetitorBenchmarks
-                category={summary.ad.businesses.category}
-                region={summary.ad.businesses.region}
-                currentCTR={summary.ctr}
-                currentCPC={parseFloat(calculateCostPerClick(summary.ad.total_cost, summary.totalClicks).replace('GH₵', ''))}
-                currentConversionRate={0}
-              />
+              {canAccessBenchmarks ? (
+                <CompetitorBenchmarks
+                  category={summary.ad.businesses.category}
+                  region={summary.ad.businesses.region}
+                  currentCTR={summary.ctr}
+                  currentCPC={parseFloat(calculateCostPerClick(summary.ad.total_cost, summary.totalClicks).replace('GH₵', ''))}
+                  currentConversionRate={0}
+                />
+              ) : (
+                <Card className="p-8 text-center">
+                  <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+                    <Lock className="h-6 w-6 text-primary" />
+                  </div>
+                  <h3 className="text-xl font-bold mb-2">Benchmarks Require Basic Plan</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Compare your performance against industry averages
+                  </p>
+                  <Button onClick={() => handleLockedFeatureClick('benchmarks')}>
+                    Upgrade to Basic
+                  </Button>
+                </Card>
+              )}
             </TabsContent>
 
             <TabsContent value="recommendations">
-              <SmartRecommendations advertisementId={adId || ''} />
+              {canAccessAI ? (
+                <SmartRecommendations advertisementId={adId || ''} />
+              ) : (
+                <Card className="p-8 text-center">
+                  <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+                    <Lock className="h-6 w-6 text-primary" />
+                  </div>
+                  <h3 className="text-xl font-bold mb-2">AI Insights Require Pro</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Get AI-powered recommendations to improve your ad performance
+                  </p>
+                  <Button onClick={() => handleLockedFeatureClick('ai-insights')}>
+                    Upgrade to Pro
+                  </Button>
+                </Card>
+              )}
             </TabsContent>
           </Tabs>
 
@@ -319,6 +450,21 @@ export default function AdAnalytics() {
         </div>
       </div>
       <Footer />
+
+      {lockedFeature && (
+        <FeatureLockedModal
+          open={showUpgradeModal}
+          onOpenChange={setShowUpgradeModal}
+          feature={
+            lockedFeature === 'ab-tests' ? 'A/B Testing' :
+            lockedFeature === 'benchmarks' ? 'Industry Benchmarks' :
+            'AI Insights'
+          }
+          currentPlan={planName}
+          requiredPlan={getRequiredPlan(lockedFeature)}
+          upgradeBenefits={getUpgradeBenefits(lockedFeature)}
+        />
+      )}
     </>
   );
 }

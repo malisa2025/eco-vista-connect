@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBusinessOwners } from "@/hooks/useBusinessClaims";
 import { useJobMutations } from "@/hooks/useJobs";
+import { useBusinessSubscription } from "@/hooks/useBusinessSubscription";
+import { useUsageTracking } from "@/hooks/useUsageTracking";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -16,10 +18,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { FeatureLockedModal } from "@/components/subscriptions/FeatureLockedModal";
+import { UsageMeter } from "@/components/subscriptions/UsageMeter";
 import AIGenerateButton from "@/components/jobs/AIGenerateButton";
-import { ArrowLeft, ArrowRight, Briefcase, Check } from "lucide-react";
+import { ArrowLeft, ArrowRight, Briefcase, Check, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { addDays } from "date-fns";
+import { useQuery } from "@tanstack/react-query";
 
 interface JobFormData {
   business_id: string;
@@ -42,9 +48,11 @@ const PostJob = () => {
   const { user } = useAuth();
   const { data: ownerships } = useBusinessOwners(user?.id);
   const { createJob } = useJobMutations();
+  const { incrementUsage } = useUsageTracking();
 
   const [currentStep, setCurrentStep] = useState(1);
   const [aiLoading, setAiLoading] = useState<{ [key: string]: boolean }>({});
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   
   const [formData, setFormData] = useState<JobFormData>({
     business_id: '',
@@ -65,6 +73,44 @@ const PostJob = () => {
   const businesses = ownerships?.map(o => o.businesses).filter(Boolean) || [];
   const totalSteps = 5;
   const progress = (currentStep / totalSteps) * 100;
+
+  // Get subscription for selected business
+  const { subscription, isLoading: subLoading } = useBusinessSubscription(formData.business_id);
+  
+  // Get job count for current month
+  const { data: jobsThisMonth, isLoading: jobsLoading } = useQuery({
+    queryKey: ['jobs-count-month', formData.business_id],
+    queryFn: async () => {
+      if (!formData.business_id) return 0;
+      
+      const startOfMonth = new Date();
+      startOfMonth.setDate(1);
+      startOfMonth.setHours(0, 0, 0, 0);
+      
+      const { count, error } = await supabase
+        .from('jobs')
+        .select('*', { count: 'exact', head: true })
+        .eq('business_id', formData.business_id)
+        .gte('posted_at', startOfMonth.toISOString());
+      
+      if (error) throw error;
+      return count || 0;
+    },
+    enabled: !!formData.business_id,
+  });
+
+  // Job posting limits by plan
+  const planName = subscription?.subscription_plans?.name || 'Free';
+  const jobLimits: Record<string, number> = {
+    'Free': 2,
+    'Basic': 5,
+    'Pro': 20,
+    'Premium': -1, // Unlimited
+  };
+  
+  const jobLimit = jobLimits[planName] || 2;
+  const canPostJob = jobLimit === -1 || (jobsThisMonth || 0) < jobLimit;
+  const isApproachingLimit = jobLimit !== -1 && (jobsThisMonth || 0) >= jobLimit * 0.8;
 
   const categories = [
     "Technology", "Sales & Marketing", "Customer Service", "Finance & Accounting",
@@ -152,6 +198,12 @@ const PostJob = () => {
   };
 
   const handlePublish = async (isDraft: boolean = false) => {
+    // Check job limit before posting
+    if (!isDraft && !canPostJob) {
+      setShowUpgradeModal(true);
+      return;
+    }
+
     const jobData = {
       ...formData,
       status: isDraft ? 'draft' : 'active',
@@ -159,7 +211,15 @@ const PostJob = () => {
     };
 
     createJob.mutate(jobData, {
-      onSuccess: () => {
+      onSuccess: async () => {
+        // Track usage if posting (not draft) and has subscription
+        if (!isDraft && subscription?.id) {
+          await incrementUsage.mutateAsync({
+            subscriptionId: subscription.id,
+            field: 'jobs_posted',
+          });
+        }
+        
         toast.success(isDraft ? "Job saved as draft!" : "Job posted successfully!");
         navigate('/my-businesses?tab=jobs');
       },
@@ -170,13 +230,61 @@ const PostJob = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       
-      <TrialBanner 
-        trialEndDate={new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)}
-        planName="Pro"
-      />
+      {subscription && new Date(subscription.end_date) > new Date() && (
+        <TrialBanner 
+          trialEndDate={new Date(subscription.end_date)}
+          planName={planName}
+        />
+      )}
       
       <main className="flex-1 py-12">
         <div className="container mx-auto px-4 max-w-4xl">
+          {/* Job Posting Limit Warning */}
+          {formData.business_id && !subLoading && !jobsLoading && (
+            <>
+              {!canPostJob && (
+                <Alert variant="destructive" className="mb-6">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    You've reached your job posting limit ({jobsThisMonth}/{jobLimit === -1 ? '∞' : jobLimit} this month). 
+                    <Button 
+                      variant="link" 
+                      className="h-auto p-0 ml-1 text-destructive underline"
+                      onClick={() => setShowUpgradeModal(true)}
+                    >
+                      Upgrade your plan
+                    </Button> to post more jobs.
+                  </AlertDescription>
+                </Alert>
+              )}
+              
+              {isApproachingLimit && canPostJob && (
+                <Alert className="mb-6">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    You're approaching your job posting limit ({jobsThisMonth}/{jobLimit} used this month).
+                    <Button 
+                      variant="link" 
+                      className="h-auto p-0 ml-1 underline"
+                      onClick={() => navigate('/subscription-plans')}
+                    >
+                      Consider upgrading
+                    </Button> for more postings.
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              <Card className="mb-6">
+                <CardContent className="pt-6">
+                  <UsageMeter
+                    label="Job Postings This Month"
+                    current={jobsThisMonth || 0}
+                    limit={jobLimit}
+                  />
+                </CardContent>
+              </Card>
+            </>
+          )}
           {/* Header */}
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-4">
@@ -493,7 +601,7 @@ const PostJob = () => {
                     </Button>
                     <Button
                       onClick={() => handlePublish(false)}
-                      disabled={createJob.isPending}
+                      disabled={!canPostJob || createJob.isPending}
                       className="flex-1"
                     >
                       <Check className="h-4 w-4 mr-2" />
@@ -531,8 +639,23 @@ const PostJob = () => {
           </Card>
         </div>
       </main>
-
+      
       <Footer />
+
+      <FeatureLockedModal
+        open={showUpgradeModal}
+        onOpenChange={setShowUpgradeModal}
+        feature="More Job Postings"
+        currentPlan={planName}
+        requiredPlan={planName === 'Free' ? 'Basic' : planName === 'Basic' ? 'Pro' : 'Premium'}
+        upgradeBenefits={[
+          `Post ${planName === 'Free' ? '5' : planName === 'Basic' ? '20' : 'unlimited'} jobs per month`,
+          "Priority placement in search results",
+          "Advanced applicant tracking",
+          "Video application screening",
+          "AI-powered candidate recommendations",
+        ]}
+      />
     </div>
   );
 };
