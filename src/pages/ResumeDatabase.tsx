@@ -316,8 +316,30 @@ const ResumeDatabase = () => {
 
           {!isLoading && profiles?.length === 0 && (
             <Card>
-              <CardContent className="py-12 text-center">
-                <p className="text-muted-foreground">No candidates found matching your criteria.</p>
+              <CardContent className="py-12 text-center space-y-4">
+                <div className="mx-auto w-16 h-16 rounded-full bg-muted flex items-center justify-center">
+                  <Search className="h-8 w-8 text-muted-foreground" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold mb-2">No Candidates Found</h3>
+                  <p className="text-muted-foreground max-w-md mx-auto">
+                    {searchQuery || filters.experienceLevel !== 'all' || filters.availability !== 'all'
+                      ? 'Try adjusting your filters or search terms to find more candidates.'
+                      : 'No candidates have uploaded their resumes yet. Check back soon!'}
+                  </p>
+                </div>
+                {(searchQuery || filters.experienceLevel !== 'all' || filters.availability !== 'all') && (
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setSearchQuery('');
+                      setFilters({ experienceLevel: 'all', location: 'all', availability: 'all' });
+                    }}
+                  >
+                    <Filter className="h-4 w-4 mr-2" />
+                    Clear Filters
+                  </Button>
+                )}
               </CardContent>
             </Card>
           )}

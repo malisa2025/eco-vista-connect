@@ -2288,6 +2288,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_subscription_usage: {
+        Args: {
+          p_field: string
+          p_increment?: number
+          p_subscription_id: string
+        }
+        Returns: undefined
+      }
       is_business_open: { Args: { p_business_id: string }; Returns: boolean }
     }
     Enums: {

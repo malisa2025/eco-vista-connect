@@ -13,31 +13,13 @@ export const useUsageTracking = () => {
 
   const incrementUsage = useMutation({
     mutationFn: async ({ subscriptionId, field, increment = 1 }: IncrementUsageParams) => {
-      // Get current usage
-      const { data: subscription } = await supabase
-        .from('business_subscriptions')
-        .select('current_usage')
-        .eq('id', subscriptionId)
-        .single();
-
-      if (!subscription) throw new Error('Subscription not found');
-
-      const currentUsage = (subscription.current_usage as Record<string, number>) || {};
-      const newUsage = {
-        ...currentUsage,
-        [field]: ((currentUsage[field] as number) || 0) + increment,
-      };
-
-      // Update usage
-      const { data, error } = await supabase
-        .from('business_subscriptions')
-        .update({ current_usage: newUsage })
-        .eq('id', subscriptionId)
-        .select()
-        .single();
+      const { error } = await supabase.rpc('increment_subscription_usage', {
+        p_subscription_id: subscriptionId,
+        p_field: field,
+        p_increment: increment,
+      });
 
       if (error) throw error;
-      return data;
     },
     onSuccess: (_, variables) => {
       // Invalidate relevant queries

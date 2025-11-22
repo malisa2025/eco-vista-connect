@@ -340,11 +340,30 @@ export default function AdAnalytics() {
             </TabsList>
 
             <TabsContent value="overview" className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <ImpressionChart data={chartData} />
-                <CTRChart data={ctrChartData} />
-              </div>
-              <ConversionTracker advertisementId={adId || ''} />
+              {dailyStats && dailyStats.length > 0 ? (
+                <>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <ImpressionChart data={chartData} />
+                    <CTRChart data={ctrChartData} />
+                  </div>
+                  <ConversionTracker advertisementId={adId || ''} />
+                </>
+              ) : (
+                <Card className="p-12">
+                  <div className="text-center space-y-4">
+                    <div className="mx-auto w-16 h-16 rounded-full bg-muted flex items-center justify-center">
+                      <TrendingUp className="h-8 w-8 text-muted-foreground" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-semibold mb-2">Building Your Analytics</h3>
+                      <p className="text-muted-foreground max-w-md mx-auto">
+                        Your ad is warming up! Data will appear here once your ad starts getting impressions and clicks. 
+                        This typically takes a few hours after your ad goes live.
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+              )}
             </TabsContent>
 
             <TabsContent value="ab-tests">
