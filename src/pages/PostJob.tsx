@@ -6,6 +6,7 @@ import { useJobMutations } from "@/hooks/useJobs";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { TrialBanner } from "@/components/subscriptions/TrialBanner";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -168,6 +169,11 @@ const PostJob = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
+      
+      <TrialBanner 
+        trialEndDate={new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)}
+        planName="Pro"
+      />
       
       <main className="flex-1 py-12">
         <div className="container mx-auto px-4 max-w-4xl">
