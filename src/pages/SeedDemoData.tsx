@@ -11,11 +11,13 @@ export default function SeedDemoData() {
   const { toast } = useToast();
   const [isSeeding, setIsSeeding] = useState(false);
   const [isDeletingAds, setIsDeletingAds] = useState(false);
+  const [isDeletingHotels, setIsDeletingHotels] = useState(false);
   const [seedStatus, setSeedStatus] = useState<{
     jobs: boolean;
     ads: boolean;
     galleries: boolean;
-  }>({ jobs: false, ads: false, galleries: false });
+    hotels: boolean;
+  }>({ jobs: false, ads: false, galleries: false, hotels: false });
 
   const seedJobs = async () => {
     try {
@@ -61,6 +63,22 @@ export default function SeedDemoData() {
       return true;
     } catch (error) {
       console.error('Error seeding advertisements:', error);
+      throw error;
+    }
+  };
+
+  const seedHotels = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('seed-demo-data', {
+        body: { action: 'hotels' },
+      });
+
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || 'Failed to seed hotels');
+
+      return true;
+    } catch (error) {
+      console.error('Error seeding hotels:', error);
       throw error;
     }
   };
@@ -125,6 +143,26 @@ export default function SeedDemoData() {
     }
   };
 
+  const handleSeedHotels = async () => {
+    setIsSeeding(true);
+    try {
+      await seedHotels();
+      setSeedStatus((prev) => ({ ...prev, hotels: true }));
+      toast({
+        title: 'Success!',
+        description: '15 demo hotels have been added (3 luxury, 4 mid-range, 3 budget, 5 guest houses)',
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to seed hotels',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSeeding(false);
+    }
+  };
+
   const handleDeleteAds = async () => {
     setIsDeletingAds(true);
     try {
@@ -151,6 +189,32 @@ export default function SeedDemoData() {
     }
   };
 
+  const handleDeleteHotels = async () => {
+    setIsDeletingHotels(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('seed-demo-data', {
+        body: { action: 'delete_hotels' },
+      });
+
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || 'Failed to delete hotels');
+
+      setSeedStatus((prev) => ({ ...prev, hotels: false }));
+      toast({
+        title: 'Success!',
+        description: 'All hotels have been deleted',
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to delete hotels',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsDeletingHotels(false);
+    }
+  };
+
   const handleSeedAll = async () => {
     setIsSeeding(true);
     try {
@@ -161,11 +225,11 @@ export default function SeedDemoData() {
       if (error) throw error;
       if (!data?.success) throw new Error(data?.error || 'Failed to seed all data');
 
-      setSeedStatus({ jobs: true, ads: true, galleries: true });
+      setSeedStatus({ jobs: true, ads: true, galleries: true, hotels: true });
       
       toast({
         title: 'Success!',
-        description: 'All demo data has been seeded successfully',
+        description: 'All demo data has been seeded successfully (jobs, ads, galleries, hotels)',
       });
     } catch (error) {
       toast({
@@ -187,7 +251,7 @@ export default function SeedDemoData() {
             <Database className="h-16 w-16 mx-auto mb-4 text-primary" />
             <h1 className="text-4xl font-bold mb-2">Seed Demo Data</h1>
             <p className="text-muted-foreground">
-              Add demo job listings and advertisements to your platform
+              Add demo jobs, ads, hotels, and galleries to your platform
             </p>
           </div>
 
@@ -260,6 +324,37 @@ export default function SeedDemoData() {
                 >
                   {seedStatus.galleries ? 'Galleries Seeded' : 'Seed Galleries Only'}
                 </Button>
+              </div>
+
+              <div className="space-y-3 p-4 bg-muted/50 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-semibold">Demo Hotels</h3>
+                    <p className="text-sm text-muted-foreground">15 hotels (3 luxury, 4 mid-range, 3 budget, 5 guest houses)</p>
+                  </div>
+                  {seedStatus.hotels && <CheckCircle2 className="h-5 w-5 text-green-600" />}
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={handleSeedHotels}
+                    disabled={isSeeding || isDeletingHotels || seedStatus.hotels}
+                    variant="outline"
+                    size="sm"
+                    className="flex-1"
+                  >
+                    {seedStatus.hotels ? 'Hotels Seeded' : 'Seed Hotels Only'}
+                  </Button>
+                  <Button
+                    onClick={handleDeleteHotels}
+                    disabled={isSeeding || isDeletingHotels}
+                    variant="destructive"
+                    size="sm"
+                    className="flex-1"
+                  >
+                    {isDeletingHotels && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Delete All Hotels
+                  </Button>
+                </div>
               </div>
 
               <div className="pt-4 border-t">
