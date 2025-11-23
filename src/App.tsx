@@ -53,6 +53,9 @@ import Hotels from "./pages/Hotels";
 import HotelDetail from "./pages/HotelDetail";
 import HotelBooking from "./pages/HotelBooking";
 import MyBookings from "./pages/MyBookings";
+import HotelDashboard from "./pages/dashboard/HotelDashboard";
+import HotelRooms from "./pages/dashboard/HotelRooms";
+import HotelBookings from "./pages/dashboard/HotelBookings";
 
 const queryClient = new QueryClient();
 
@@ -72,7 +75,12 @@ const App = () => (
         <Route path="/hotels" element={<Hotels />} />
         <Route path="/hotels/:id" element={<HotelDetail />} />
         <Route path="/hotels/:id/book" element={<ProtectedRoute><HotelBooking /></ProtectedRoute>} />
-        <Route path="/my-bookings" element={<ProtectedRoute><MyBookings /></ProtectedRoute>} />
+          <Route path="/my-bookings" element={<ProtectedRoute><MyBookings /></ProtectedRoute>} />
+          
+          {/* Hotel Owner Dashboard Routes */}
+          <Route path="/dashboard/hotel" element={<ProtectedRoute requireRole="business_owner"><HotelDashboard /></ProtectedRoute>} />
+          <Route path="/dashboard/hotel/rooms" element={<ProtectedRoute requireRole="business_owner"><HotelRooms /></ProtectedRoute>} />
+          <Route path="/dashboard/hotel/bookings" element={<ProtectedRoute requireRole="business_owner"><HotelBookings /></ProtectedRoute>} />
                 <Route path="/jobs" element={<Jobs />} />
                 <Route path="/jobs/:id" element={<JobDetail />} />
                 <Route path="/subscribe-job-seeker" element={<SubscribeJobSeeker />} />

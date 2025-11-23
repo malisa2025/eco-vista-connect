@@ -192,6 +192,10 @@ const Navbar = () => {
                           <Database className="mr-2 h-4 w-4" />
                           Resume Database
                         </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => navigate('/dashboard/hotel')}>
+                          <Building2 className="mr-2 h-4 w-4" />
+                          Hotel Dashboard
+                        </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={() => navigate('/subscription-plans')}>
                           <CreditCard className="mr-2 h-4 w-4" />
