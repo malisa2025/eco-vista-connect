@@ -90,6 +90,12 @@ const Navbar = () => {
               Business News
             </button>
             <button 
+              onClick={() => navigate('/hotels')}
+              className="text-sm font-medium hover:text-primary transition-smooth"
+            >
+              Hotels
+            </button>
+            <button 
               onClick={() => navigate('/jobs')}
               className="text-sm font-medium hover:text-primary transition-smooth"
             >
@@ -150,6 +156,10 @@ const Navbar = () => {
                     <DropdownMenuItem onClick={() => navigate('/favorites')}>
                       <Heart className="mr-2 h-4 w-4" />
                       Favorites
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/my-bookings')}>
+                      <Building2 className="mr-2 h-4 w-4" />
+                      My Bookings
                     </DropdownMenuItem>
                     {!hasRole('business_owner') && !hasRole('admin') && (
                       <>
@@ -249,6 +259,12 @@ const Navbar = () => {
                 className="text-sm font-medium hover:text-primary transition-smooth py-2 text-left"
               >
                 Business News
+              </button>
+              <button 
+                onClick={() => { navigate('/hotels'); setIsOpen(false); }}
+                className="text-sm font-medium hover:text-primary transition-smooth py-2 text-left"
+              >
+                Hotels
               </button>
               <button 
                 onClick={() => { navigate('/jobs'); setIsOpen(false); }}
