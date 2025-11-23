@@ -29,3 +29,27 @@ verify_jwt = false
 
 [functions.analyze-review-authenticity]
 verify_jwt = false
+
+[functions.calculate-ad-benchmarks]
+verify_jwt = false
+
+[functions.generate-ad-recommendations]
+verify_jwt = false
+
+[functions.analyze-ab-test]
+
+[functions.calculate-ad-roi]
+verify_jwt = false
+
+[functions.check-ad-alerts]
+verify_jwt = false
+
+[functions.aggregate-daily-stats]
+verify_jwt = false
+
+[functions.generate-lead-score]
+
+[functions.send-lead-notification]
+verify_jwt = false
+
+[functions.verify-business-subscription-payment]
