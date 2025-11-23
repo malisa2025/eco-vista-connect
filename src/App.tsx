@@ -49,6 +49,10 @@ import SubscriptionPlans from "./pages/SubscriptionPlans";
 import BusinessSubscriptionCheckout from "./pages/BusinessSubscriptionCheckout";
 import ManageSubscription from "./pages/ManageSubscription";
 import LeadDashboard from "./pages/LeadDashboard";
+import Hotels from "./pages/Hotels";
+import HotelDetail from "./pages/HotelDetail";
+import HotelBooking from "./pages/HotelBooking";
+import MyBookings from "./pages/MyBookings";
 
 const queryClient = new QueryClient();
 
@@ -65,6 +69,10 @@ const App = () => (
         <Route path="/businesses/:id" element={<BusinessDetail />} />
         <Route path="/businesses/:id/edit" element={<ProtectedRoute><EditBusiness /></ProtectedRoute>} />
         <Route path="/business-news" element={<BusinessNews />} />
+        <Route path="/hotels" element={<Hotels />} />
+        <Route path="/hotels/:id" element={<HotelDetail />} />
+        <Route path="/hotels/:id/book" element={<ProtectedRoute><HotelBooking /></ProtectedRoute>} />
+        <Route path="/my-bookings" element={<ProtectedRoute><MyBookings /></ProtectedRoute>} />
                 <Route path="/jobs" element={<Jobs />} />
                 <Route path="/jobs/:id" element={<JobDetail />} />
                 <Route path="/subscribe-job-seeker" element={<SubscribeJobSeeker />} />
