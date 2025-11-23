@@ -3,6 +3,7 @@ import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useReservationFee } from "@/hooks/useReservationFee";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -54,6 +55,11 @@ const HotelBooking = () => {
   const nights = checkIn && checkOut ? differenceInDays(checkOut, checkIn) : 0;
   const subtotal = selectedRoom ? selectedRoom.base_price_per_night * nights * rooms : 0;
   const total = subtotal;
+  
+  const { data: feeData } = useReservationFee(hotel?.id, total);
+  const reservationFee = feeData?.reservationFee || total;
+  const balanceDue = feeData?.balanceDue || 0;
+  const feeEnabled = feeData?.feeEnabled || false;
 
   useEffect(() => {
     if (user) {
@@ -102,8 +108,11 @@ const HotelBooking = () => {
           number_of_guests: guests,
           number_of_nights: nights,
           total_price: total,
+          reservation_fee_amount: reservationFee,
+          balance_due: balanceDue,
+          deposit_paid_at: new Date().toISOString(),
           status: "confirmed",
-          payment_status: "paid",
+          payment_status: balanceDue > 0 ? "partial" : "paid",
           payment_reference: paymentReference,
           special_requests: specialRequests,
         })
@@ -124,7 +133,7 @@ const HotelBooking = () => {
 
   const paystackConfig = {
     email: guestEmail,
-    amount: Math.round(total * 100), // Convert to pesewas
+    amount: Math.round(reservationFee * 100), // Convert to pesewas (charge only reservation fee)
     publicKey: "pk_test_4e0fc2b1b9aad7f84b0ec18e9c8c14872b3ad1a5",
     metadata: {
       hotel_id: id,
@@ -271,9 +280,29 @@ const HotelBooking = () => {
 
                   <Separator />
 
-                  <div className="flex justify-between items-center">
-                    <span className="font-bold text-lg">Total</span>
-                    <span className="font-bold text-2xl">GH₵{total.toFixed(2)}</span>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="font-bold text-lg">Total Booking Cost</span>
+                      <span className="font-bold text-2xl">GH₵{total.toFixed(2)}</span>
+                    </div>
+                    
+                    {feeEnabled && balanceDue > 0 && (
+                      <>
+                        <div className="pt-2 space-y-2 text-sm">
+                          <div className="flex justify-between items-center p-2 bg-primary/10 rounded">
+                            <span className="font-medium">Paying Now (Deposit):</span>
+                            <span className="font-bold text-primary">GH₵{reservationFee.toFixed(2)}</span>
+                          </div>
+                          <div className="flex justify-between items-center p-2 bg-muted rounded">
+                            <span className="font-medium">Balance Due:</span>
+                            <span className="font-semibold">GH₵{balanceDue.toFixed(2)}</span>
+                          </div>
+                          <p className="text-xs text-muted-foreground pt-1">
+                            ✓ Pay remaining balance at check-in
+                          </p>
+                        </div>
+                      </>
+                    )}
                   </div>
 
                   <PaystackButton
@@ -289,7 +318,10 @@ const HotelBooking = () => {
                     ) : (
                       <>
                         <CheckCircle className="w-4 h-4 mr-2" />
-                        Confirm & Pay
+                        {feeEnabled && balanceDue > 0 
+                          ? `Confirm & Pay GH₵${reservationFee.toFixed(2)}`
+                          : "Confirm & Pay Full"
+                        }
                       </>
                     )}
                   </PaystackButton>

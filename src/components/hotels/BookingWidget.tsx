@@ -9,6 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { format, differenceInDays } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useReservationFee } from "@/hooks/useReservationFee";
 
 interface BookingWidgetProps {
   hotelId: string;
@@ -64,6 +65,11 @@ const BookingWidget = ({ hotelId, roomTypes }: BookingWidgetProps) => {
 
   const nights = checkIn && checkOut ? differenceInDays(checkOut, checkIn) : 0;
   const total = calculateTotal();
+  
+  const { data: feeData } = useReservationFee(hotelId, total);
+  const reservationFee = feeData?.reservationFee || total;
+  const balanceDue = feeData?.balanceDue || 0;
+  const feeEnabled = feeData?.feeEnabled || false;
 
   return (
     <Card className="sticky top-4">
@@ -185,16 +191,35 @@ const BookingWidget = ({ hotelId, roomTypes }: BookingWidgetProps) => {
                 <p className="text-xs text-muted-foreground">Taxes included</p>
               </div>
             </div>
+            
+            {feeEnabled && balanceDue > 0 && (
+              <div className="pt-2 border-t space-y-1">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Reservation Fee (pay now):</span>
+                  <span className="font-semibold text-primary">GH₵{reservationFee.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Balance Due (at check-in):</span>
+                  <span className="font-medium">GH₵{balanceDue.toFixed(2)}</span>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
         {/* Reserve Button */}
         <Button onClick={handleReserve} className="w-full" size="lg">
-          Reserve Now
+          {feeEnabled && balanceDue > 0 
+            ? `Reserve Now - Pay GH₵${reservationFee.toFixed(2)}`
+            : "Book Now - Pay Full"
+          }
         </Button>
 
         <p className="text-xs text-center text-muted-foreground">
-          You won't be charged yet
+          {feeEnabled && balanceDue > 0 
+            ? "Secure your booking with a deposit"
+            : "You won't be charged yet"
+          }
         </p>
       </CardContent>
     </Card>
