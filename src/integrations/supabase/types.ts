@@ -1058,12 +1058,16 @@ export type Database = {
       }
       hotel_bookings: {
         Row: {
+          balance_due: number | null
+          balance_paid_at: string | null
+          balance_payment_reference: string | null
           booking_reference: string
           cancellation_reason: string | null
           cancelled_at: string | null
           check_in_date: string
           check_out_date: string
           created_at: string | null
+          deposit_paid_at: string | null
           guest_email: string
           guest_name: string
           guest_phone: string | null
@@ -1075,6 +1079,7 @@ export type Database = {
           payment_method: string | null
           payment_reference: string | null
           payment_status: string | null
+          reservation_fee_amount: number | null
           room_type_id: string
           special_requests: string | null
           status: Database["public"]["Enums"]["booking_status"] | null
@@ -1083,12 +1088,16 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          balance_due?: number | null
+          balance_paid_at?: string | null
+          balance_payment_reference?: string | null
           booking_reference: string
           cancellation_reason?: string | null
           cancelled_at?: string | null
           check_in_date: string
           check_out_date: string
           created_at?: string | null
+          deposit_paid_at?: string | null
           guest_email: string
           guest_name: string
           guest_phone?: string | null
@@ -1100,6 +1109,7 @@ export type Database = {
           payment_method?: string | null
           payment_reference?: string | null
           payment_status?: string | null
+          reservation_fee_amount?: number | null
           room_type_id: string
           special_requests?: string | null
           status?: Database["public"]["Enums"]["booking_status"] | null
@@ -1108,12 +1118,16 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          balance_due?: number | null
+          balance_paid_at?: string | null
+          balance_payment_reference?: string | null
           booking_reference?: string
           cancellation_reason?: string | null
           cancelled_at?: string | null
           check_in_date?: string
           check_out_date?: string
           created_at?: string | null
+          deposit_paid_at?: string | null
           guest_email?: string
           guest_name?: string
           guest_phone?: string | null
@@ -1125,6 +1139,7 @@ export type Database = {
           payment_method?: string | null
           payment_reference?: string | null
           payment_status?: string | null
+          reservation_fee_amount?: number | null
           room_type_id?: string
           special_requests?: string | null
           status?: Database["public"]["Enums"]["booking_status"] | null
@@ -1224,6 +1239,10 @@ export type Database = {
           id: string
           parking_available: boolean | null
           pool_available: boolean | null
+          reservation_fee_enabled: boolean | null
+          reservation_fee_fixed_amount: number | null
+          reservation_fee_percentage: number | null
+          reservation_fee_type: string | null
           restaurant_on_site: boolean | null
           spa_available: boolean | null
           star_rating: number | null
@@ -1242,6 +1261,10 @@ export type Database = {
           id?: string
           parking_available?: boolean | null
           pool_available?: boolean | null
+          reservation_fee_enabled?: boolean | null
+          reservation_fee_fixed_amount?: number | null
+          reservation_fee_percentage?: number | null
+          reservation_fee_type?: string | null
           restaurant_on_site?: boolean | null
           spa_available?: boolean | null
           star_rating?: number | null
@@ -1260,6 +1283,10 @@ export type Database = {
           id?: string
           parking_available?: boolean | null
           pool_available?: boolean | null
+          reservation_fee_enabled?: boolean | null
+          reservation_fee_fixed_amount?: number | null
+          reservation_fee_percentage?: number | null
+          reservation_fee_type?: string | null
           restaurant_on_site?: boolean | null
           spa_available?: boolean | null
           star_rating?: number | null
@@ -2693,6 +2720,14 @@ export type Database = {
       calculate_job_performance: {
         Args: { p_job_id: string }
         Returns: undefined
+      }
+      calculate_reservation_fee: {
+        Args: { p_hotel_id: string; p_total_price: number }
+        Returns: {
+          balance_due: number
+          fee_enabled: boolean
+          reservation_fee: number
+        }[]
       }
       calculate_trust_score: {
         Args: { p_business_id: string }
