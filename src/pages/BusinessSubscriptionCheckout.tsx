@@ -60,7 +60,7 @@ export default function BusinessSubscriptionCheckout() {
   const paystackConfig = {
     email: user?.email || "",
     amount: total * 100, // Convert to pesewas
-    publicKey: "pk_test_YOUR_PUBLIC_KEY", // Replace with actual key
+    publicKey: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || "",
     text: "Complete Purchase",
     onSuccess: async (reference: any) => {
       try {

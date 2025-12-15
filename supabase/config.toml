@@ -53,3 +53,10 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.verify-business-subscription-payment]
+
+[functions.verify-subscription-payment]
+
+[functions.verify-hotel-booking-payment]
+
+[functions.paystack-webhook]
+verify_jwt = false
