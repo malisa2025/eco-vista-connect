@@ -134,7 +134,7 @@ const HotelBooking = () => {
   const paystackConfig = {
     email: guestEmail,
     amount: Math.round(reservationFee * 100), // Convert to pesewas (charge only reservation fee)
-    publicKey: "pk_test_4e0fc2b1b9aad7f84b0ec18e9c8c14872b3ad1a5",
+    publicKey: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || "",
     metadata: {
       hotel_id: id,
       room_type_id: roomTypeId,
