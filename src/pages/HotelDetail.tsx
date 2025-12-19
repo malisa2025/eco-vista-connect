@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Star, MapPin, Phone, Mail, Wifi, Car, UtensilsCrossed, Waves, Dumbbell, Sparkles, Clock } from "lucide-react";
@@ -11,6 +11,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 const HotelDetail = () => {
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
+  const preSelectedRoom = searchParams.get("selectRoom") || undefined;
 
   const { data: hotel, isLoading } = useQuery({
     queryKey: ["hotel", id],
@@ -250,7 +252,7 @@ const HotelDetail = () => {
 
           {/* Right Column - Booking Widget */}
           <div className="lg:sticky lg:top-4 h-fit">
-            <BookingWidget hotelId={hotel.id} roomTypes={hotel.room_types} />
+            <BookingWidget hotelId={hotel.id} roomTypes={hotel.room_types} preSelectedRoom={preSelectedRoom} />
           </div>
         </div>
       </div>
