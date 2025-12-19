@@ -12,7 +12,8 @@ serve(async (req) => {
   }
 
   try {
-    const { reference } = await req.json();
+    const requestBody = await req.json();
+    const { reference, businessId: bodyBusinessId, planId: bodyPlanId } = requestBody;
 
     if (!reference) {
       return new Response(
@@ -20,6 +21,8 @@ serve(async (req) => {
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+
+    console.log('Verifying business subscription payment:', reference);
 
     // Verify payment with Paystack
     const PAYSTACK_SECRET_KEY = Deno.env.get('PAYSTACK_SECRET_KEY');
@@ -37,10 +40,11 @@ serve(async (req) => {
     );
 
     const verifyData = await verifyResponse.json();
+    console.log('Paystack verification response:', verifyData.status, verifyData.data?.status);
 
     if (!verifyData.status || verifyData.data.status !== 'success') {
       return new Response(
-        JSON.stringify({ error: 'Payment verification failed' }),
+        JSON.stringify({ error: 'Payment verification failed', details: verifyData.message }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -50,12 +54,16 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const businessId = verifyData.data.metadata.business_id;
-    const planId = verifyData.data.metadata.plan_id;
+    // Get businessId and planId from Paystack metadata or request body (fallback)
+    const metadata = verifyData.data.metadata || {};
+    const businessId = metadata.business_id || bodyBusinessId;
+    const planId = metadata.plan_id || bodyPlanId;
     const amount = verifyData.data.amount / 100; // Paystack returns amount in kobo/pesewas
 
+    console.log('Processing subscription for business:', businessId, 'plan:', planId);
+
     if (!businessId || !planId) {
-      throw new Error('Business ID and Plan ID required in payment metadata');
+      throw new Error('Business ID and Plan ID required in payment metadata or request body');
     }
 
     // Get plan details

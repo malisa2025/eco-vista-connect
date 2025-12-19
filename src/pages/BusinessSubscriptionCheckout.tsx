@@ -7,28 +7,59 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useSubscriptionPlans } from "@/hooks/useSubscriptionPlans";
 import { PromoCodeInput } from "@/components/subscriptions/PromoCodeInput";
 import { useAuth } from "@/contexts/AuthContext";
 import { PaystackButton } from "react-paystack";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
+import { Loader2 } from "lucide-react";
+import { generatePaymentReference, toPesewas, PAYSTACK_PUBLIC_KEY } from "@/lib/paystack";
 
 export default function BusinessSubscriptionCheckout() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const planId = searchParams.get("plan");
+  const businessIdParam = searchParams.get("business");
   const { user } = useAuth();
   const { plans } = useSubscriptionPlans();
   const [discount, setDiscount] = useState(0);
   const [promoCode, setPromoCode] = useState("");
   const [agreed, setAgreed] = useState(false);
+  const [selectedBusinessId, setSelectedBusinessId] = useState<string>(businessIdParam || "");
   const [companyDetails, setCompanyDetails] = useState({
     company_name: "",
     tax_id: "",
   });
 
+  // Fetch user's businesses
+  const { data: userBusinesses, isLoading: loadingBusinesses } = useQuery({
+    queryKey: ['user-businesses', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const { data, error } = await supabase
+        .from('business_owners')
+        .select('business_id, businesses(id, name)')
+        .eq('user_id', user.id);
+      
+      if (error) throw error;
+      return data?.map(bo => bo.businesses).filter(Boolean) || [];
+    },
+    enabled: !!user?.id,
+  });
+
   const selectedPlan = plans?.find(p => p.id === planId);
+
+  // Auto-select business if only one exists or if param provided
+  useEffect(() => {
+    if (businessIdParam) {
+      setSelectedBusinessId(businessIdParam);
+    } else if (userBusinesses?.length === 1 && !selectedBusinessId) {
+      setSelectedBusinessId((userBusinesses[0] as any).id);
+    }
+  }, [userBusinesses, businessIdParam, selectedBusinessId]);
 
   useEffect(() => {
     if (!user) {
@@ -57,17 +88,40 @@ export default function BusinessSubscriptionCheckout() {
   const discountAmount = subtotal * (discount / 100);
   const total = subtotal - discountAmount;
 
+  const paymentReference = generatePaymentReference("business_subscription", selectedBusinessId);
+
   const paystackConfig = {
     email: user?.email || "",
-    amount: total * 100, // Convert to pesewas
-    publicKey: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || "",
+    amount: toPesewas(total),
+    publicKey: PAYSTACK_PUBLIC_KEY,
+    reference: paymentReference,
     text: "Complete Purchase",
+    metadata: {
+      payment_type: "business_subscription",
+      business_id: selectedBusinessId,
+      plan_id: selectedPlan.id,
+      user_id: user?.id,
+      promo_code: promoCode || null,
+      custom_fields: [
+        {
+          display_name: "Business ID",
+          variable_name: "business_id",
+          value: selectedBusinessId,
+        },
+        {
+          display_name: "Plan",
+          variable_name: "plan_name",
+          value: selectedPlan.name,
+        },
+      ],
+    },
     onSuccess: async (reference: any) => {
       try {
         // Call edge function to verify and create subscription
         const { error } = await supabase.functions.invoke("verify-business-subscription-payment", {
           body: {
             reference: reference.reference,
+            businessId: selectedBusinessId,
             planId: selectedPlan.id,
             userId: user?.id,
             promoCode: promoCode || null,
@@ -89,6 +143,35 @@ export default function BusinessSubscriptionCheckout() {
     },
   };
 
+  if (loadingBusinesses) {
+    return (
+      <>
+        <Navbar />
+        <div className="min-h-screen bg-background pt-20 flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+        <Footer />
+      </>
+    );
+  }
+
+  if (!userBusinesses?.length) {
+    return (
+      <>
+        <Navbar />
+        <div className="min-h-screen bg-background pt-20 flex items-center justify-center">
+          <div className="text-center">
+            <p>You need to register a business first.</p>
+            <Button onClick={() => navigate("/register-business")} className="mt-4">
+              Register Business
+            </Button>
+          </div>
+        </div>
+        <Footer />
+      </>
+    );
+  }
+
   return (
     <>
       <Navbar />
@@ -101,9 +184,27 @@ export default function BusinessSubscriptionCheckout() {
             <div className="md:col-span-2 space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Company Details</CardTitle>
+                  <CardTitle>Business & Company Details</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  {userBusinesses.length > 1 && (
+                    <div className="space-y-2">
+                      <Label>Select Business *</Label>
+                      <Select value={selectedBusinessId} onValueChange={setSelectedBusinessId}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a business" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {userBusinesses.map((business: any) => (
+                            <SelectItem key={business.id} value={business.id}>
+                              {business.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+
                   <div className="space-y-2">
                     <Label htmlFor="company_name">Company Name *</Label>
                     <Input
@@ -187,7 +288,7 @@ export default function BusinessSubscriptionCheckout() {
                   <PaystackButton
                     {...paystackConfig}
                     className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 rounded-md disabled:opacity-50"
-                    disabled={!agreed || !companyDetails.company_name}
+                    disabled={!agreed || !companyDetails.company_name || !selectedBusinessId}
                   />
 
                   <p className="text-xs text-muted-foreground text-center">
