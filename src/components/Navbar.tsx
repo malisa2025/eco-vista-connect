@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
-import { Building2, Menu, User, Heart, LogOut, LayoutDashboard, MessageCircle, TrendingUp, Bookmark, Bell, CreditCard, Database, Hotel, Briefcase } from "lucide-react";
+import { Building2, Menu, User, Heart, LogOut, LayoutDashboard, MessageCircle, TrendingUp, Bookmark, Bell, CreditCard, Database, Hotel, Briefcase, X } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +17,14 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { Separator } from "@/components/ui/separator";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -53,11 +61,10 @@ const Navbar = () => {
 
   const scrollToSection = (sectionId: string) => {
     setIsOpen(false);
-    // Use setTimeout to ensure menu closes before scrolling
     setTimeout(() => {
       const element = document.getElementById(sectionId);
       if (element) {
-        const navbarHeight = 64; // h-16 = 64px
+        const navbarHeight = 64;
         const elementPosition = element.getBoundingClientRect().top + window.scrollY;
         window.scrollTo({
           top: elementPosition - navbarHeight,
@@ -67,17 +74,10 @@ const Navbar = () => {
     }, 100);
   };
 
-  // Close menu on Escape key press
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
-        setIsOpen(false);
-      }
-    };
-    
-    document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
-  }, [isOpen]);
+  const handleNavigate = (path: string) => {
+    setIsOpen(false);
+    navigate(path);
+  };
 
   const getInitials = () => {
     if (!profile?.full_name) return 'U';
@@ -268,174 +268,236 @@ const Navbar = () => {
             )}
           </div>
 
-          {/* Mobile Menu Button */}
-          <button
-            className="md:hidden p-2 hover:bg-muted rounded-lg transition-smooth"
-            onClick={() => setIsOpen(!isOpen)}
-          >
-            <Menu className="h-6 w-6" />
-          </button>
-        </div>
+          {/* Mobile Menu - Sheet Slide-in */}
+          <Sheet open={isOpen} onOpenChange={setIsOpen}>
+            <SheetTrigger asChild>
+              <button className="md:hidden p-2 hover:bg-muted rounded-lg transition-smooth">
+                <Menu className="h-6 w-6" />
+              </button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-[300px] sm:w-[350px] p-0">
+              <SheetHeader className="p-4 pb-2 border-b border-border/50">
+                <SheetTitle className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg gradient-hero flex items-center justify-center">
+                    <Building2 className="h-4 w-4 text-white" />
+                  </div>
+                  <span className="font-display font-bold">GHKonect</span>
+                </SheetTitle>
+              </SheetHeader>
+              
+              <ScrollArea className="h-[calc(100vh-80px)]">
+                <div className="p-4 space-y-4">
+                  {/* Navigation Section */}
+                  <div className="space-y-1">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2 mb-2">
+                      Navigation
+                    </p>
+                    <Button 
+                      variant="ghost" 
+                      className="w-full justify-start h-11 text-base"
+                      onClick={() => handleNavigate('/businesses')}
+                    >
+                      <Building2 className="mr-3 h-5 w-5" />
+                      Businesses
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      className="w-full justify-start h-11 text-base"
+                      onClick={() => handleNavigate('/business-news')}
+                    >
+                      <Briefcase className="mr-3 h-5 w-5" />
+                      Business News
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      className="w-full justify-start h-11 text-base"
+                      onClick={() => handleNavigate('/hotels')}
+                    >
+                      <Hotel className="mr-3 h-5 w-5" />
+                      Hotels
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      className="w-full justify-start h-11 text-base"
+                      onClick={() => handleNavigate('/jobs')}
+                    >
+                      <Briefcase className="mr-3 h-5 w-5" />
+                      Jobs
+                    </Button>
+                    {user && !hasRole('business_owner') && !hasRole('admin') && (
+                      <Button 
+                        variant="ghost" 
+                        className="w-full justify-start h-11 text-base"
+                        onClick={() => handleNavigate('/my-applications')}
+                      >
+                        <Briefcase className="mr-3 h-5 w-5" />
+                        My Applications
+                      </Button>
+                    )}
+                  </div>
 
-        {/* Mobile Menu Backdrop */}
-        {isOpen && (
-          <div 
-            className="md:hidden fixed inset-0 bg-black/20 z-40"
-            onClick={() => setIsOpen(false)}
-          />
-        )}
+                  {/* Homepage Sections */}
+                  {isHome && (
+                    <>
+                      <Separator />
+                      <div className="space-y-1">
+                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2 mb-2">
+                          On This Page
+                        </p>
+                        <Button variant="ghost" className="w-full justify-start h-10" onClick={() => scrollToSection('features')}>
+                          Features
+                        </Button>
+                        <Button variant="ghost" className="w-full justify-start h-10" onClick={() => scrollToSection('benefits')}>
+                          Benefits
+                        </Button>
+                        <Button variant="ghost" className="w-full justify-start h-10" onClick={() => scrollToSection('pricing')}>
+                          Pricing
+                        </Button>
+                        <Button variant="ghost" className="w-full justify-start h-10" onClick={() => scrollToSection('about')}>
+                          About
+                        </Button>
+                      </div>
+                    </>
+                  )}
 
-        {/* Mobile Menu */}
-        {isOpen && (
-          <div className="md:hidden py-4 border-t border-border/50 animate-fade-in relative z-50 bg-background">
-            <div className="flex flex-col gap-4">
-              <button 
-                onClick={() => { navigate('/businesses'); setIsOpen(false); }}
-                className="text-sm font-medium hover:text-primary transition-smooth py-2 text-left"
-              >
-                Businesses
-              </button>
-              <button 
-                onClick={() => { navigate('/business-news'); setIsOpen(false); }}
-                className="text-sm font-medium hover:text-primary transition-smooth py-2 text-left"
-              >
-                Business News
-              </button>
-              <button 
-                onClick={() => { navigate('/hotels'); setIsOpen(false); }}
-                className="text-sm font-medium hover:text-primary transition-smooth py-2 text-left"
-              >
-                Hotels
-              </button>
-              <button 
-                onClick={() => { navigate('/jobs'); setIsOpen(false); }}
-                className="text-sm font-medium hover:text-primary transition-smooth py-2 text-left"
-              >
-                Jobs
-              </button>
-              {user && !hasRole('business_owner') && !hasRole('admin') && (
-                <button 
-                  onClick={() => { navigate('/my-applications'); setIsOpen(false); }}
-                  className="text-sm font-medium hover:text-primary transition-smooth py-2 text-left"
-                >
-                  My Applications
-                </button>
-              )}
-              {isHome && (
-                <>
-                  <button onClick={() => scrollToSection('features')} className="text-sm font-medium hover:text-primary transition-smooth py-2 text-left">
-                    Features
-                  </button>
-                  <button onClick={() => scrollToSection('benefits')} className="text-sm font-medium hover:text-primary transition-smooth py-2 text-left">
-                    Benefits
-                  </button>
-                  <button onClick={() => scrollToSection('pricing')} className="text-sm font-medium hover:text-primary transition-smooth py-2 text-left">
-                    Pricing
-                  </button>
-                  <button onClick={() => scrollToSection('about')} className="text-sm font-medium hover:text-primary transition-smooth py-2 text-left">
-                    About
-                  </button>
-                </>
-              )}
-              <ScrollArea className="max-h-[60vh]">
-                <div className="flex flex-col gap-2 pt-4 border-t border-border/50">
+                  {/* Account Section */}
                   {user ? (
                     <>
-                      <Button variant="ghost" className="w-full justify-start" onClick={() => { navigate('/profile'); setIsOpen(false); }}>
-                        <User className="mr-2 h-4 w-4" />
-                        Profile
-                      </Button>
-                      <Button variant="ghost" className="w-full justify-start" onClick={() => { navigate('/inbox'); setIsOpen(false); }}>
-                        <MessageCircle className="mr-2 h-4 w-4" />
-                        Messages
-                      </Button>
-                      <Button variant="ghost" className="w-full justify-start" onClick={() => { navigate('/favorites'); setIsOpen(false); }}>
-                        <Heart className="mr-2 h-4 w-4" />
-                        Favorites
-                      </Button>
-                      <Button variant="ghost" className="w-full justify-start" onClick={() => { navigate('/my-bookings'); setIsOpen(false); }}>
-                        <Hotel className="mr-2 h-4 w-4" />
-                        My Bookings
-                      </Button>
-                      
-                      {!hasRole('business_owner') && !hasRole('admin') && (
-                        <>
-                          <Button variant="ghost" className="w-full justify-start" onClick={() => { navigate('/saved-jobs'); setIsOpen(false); }}>
-                            <Bookmark className="mr-2 h-4 w-4" />
-                            Saved Jobs
-                          </Button>
-                          <Button variant="ghost" className="w-full justify-start" onClick={() => { navigate('/job-alerts'); setIsOpen(false); }}>
-                            <Bell className="mr-2 h-4 w-4" />
-                            Job Alerts
-                          </Button>
-                        </>
-                      )}
-                      
+                      <Separator />
+                      <div className="space-y-1">
+                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2 mb-2">
+                          Account
+                        </p>
+                        <Button variant="ghost" className="w-full justify-start h-11 text-base" onClick={() => handleNavigate('/profile')}>
+                          <User className="mr-3 h-5 w-5" />
+                          Profile
+                        </Button>
+                        <Button variant="ghost" className="w-full justify-start h-11 text-base" onClick={() => handleNavigate('/inbox')}>
+                          <MessageCircle className="mr-3 h-5 w-5" />
+                          Messages
+                        </Button>
+                        <Button variant="ghost" className="w-full justify-start h-11 text-base" onClick={() => handleNavigate('/favorites')}>
+                          <Heart className="mr-3 h-5 w-5" />
+                          Favorites
+                        </Button>
+                        <Button variant="ghost" className="w-full justify-start h-11 text-base" onClick={() => handleNavigate('/my-bookings')}>
+                          <Hotel className="mr-3 h-5 w-5" />
+                          My Bookings
+                        </Button>
+                        
+                        {!hasRole('business_owner') && !hasRole('admin') && (
+                          <>
+                            <Button variant="ghost" className="w-full justify-start h-11 text-base" onClick={() => handleNavigate('/saved-jobs')}>
+                              <Bookmark className="mr-3 h-5 w-5" />
+                              Saved Jobs
+                            </Button>
+                            <Button variant="ghost" className="w-full justify-start h-11 text-base" onClick={() => handleNavigate('/job-alerts')}>
+                              <Bell className="mr-3 h-5 w-5" />
+                              Job Alerts
+                            </Button>
+                          </>
+                        )}
+                      </div>
+
+                      {/* Business Owner Section */}
                       {hasRole('business_owner') && (
                         <>
-                          <Button variant="ghost" className="w-full justify-start" onClick={() => { navigate('/my-businesses'); setIsOpen(false); }}>
-                            <Building2 className="mr-2 h-4 w-4" />
-                            My Businesses
-                          </Button>
-                          <Button variant="ghost" className="w-full justify-start" onClick={() => { navigate('/purchase-ad'); setIsOpen(false); }}>
-                            <TrendingUp className="mr-2 h-4 w-4" />
-                            Purchase Ad
-                          </Button>
-                          <Button variant="ghost" className="w-full justify-start" onClick={() => { navigate('/resume-database'); setIsOpen(false); }}>
-                            <Database className="mr-2 h-4 w-4" />
-                            Resume Database
-                          </Button>
-                          <Button variant="ghost" className="w-full justify-start" onClick={() => { navigate('/dashboard/hotel'); setIsOpen(false); }}>
-                            <Hotel className="mr-2 h-4 w-4" />
-                            Hotel Dashboard
-                          </Button>
-                          <Button variant="ghost" className="w-full justify-start" onClick={() => { navigate('/subscription-plans'); setIsOpen(false); }}>
-                            <CreditCard className="mr-2 h-4 w-4" />
-                            Subscription Plans
-                          </Button>
-                          {subscription && (
-                            <Button variant="ghost" className="w-full justify-start" onClick={() => { navigate('/manage-subscription'); setIsOpen(false); }}>
-                              <CreditCard className="mr-2 h-4 w-4" />
-                              Manage Subscription
+                          <Separator />
+                          <div className="space-y-1">
+                            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2 mb-2">
+                              Business
+                            </p>
+                            <Button variant="ghost" className="w-full justify-start h-11 text-base" onClick={() => handleNavigate('/my-businesses')}>
+                              <Building2 className="mr-3 h-5 w-5" />
+                              My Businesses
+                              {subscription && (
+                                <Badge variant="secondary" className="ml-auto text-xs">
+                                  {subscription.subscription_plans?.name}
+                                </Badge>
+                              )}
                             </Button>
-                          )}
+                            <Button variant="ghost" className="w-full justify-start h-11 text-base" onClick={() => handleNavigate('/purchase-ad')}>
+                              <TrendingUp className="mr-3 h-5 w-5" />
+                              Purchase Ad
+                            </Button>
+                            <Button variant="ghost" className="w-full justify-start h-11 text-base" onClick={() => handleNavigate('/resume-database')}>
+                              <Database className="mr-3 h-5 w-5" />
+                              Resume Database
+                            </Button>
+                            <Button variant="ghost" className="w-full justify-start h-11 text-base" onClick={() => handleNavigate('/dashboard/hotel')}>
+                              <Hotel className="mr-3 h-5 w-5" />
+                              Hotel Dashboard
+                            </Button>
+                            <Button variant="ghost" className="w-full justify-start h-11 text-base" onClick={() => handleNavigate('/subscription-plans')}>
+                              <CreditCard className="mr-3 h-5 w-5" />
+                              Subscription Plans
+                            </Button>
+                            {subscription && (
+                              <Button variant="ghost" className="w-full justify-start h-11 text-base" onClick={() => handleNavigate('/manage-subscription')}>
+                                <CreditCard className="mr-3 h-5 w-5" />
+                                Manage Subscription
+                              </Button>
+                            )}
+                          </div>
                         </>
                       )}
-                      
+
+                      {/* Job Seeker Upgrade */}
                       {!hasRole('business_owner') && !hasRole('admin') && (
-                        <Button variant="ghost" className="w-full justify-start" onClick={() => { navigate('/subscription-plans'); setIsOpen(false); }}>
-                          <CreditCard className="mr-2 h-4 w-4" />
-                          Upgrade to Pro
-                        </Button>
+                        <>
+                          <Separator />
+                          <Button variant="ghost" className="w-full justify-start h-11 text-base" onClick={() => handleNavigate('/subscription-plans')}>
+                            <CreditCard className="mr-3 h-5 w-5" />
+                            Upgrade to Pro
+                          </Button>
+                        </>
                       )}
-                      
+
+                      {/* Admin Section */}
                       {hasRole('admin') && (
-                        <Button variant="ghost" className="w-full justify-start" onClick={() => { navigate('/admin/dashboard'); setIsOpen(false); }}>
-                          <LayoutDashboard className="mr-2 h-4 w-4" />
-                          Admin Dashboard
-                        </Button>
+                        <>
+                          <Separator />
+                          <div className="space-y-1">
+                            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2 mb-2">
+                              Admin
+                            </p>
+                            <Button variant="ghost" className="w-full justify-start h-11 text-base" onClick={() => handleNavigate('/admin/dashboard')}>
+                              <LayoutDashboard className="mr-3 h-5 w-5" />
+                              Admin Dashboard
+                            </Button>
+                          </div>
+                        </>
                       )}
-                      
-                      <Button variant="outline" className="w-full justify-start mt-2" onClick={() => { signOut(); setIsOpen(false); }}>
-                        <LogOut className="mr-2 h-4 w-4" />
+
+                      {/* Sign Out */}
+                      <Separator />
+                      <Button 
+                        variant="outline" 
+                        className="w-full justify-start h-11 text-base text-destructive hover:text-destructive hover:bg-destructive/10"
+                        onClick={() => { signOut(); setIsOpen(false); }}
+                      >
+                        <LogOut className="mr-3 h-5 w-5" />
                         Sign Out
                       </Button>
                     </>
                   ) : (
                     <>
-                      <Button variant="ghost" className="w-full" onClick={() => { navigate('/auth'); setIsOpen(false); }}>
-                        Sign In
-                      </Button>
-                      <Button className="w-full" onClick={() => { navigate('/auth'); setIsOpen(false); }}>
-                        Get Started
-                      </Button>
+                      <Separator />
+                      <div className="space-y-3 pt-2">
+                        <Button variant="outline" className="w-full h-11 text-base" onClick={() => handleNavigate('/auth')}>
+                          Sign In
+                        </Button>
+                        <Button className="w-full h-11 text-base" onClick={() => handleNavigate('/auth')}>
+                          Get Started
+                        </Button>
+                      </div>
                     </>
                   )}
                 </div>
               </ScrollArea>
-            </div>
-          </div>
-        )}
+            </SheetContent>
+          </Sheet>
+        </div>
       </div>
     </nav>
   );
