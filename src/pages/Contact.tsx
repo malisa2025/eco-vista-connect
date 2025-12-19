@@ -89,7 +89,8 @@ const Contact = () => {
   const onSubmit = async (data: ContactFormData) => {
     setIsSubmitting(true);
     try {
-      const { error } = await supabase.from("contact_submissions").insert({
+      // Using type assertion since types are auto-generated
+      const { error } = await (supabase.from("contact_submissions" as any) as any).insert({
         name: data.name,
         email: data.email,
         phone: data.phone || null,
