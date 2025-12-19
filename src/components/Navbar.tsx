@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Building2, Menu, User, Heart, LogOut, LayoutDashboard, MessageCircle, TrendingUp, Bookmark, Bell, CreditCard, Database, Hotel, Briefcase } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Badge } from "@/components/ui/badge";
@@ -53,16 +53,31 @@ const Navbar = () => {
 
   const scrollToSection = (sectionId: string) => {
     setIsOpen(false);
-    const element = document.getElementById(sectionId);
-    if (element) {
-      const navbarHeight = 64; // h-16 = 64px
-      const elementPosition = element.getBoundingClientRect().top + window.scrollY;
-      window.scrollTo({
-        top: elementPosition - navbarHeight,
-        behavior: 'smooth'
-      });
-    }
+    // Use setTimeout to ensure menu closes before scrolling
+    setTimeout(() => {
+      const element = document.getElementById(sectionId);
+      if (element) {
+        const navbarHeight = 64; // h-16 = 64px
+        const elementPosition = element.getBoundingClientRect().top + window.scrollY;
+        window.scrollTo({
+          top: elementPosition - navbarHeight,
+          behavior: 'smooth'
+        });
+      }
+    }, 100);
   };
+
+  // Close menu on Escape key press
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        setIsOpen(false);
+      }
+    };
+    
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [isOpen]);
 
   const getInitials = () => {
     if (!profile?.full_name) return 'U';
@@ -262,9 +277,17 @@ const Navbar = () => {
           </button>
         </div>
 
+        {/* Mobile Menu Backdrop */}
+        {isOpen && (
+          <div 
+            className="md:hidden fixed inset-0 bg-black/20 z-40"
+            onClick={() => setIsOpen(false)}
+          />
+        )}
+
         {/* Mobile Menu */}
         {isOpen && (
-          <div className="md:hidden py-4 border-t border-border/50 animate-fade-in">
+          <div className="md:hidden py-4 border-t border-border/50 animate-fade-in relative z-50 bg-background">
             <div className="flex flex-col gap-4">
               <button 
                 onClick={() => { navigate('/businesses'); setIsOpen(false); }}
