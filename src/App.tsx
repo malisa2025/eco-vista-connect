@@ -57,6 +57,7 @@ import HotelDashboard from "./pages/dashboard/HotelDashboard";
 import HotelRooms from "./pages/dashboard/HotelRooms";
 import HotelBookings from "./pages/dashboard/HotelBookings";
 import HotelSettings from "./pages/dashboard/HotelSettings";
+import Contact from "./pages/Contact";
 
 const queryClient = new QueryClient();
 
@@ -127,6 +128,7 @@ const App = () => (
                   }
                 />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/contact" element={<Contact />} />
             <Route path="/subscription-plans" element={<SubscriptionPlans />} />
             <Route path="/business-subscription-checkout" element={<ProtectedRoute requireRole="business_owner"><BusinessSubscriptionCheckout /></ProtectedRoute>} />
             <Route path="/manage-subscription" element={<ProtectedRoute><ManageSubscription /></ProtectedRoute>} />
