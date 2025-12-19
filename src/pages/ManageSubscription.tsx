@@ -12,11 +12,52 @@ import { UsageMeter } from "@/components/subscriptions/UsageMeter";
 import { InvoiceTable } from "@/components/subscriptions/InvoiceTable";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { format } from "date-fns";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Loader2 } from "lucide-react";
 
 export default function ManageSubscription() {
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const { subscription, toggleAutoRenew, cancelSubscription } = useBusinessSubscription(user?.id || "");
+  const { user, hasRole } = useAuth();
+  
+  // Fetch user's primary business
+  const { data: primaryBusinessId, isLoading: isLoadingBusiness } = useQuery({
+    queryKey: ['primary-business', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      
+      const { data, error } = await supabase
+        .from('business_owners')
+        .select('business_id')
+        .eq('user_id', user.id)
+        .eq('is_primary', true)
+        .maybeSingle();
+      
+      if (error) {
+        console.error('Error fetching primary business:', error);
+        return null;
+      }
+      
+      return data?.business_id || null;
+    },
+    enabled: !!user?.id,
+  });
+  
+  const { subscription, isLoading: isLoadingSubscription, toggleAutoRenew, cancelSubscription } = useBusinessSubscription(primaryBusinessId || "");
+
+  if (isLoadingBusiness || isLoadingSubscription) {
+    return (
+      <>
+        <Navbar />
+        <div className="min-h-screen bg-background pt-20">
+          <div className="container mx-auto px-4 py-8 flex items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        </div>
+        <Footer />
+      </>
+    );
+  }
 
   if (!subscription) {
     return (

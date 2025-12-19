@@ -16,6 +16,7 @@ import SkillsManager from '@/components/profile/SkillsManager';
 import PreferencesSection from '@/components/profile/PreferencesSection';
 import LinksSection from '@/components/profile/LinksSection';
 import { EmailPreferences } from '@/components/profile/EmailPreferences';
+import EducationSection from '@/components/profile/EducationSection';
 
 const Profile = () => {
   const { profile, roles, updateProfile, user } = useAuth();
@@ -225,19 +226,10 @@ const Profile = () => {
                   </TabsContent>
 
                   <TabsContent value="education" className="space-y-4 mt-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="education">
-                        <GraduationCap className="inline h-4 w-4 mr-2" />
-                        Education
-                      </Label>
-                      <Textarea
-                        id="education"
-                        value={formData.education}
-                        onChange={(e) => setFormData({ ...formData, education: e.target.value })}
-                        rows={6}
-                        placeholder="List your educational background, degrees, certifications..."
-                      />
-                    </div>
+                    <EducationSection
+                      education={formData.education}
+                      onChange={(education) => setFormData({ ...formData, education })}
+                    />
                     <Button onClick={handleSave}>Save Changes</Button>
                   </TabsContent>
 
