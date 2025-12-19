@@ -1,4 +1,5 @@
 import { Building2 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -62,9 +63,9 @@ const Footer = () => {
                 </a>
               </li>
               <li>
-                <a href="#" className="text-muted-foreground hover:text-primary transition-smooth">
+                <Link to="/contact" className="text-muted-foreground hover:text-primary transition-smooth">
                   Contact
-                </a>
+                </Link>
               </li>
               <li>
                 <a href="#" className="text-muted-foreground hover:text-primary transition-smooth">
