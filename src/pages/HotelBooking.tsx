@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,9 +11,15 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { format, differenceInDays } from "date-fns";
-import { Loader2, CheckCircle } from "lucide-react";
+import { Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { PaystackButton } from "react-paystack";
+import { 
+  PAYSTACK_PUBLIC_KEY, 
+  generatePaymentReference, 
+  toPesewas, 
+  isPaystackConfigured 
+} from "@/lib/paystack";
 
 const HotelBooking = () => {
   const { id } = useParams<{ id: string }>();
@@ -32,6 +38,12 @@ const HotelBooking = () => {
   const roomTypeId = searchParams.get("room");
   const guests = parseInt(searchParams.get("guests") || "2");
   const rooms = parseInt(searchParams.get("rooms") || "1");
+
+  // Generate a unique payment reference once
+  const paymentReference = useMemo(() => 
+    generatePaymentReference("hotel_booking", id), 
+    [id]
+  );
 
   const { data: hotel } = useQuery({
     queryKey: ["hotel", id],
@@ -56,7 +68,7 @@ const HotelBooking = () => {
   const subtotal = selectedRoom ? selectedRoom.base_price_per_night * nights * rooms : 0;
   const total = subtotal;
   
-  const { data: feeData } = useReservationFee(hotel?.id, total);
+  const { data: feeData, isLoading: feeLoading } = useReservationFee(hotel?.id, total);
   const reservationFee = feeData?.reservationFee || total;
   const balanceDue = feeData?.balanceDue || 0;
   const feeEnabled = feeData?.feeEnabled || false;
@@ -78,7 +90,7 @@ const HotelBooking = () => {
     }
   }, [user]);
 
-  const handleCreateBooking = async (paymentReference: string) => {
+  const handlePaymentSuccess = async (reference: any) => {
     if (!checkIn || !checkOut || !selectedRoom || !hotel) {
       toast.error("Missing booking information");
       return;
@@ -87,70 +99,89 @@ const HotelBooking = () => {
     setIsProcessing(true);
 
     try {
-      // Generate booking reference
-      const { data: refData } = await supabase.rpc("generate_booking_reference");
-      const bookingReference = refData;
+      console.log("Verifying payment with reference:", reference.reference);
 
-      // Create booking
-      const { data: booking, error: bookingError } = await supabase
-        .from("hotel_bookings")
-        .insert({
-          booking_reference: bookingReference,
-          hotel_id: hotel.id,
-          room_type_id: selectedRoom.id,
-          user_id: user?.id,
-          guest_name: guestName,
-          guest_email: guestEmail,
-          guest_phone: guestPhone,
-          check_in_date: format(checkIn, "yyyy-MM-dd"),
-          check_out_date: format(checkOut, "yyyy-MM-dd"),
-          number_of_rooms: rooms,
-          number_of_guests: guests,
-          number_of_nights: nights,
-          total_price: total,
-          reservation_fee_amount: reservationFee,
-          balance_due: balanceDue,
-          deposit_paid_at: new Date().toISOString(),
-          status: "confirmed",
-          payment_status: balanceDue > 0 ? "partial" : "paid",
-          payment_reference: paymentReference,
-          special_requests: specialRequests,
-        })
-        .select()
-        .single();
+      // Call edge function to verify payment AND create booking
+      const { data, error } = await supabase.functions.invoke(
+        "verify-hotel-booking-payment",
+        {
+          body: {
+            reference: reference.reference,
+            bookingData: {
+              hotel_id: hotel.id,
+              room_type_id: selectedRoom.id,
+              user_id: user?.id || null,
+              guest_name: guestName,
+              guest_email: guestEmail,
+              guest_phone: guestPhone,
+              check_in_date: format(checkIn, "yyyy-MM-dd"),
+              check_out_date: format(checkOut, "yyyy-MM-dd"),
+              number_of_rooms: rooms,
+              number_of_guests: guests,
+              number_of_nights: nights,
+              total_price: total,
+              reservation_fee_amount: reservationFee,
+              balance_due: balanceDue,
+              special_requests: specialRequests,
+              hotel_name: hotel.business.name,
+            },
+          },
+        }
+      );
 
-      if (bookingError) throw bookingError;
+      if (error) {
+        console.error("Edge function error:", error);
+        throw new Error(error.message || "Payment verification failed");
+      }
 
+      if (!data?.success) {
+        throw new Error(data?.error || "Payment verification failed");
+      }
+
+      console.log("Booking created successfully:", data.booking);
       toast.success("Booking confirmed!");
-      navigate(`/my-bookings?booking=${booking.id}`);
+      navigate(`/my-bookings?booking=${data.booking.id}`);
     } catch (error: any) {
-      console.error("Booking error:", error);
-      toast.error(error.message || "Failed to create booking");
+      console.error("Payment verification error:", error);
+      toast.error(error.message || "Failed to verify payment. Please contact support.");
     } finally {
       setIsProcessing(false);
     }
   };
 
+  // Validate form and payment readiness
+  const isFormValid = guestName && guestEmail && guestPhone;
+  const isPaymentReady = isFormValid && reservationFee > 0 && !feeLoading && isPaystackConfigured();
+
   const paystackConfig = {
     email: guestEmail,
-    amount: Math.round(reservationFee * 100), // Convert to pesewas (charge only reservation fee)
-    publicKey: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || "",
+    amount: toPesewas(reservationFee),
+    publicKey: PAYSTACK_PUBLIC_KEY,
+    reference: paymentReference,
     metadata: {
+      payment_type: "hotel_booking",
       hotel_id: id,
       room_type_id: roomTypeId,
+      user_id: user?.id,
+      guest_email: guestEmail,
       custom_fields: [
         {
-          display_name: "Hotel Booking",
-          variable_name: "booking_type",
-          value: "hotel",
+          display_name: "Payment Type",
+          variable_name: "payment_type",
+          value: "hotel_booking",
+        },
+        {
+          display_name: "Hotel ID",
+          variable_name: "hotel_id",
+          value: id || "",
         },
       ],
     },
-    onSuccess: (reference: any) => {
-      handleCreateBooking(reference.reference);
-    },
+    onSuccess: handlePaymentSuccess,
     onClose: () => {
-      toast.error("Payment cancelled");
+      if (!isProcessing) {
+        toast.error("Payment cancelled");
+      }
     },
   };
 
@@ -305,26 +336,38 @@ const HotelBooking = () => {
                     )}
                   </div>
 
-                  <PaystackButton
-                    {...paystackConfig}
-                    className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-11 px-8 rounded-md font-medium inline-flex items-center justify-center disabled:opacity-50"
-                    disabled={!guestName || !guestEmail || !guestPhone || isProcessing}
-                  >
-                    {isProcessing ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Processing...
-                      </>
-                    ) : (
-                      <>
-                        <CheckCircle className="w-4 h-4 mr-2" />
-                        {feeEnabled && balanceDue > 0 
-                          ? `Confirm & Pay GH₵${reservationFee.toFixed(2)}`
-                          : "Confirm & Pay Full"
-                        }
-                      </>
-                    )}
-                  </PaystackButton>
+                  {!isPaystackConfigured() ? (
+                    <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-md text-center">
+                      <AlertCircle className="w-5 h-5 mx-auto mb-2 text-destructive" />
+                      <p className="text-sm text-destructive">Payment system not configured</p>
+                    </div>
+                  ) : feeLoading ? (
+                    <Button disabled className="w-full">
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Loading...
+                    </Button>
+                  ) : (
+                    <PaystackButton
+                      {...paystackConfig}
+                      className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-11 px-8 rounded-md font-medium inline-flex items-center justify-center disabled:opacity-50"
+                      disabled={!isPaymentReady || isProcessing}
+                    >
+                      {isProcessing ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Verifying Payment...
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle className="w-4 h-4 mr-2" />
+                          {feeEnabled && balanceDue > 0 
+                            ? `Confirm & Pay GH₵${reservationFee.toFixed(2)}`
+                            : `Confirm & Pay GH₵${total.toFixed(2)}`
+                          }
+                        </>
+                      )}
+                    </PaystackButton>
+                  )}
 
                   <p className="text-xs text-center text-muted-foreground">
                     Payment secured by Paystack
