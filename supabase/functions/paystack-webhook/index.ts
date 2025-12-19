@@ -103,6 +103,84 @@ serve(async (req) => {
           }
         }
 
+        // Handle business subscription payments
+        if (paymentType === "business_subscription" && metadata.business_id && metadata.plan_id) {
+          console.log("Processing business subscription via webhook:", metadata.business_id);
+          
+          // Get plan details
+          const { data: plan, error: planError } = await supabase
+            .from("subscription_plans")
+            .select("*")
+            .eq("id", metadata.plan_id)
+            .single();
+
+          if (planError) {
+            console.error("Failed to get plan:", planError);
+          } else {
+            const startDate = new Date();
+            const endDate = new Date();
+            if (plan.billing_period === "annual") {
+              endDate.setFullYear(endDate.getFullYear() + 1);
+            } else {
+              endDate.setDate(endDate.getDate() + 30);
+            }
+
+            const amount = data.amount / 100;
+
+            // Upsert subscription
+            const { error: subError } = await supabase
+              .from("business_subscriptions")
+              .upsert({
+                business_id: metadata.business_id,
+                plan_id: metadata.plan_id,
+                status: "active",
+                payment_reference: reference,
+                amount,
+                start_date: startDate.toISOString(),
+                end_date: endDate.toISOString(),
+                updated_at: new Date().toISOString(),
+              }, {
+                onConflict: "business_id",
+              });
+
+            if (subError) {
+              console.error("Failed to create/update business subscription:", subError);
+            } else {
+              console.log("Business subscription activated via webhook");
+            }
+          }
+        }
+
+        // Handle job seeker subscription payments
+        if (paymentType === "job_seeker_subscription" && metadata.user_id) {
+          console.log("Processing job seeker subscription via webhook:", metadata.user_id);
+          
+          const startDate = new Date();
+          const endDate = new Date();
+          endDate.setDate(endDate.getDate() + 30);
+          const amount = data.amount / 100;
+
+          const { error: subError } = await supabase
+            .from("job_seeker_subscriptions")
+            .upsert({
+              user_id: metadata.user_id,
+              status: "active",
+              payment_reference: reference,
+              amount,
+              start_date: startDate.toISOString(),
+              end_date: endDate.toISOString(),
+              updated_at: new Date().toISOString(),
+            }, {
+              onConflict: "user_id",
+            });
+
+          if (subError) {
+            console.error("Failed to create/update job seeker subscription:", subError);
+          } else {
+            console.log("Job seeker subscription activated via webhook");
+          }
+        }
+
         break;
       }
 
