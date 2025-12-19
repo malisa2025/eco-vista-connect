@@ -7,32 +7,56 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  console.log('generate-lead-score function invoked');
+  console.log('Request method:', req.method);
+  
   if (req.method === 'OPTIONS') {
+    console.log('Handling CORS preflight request');
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { leadId } = await req.json();
+    const body = await req.json();
+    console.log('Request body:', JSON.stringify(body));
+    
+    const { leadId } = body;
 
     if (!leadId) {
+      console.error('Lead ID is missing from request');
       throw new Error('Lead ID is required');
     }
 
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
+    console.log(`Processing lead score for lead ID: ${leadId}`);
 
-    console.log(`Generating lead score for lead ${leadId}`);
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    
+    if (!supabaseUrl || !supabaseKey) {
+      console.error('Missing Supabase environment variables');
+      throw new Error('Server configuration error');
+    }
+
+    const supabaseClient = createClient(supabaseUrl, supabaseKey);
 
     // Get lead details
+    console.log('Fetching lead details from database...');
     const { data: lead, error: leadError } = await supabaseClient
       .from('business_leads')
       .select('*')
       .eq('id', leadId)
       .single();
 
-    if (leadError) throw leadError;
+    if (leadError) {
+      console.error('Failed to fetch lead:', leadError);
+      throw leadError;
+    }
+
+    if (!lead) {
+      console.error('Lead not found with ID:', leadId);
+      throw new Error('Lead not found');
+    }
+
+    console.log('Lead found:', lead.name, lead.email);
 
     let score = 0;
     const factors = [];
@@ -74,14 +98,16 @@ serve(async (req) => {
 
     // Source quality (0-20 points)
     const sourceScores: Record<string, number> = {
-      'ad': 15,        // Paid traffic, high intent
-      'referral': 20,  // Referred by someone, highest quality
-      'organic': 10,   // Found naturally, good intent
-      'direct': 5      // Typed URL directly
+      'ad': 15,
+      'referral': 20,
+      'organic': 10,
+      'direct': 5,
+      'website': 10,
+      'contact_form': 10
     };
     const sourceScore = sourceScores[lead.source] || 5;
     score += sourceScore;
-    factors.push(`Source: ${lead.source}`);
+    factors.push(`Source: ${lead.source || 'unknown'}`);
 
     // UTM campaign parameters (0-10 points)
     if (lead.utm_campaign) {
@@ -135,12 +161,21 @@ serve(async (req) => {
     }
 
     // Update lead score in database
-    await supabaseClient
+    console.log(`Updating lead score in database: ${score}`);
+    const { error: updateError } = await supabaseClient
       .from('business_leads')
       .update({ score })
       .eq('id', leadId);
 
+    if (updateError) {
+      console.error('Failed to update lead score:', updateError);
+      // Don't throw - the score calculation succeeded, just the update failed
+    } else {
+      console.log('Lead score updated successfully');
+    }
+
     console.log(`Lead score calculated: ${score} (${temperature})`);
+    console.log('Factors:', factors.join(', '));
 
     return new Response(
       JSON.stringify({
@@ -155,9 +190,10 @@ serve(async (req) => {
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error: any) {
-    console.error('Error generating lead score:', error);
+    console.error('Error in generate-lead-score function:', error);
+    console.error('Error stack:', error.stack);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: error.message, success: false }),
       { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
