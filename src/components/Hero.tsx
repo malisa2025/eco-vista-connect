@@ -149,7 +149,7 @@ const Hero = () => {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 mb-6">
-            <Button size="lg" className="group shadow-glow hover:shadow-xl transition-smooth text-lg px-8 py-6">
+            <Button size="lg" className="group shadow-glow hover:shadow-xl transition-smooth text-lg px-8 py-6" onClick={() => navigate('/auth')}>
               Get Started
               <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-smooth" />
             </Button>

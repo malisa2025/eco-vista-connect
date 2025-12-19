@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { Building2, Menu, User, Heart, LogOut, LayoutDashboard, MessageCircle, TrendingUp, Bookmark, Bell, CreditCard, Database, Users2 } from "lucide-react";
+import { Building2, Menu, User, Heart, LogOut, LayoutDashboard, MessageCircle, TrendingUp, Bookmark, Bell, CreditCard, Database, Hotel, Briefcase } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -300,48 +301,102 @@ const Navbar = () => {
                   </a>
                 </>
               )}
-              <div className="flex flex-col gap-2 pt-4 border-t border-border/50">
-                {user ? (
-                  <>
-                    <Button variant="ghost" className="w-full" onClick={() => { navigate('/profile'); setIsOpen(false); }}>
-                      Profile
-                    </Button>
-                    <Button variant="ghost" className="w-full" onClick={() => { navigate('/favorites'); setIsOpen(false); }}>
-                      Favorites
-                    </Button>
-                    {hasRole('business_owner') && (
-                      <>
-                        <Button variant="ghost" className="w-full" onClick={() => { navigate('/my-businesses'); setIsOpen(false); }}>
-                          My Businesses
-                        </Button>
-                        <Button variant="ghost" className="w-full" onClick={() => { navigate('/resume-database'); setIsOpen(false); }}>
-                          Resume Database
-                        </Button>
-                        <Button variant="ghost" className="w-full" onClick={() => { navigate('/subscription-plans'); setIsOpen(false); }}>
-                          Subscription Plans
-                        </Button>
-                      </>
-                    )}
-                    {!hasRole('business_owner') && !hasRole('admin') && (
-                      <Button variant="ghost" className="w-full" onClick={() => { navigate('/subscription-plans'); setIsOpen(false); }}>
-                        Upgrade to Pro
+              <ScrollArea className="max-h-[60vh]">
+                <div className="flex flex-col gap-2 pt-4 border-t border-border/50">
+                  {user ? (
+                    <>
+                      <Button variant="ghost" className="w-full justify-start" onClick={() => { navigate('/profile'); setIsOpen(false); }}>
+                        <User className="mr-2 h-4 w-4" />
+                        Profile
                       </Button>
-                    )}
-                    <Button variant="outline" className="w-full" onClick={() => { signOut(); setIsOpen(false); }}>
-                      Sign Out
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    <Button variant="ghost" className="w-full" onClick={() => { navigate('/auth'); setIsOpen(false); }}>
-                      Sign In
-                    </Button>
-                    <Button className="w-full" onClick={() => { navigate('/auth'); setIsOpen(false); }}>
-                      Get Started
-                    </Button>
-                  </>
-                )}
-              </div>
+                      <Button variant="ghost" className="w-full justify-start" onClick={() => { navigate('/inbox'); setIsOpen(false); }}>
+                        <MessageCircle className="mr-2 h-4 w-4" />
+                        Messages
+                      </Button>
+                      <Button variant="ghost" className="w-full justify-start" onClick={() => { navigate('/favorites'); setIsOpen(false); }}>
+                        <Heart className="mr-2 h-4 w-4" />
+                        Favorites
+                      </Button>
+                      <Button variant="ghost" className="w-full justify-start" onClick={() => { navigate('/my-bookings'); setIsOpen(false); }}>
+                        <Hotel className="mr-2 h-4 w-4" />
+                        My Bookings
+                      </Button>
+                      
+                      {!hasRole('business_owner') && !hasRole('admin') && (
+                        <>
+                          <Button variant="ghost" className="w-full justify-start" onClick={() => { navigate('/saved-jobs'); setIsOpen(false); }}>
+                            <Bookmark className="mr-2 h-4 w-4" />
+                            Saved Jobs
+                          </Button>
+                          <Button variant="ghost" className="w-full justify-start" onClick={() => { navigate('/job-alerts'); setIsOpen(false); }}>
+                            <Bell className="mr-2 h-4 w-4" />
+                            Job Alerts
+                          </Button>
+                        </>
+                      )}
+                      
+                      {hasRole('business_owner') && (
+                        <>
+                          <Button variant="ghost" className="w-full justify-start" onClick={() => { navigate('/my-businesses'); setIsOpen(false); }}>
+                            <Building2 className="mr-2 h-4 w-4" />
+                            My Businesses
+                          </Button>
+                          <Button variant="ghost" className="w-full justify-start" onClick={() => { navigate('/purchase-ad'); setIsOpen(false); }}>
+                            <TrendingUp className="mr-2 h-4 w-4" />
+                            Purchase Ad
+                          </Button>
+                          <Button variant="ghost" className="w-full justify-start" onClick={() => { navigate('/resume-database'); setIsOpen(false); }}>
+                            <Database className="mr-2 h-4 w-4" />
+                            Resume Database
+                          </Button>
+                          <Button variant="ghost" className="w-full justify-start" onClick={() => { navigate('/dashboard/hotel'); setIsOpen(false); }}>
+                            <Hotel className="mr-2 h-4 w-4" />
+                            Hotel Dashboard
+                          </Button>
+                          <Button variant="ghost" className="w-full justify-start" onClick={() => { navigate('/subscription-plans'); setIsOpen(false); }}>
+                            <CreditCard className="mr-2 h-4 w-4" />
+                            Subscription Plans
+                          </Button>
+                          {subscription && (
+                            <Button variant="ghost" className="w-full justify-start" onClick={() => { navigate('/manage-subscription'); setIsOpen(false); }}>
+                              <CreditCard className="mr-2 h-4 w-4" />
+                              Manage Subscription
+                            </Button>
+                          )}
+                        </>
+                      )}
+                      
+                      {!hasRole('business_owner') && !hasRole('admin') && (
+                        <Button variant="ghost" className="w-full justify-start" onClick={() => { navigate('/subscription-plans'); setIsOpen(false); }}>
+                          <CreditCard className="mr-2 h-4 w-4" />
+                          Upgrade to Pro
+                        </Button>
+                      )}
+                      
+                      {hasRole('admin') && (
+                        <Button variant="ghost" className="w-full justify-start" onClick={() => { navigate('/admin/dashboard'); setIsOpen(false); }}>
+                          <LayoutDashboard className="mr-2 h-4 w-4" />
+                          Admin Dashboard
+                        </Button>
+                      )}
+                      
+                      <Button variant="outline" className="w-full justify-start mt-2" onClick={() => { signOut(); setIsOpen(false); }}>
+                        <LogOut className="mr-2 h-4 w-4" />
+                        Sign Out
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button variant="ghost" className="w-full" onClick={() => { navigate('/auth'); setIsOpen(false); }}>
+                        Sign In
+                      </Button>
+                      <Button className="w-full" onClick={() => { navigate('/auth'); setIsOpen(false); }}>
+                        Get Started
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </ScrollArea>
             </div>
           </div>
         )}
