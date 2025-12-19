@@ -7,32 +7,60 @@ export const useLeadMutations = (businessId: string) => {
 
   const createLead = useMutation({
     mutationFn: async (lead: any) => {
+      console.log('Creating lead:', lead);
+      
       const { data, error } = await supabase
         .from('business_leads')
         .insert(lead)
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Failed to insert lead:', error);
+        throw error;
+      }
 
-      // Trigger notifications
-      await supabase.functions.invoke('send-lead-notification', {
-        body: { leadId: data.id },
-      });
+      console.log('Lead created successfully:', data.id);
 
-      // Generate lead score
-      await supabase.functions.invoke('generate-lead-score', {
-        body: { leadId: data.id },
-      });
+      // Non-blocking notifications - don't fail the mutation if these fail
+      try {
+        console.log('Triggering lead notification...');
+        const notifyResult = await supabase.functions.invoke('send-lead-notification', {
+          body: { leadId: data.id },
+        });
+        if (notifyResult.error) {
+          console.error('Lead notification failed:', notifyResult.error);
+        } else {
+          console.log('Lead notification sent successfully');
+        }
+      } catch (notifyError) {
+        console.error('Failed to send lead notification:', notifyError);
+      }
+
+      // Non-blocking lead scoring - don't fail the mutation if this fails
+      try {
+        console.log('Generating lead score...');
+        const scoreResult = await supabase.functions.invoke('generate-lead-score', {
+          body: { leadId: data.id },
+        });
+        if (scoreResult.error) {
+          console.error('Lead score generation failed:', scoreResult.error);
+        } else {
+          console.log('Lead score generated successfully');
+        }
+      } catch (scoreError) {
+        console.error('Failed to generate lead score:', scoreError);
+      }
 
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['business-leads', businessId] });
-      toast.success('Lead captured successfully');
+      toast.success('Message sent successfully!');
     },
     onError: (error: Error) => {
-      toast.error('Failed to create lead: ' + error.message);
+      console.error('Lead creation mutation failed:', error);
+      toast.error('Failed to send message: ' + error.message);
     },
   });
 
