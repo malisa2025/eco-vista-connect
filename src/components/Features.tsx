@@ -42,7 +42,7 @@ const features = [
 
 const Features = () => {
   return (
-    <section className="py-24 gradient-subtle">
+    <section id="features" className="py-24 gradient-subtle">
       <div className="container mx-auto px-4">
         <div className="text-center max-w-3xl mx-auto mb-16 animate-fade-in">
           <h2 className="font-display mb-4">Platform Features</h2>

@@ -5,13 +5,13 @@ import FeaturedBusinesses from "@/components/FeaturedBusinesses";
 import RegionsShowcase from "@/components/RegionsShowcase";
 import GhanaMap from "@/components/GhanaMap";
 import Benefits from "@/components/Benefits";
+import Pricing from "@/components/Pricing";
+import About from "@/components/About";
 import CTA from "@/components/CTA";
 import Footer from "@/components/Footer";
 import AdSlot from "@/components/AdSlot";
 import { SponsoredVideoCarousel } from "@/components/SponsoredVideoCarousel";
 import { PartnersShowcase } from "@/components/PartnersShowcase";
-
-
 const Index = () => {
   return (
     <div className="min-h-screen">
@@ -26,6 +26,8 @@ const Index = () => {
         <RegionsShowcase />
         <GhanaMap />
         <Benefits />
+        <Pricing />
+        <About />
         <CTA />
       </main>
       <Footer />
