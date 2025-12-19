@@ -51,6 +51,19 @@ const Navbar = () => {
 
   const isHome = location.pathname === '/';
 
+  const scrollToSection = (sectionId: string) => {
+    setIsOpen(false);
+    const element = document.getElementById(sectionId);
+    if (element) {
+      const navbarHeight = 64; // h-16 = 64px
+      const elementPosition = element.getBoundingClientRect().top + window.scrollY;
+      window.scrollTo({
+        top: elementPosition - navbarHeight,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   const getInitials = () => {
     if (!profile?.full_name) return 'U';
     return profile.full_name
@@ -112,18 +125,18 @@ const Navbar = () => {
             )}
             {isHome && (
               <>
-                <a href="#features" className="text-sm font-medium hover:text-primary transition-smooth">
+                <button onClick={() => scrollToSection('features')} className="text-sm font-medium hover:text-primary transition-smooth">
                   Features
-                </a>
-                <a href="#benefits" className="text-sm font-medium hover:text-primary transition-smooth">
+                </button>
+                <button onClick={() => scrollToSection('benefits')} className="text-sm font-medium hover:text-primary transition-smooth">
                   Benefits
-                </a>
-                <a href="#pricing" className="text-sm font-medium hover:text-primary transition-smooth">
+                </button>
+                <button onClick={() => scrollToSection('pricing')} className="text-sm font-medium hover:text-primary transition-smooth">
                   Pricing
-                </a>
-                <a href="#about" className="text-sm font-medium hover:text-primary transition-smooth">
+                </button>
+                <button onClick={() => scrollToSection('about')} className="text-sm font-medium hover:text-primary transition-smooth">
                   About
-                </a>
+                </button>
               </>
             )}
           </div>
@@ -287,18 +300,18 @@ const Navbar = () => {
               )}
               {isHome && (
                 <>
-                  <a href="#features" className="text-sm font-medium hover:text-primary transition-smooth py-2">
+                  <button onClick={() => scrollToSection('features')} className="text-sm font-medium hover:text-primary transition-smooth py-2 text-left">
                     Features
-                  </a>
-                  <a href="#benefits" className="text-sm font-medium hover:text-primary transition-smooth py-2">
+                  </button>
+                  <button onClick={() => scrollToSection('benefits')} className="text-sm font-medium hover:text-primary transition-smooth py-2 text-left">
                     Benefits
-                  </a>
-                  <a href="#pricing" className="text-sm font-medium hover:text-primary transition-smooth py-2">
+                  </button>
+                  <button onClick={() => scrollToSection('pricing')} className="text-sm font-medium hover:text-primary transition-smooth py-2 text-left">
                     Pricing
-                  </a>
-                  <a href="#about" className="text-sm font-medium hover:text-primary transition-smooth py-2">
+                  </button>
+                  <button onClick={() => scrollToSection('about')} className="text-sm font-medium hover:text-primary transition-smooth py-2 text-left">
                     About
-                  </a>
+                  </button>
                 </>
               )}
               <ScrollArea className="max-h-[60vh]">
