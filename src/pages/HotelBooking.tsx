@@ -15,7 +15,8 @@ import { Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { PaystackButton } from "react-paystack";
 import { 
-  PAYSTACK_PUBLIC_KEY, 
+  PAYSTACK_PUBLIC_KEY,
+  PAYSTACK_CURRENCY,
   generatePaymentReference, 
   toPesewas, 
   isPaystackConfigured 
@@ -156,6 +157,7 @@ const HotelBooking = () => {
   const paystackConfig = {
     email: guestEmail,
     amount: toPesewas(reservationFee),
+    currency: PAYSTACK_CURRENCY,
     publicKey: PAYSTACK_PUBLIC_KEY,
     reference: paymentReference,
     metadata: {

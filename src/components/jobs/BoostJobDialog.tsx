@@ -7,6 +7,7 @@ import { usePaystackPayment } from 'react-paystack';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { PAYSTACK_PUBLIC_KEY, PAYSTACK_CURRENCY } from '@/lib/paystack';
 
 interface BoostJobDialogProps {
   open: boolean;
@@ -50,7 +51,8 @@ const BoostJobDialog = ({ open, onOpenChange, jobId, jobTitle }: BoostJobDialogP
   const config = {
     email: '',
     amount: BOOST_PRICE * 100, // Convert to pesewas
-    publicKey: 'pk_test_8f6e90d5c3e4a8b6c8e4a8b6c8e4a8b6c8e4a8b6',
+    currency: PAYSTACK_CURRENCY,
+    publicKey: PAYSTACK_PUBLIC_KEY,
     reference: `boost_${jobId}_${Date.now()}`,
   };
 

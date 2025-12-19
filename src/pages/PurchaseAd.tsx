@@ -17,6 +17,7 @@ import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { usePaystackPayment } from 'react-paystack';
 import { supabase } from '@/integrations/supabase/client';
+import { PAYSTACK_PUBLIC_KEY, PAYSTACK_CURRENCY } from '@/lib/paystack';
 
 const PurchaseAd = () => {
   const navigate = useNavigate();
@@ -67,8 +68,9 @@ const PurchaseAd = () => {
       const config = {
         reference: `ad_${ad.id}_${Date.now()}`,
         email: user?.email || '',
-        amount: Math.round(totalCost * 100), // Convert to kobo
-        publicKey: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || '',
+        amount: Math.round(totalCost * 100), // Convert to pesewas
+        currency: PAYSTACK_CURRENCY,
+        publicKey: PAYSTACK_PUBLIC_KEY,
         metadata: {
           advertisement_id: ad.id,
           business_id: formData.business_id,

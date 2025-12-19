@@ -1,6 +1,7 @@
 // Paystack payment utilities
 
 export const PAYSTACK_PUBLIC_KEY = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || "";
+export const PAYSTACK_CURRENCY = "GHS";
 
 export type PaymentType = "hotel_booking" | "advertisement" | "business_subscription" | "job_seeker_subscription";
 
@@ -64,6 +65,7 @@ export function buildPaystackConfig({
   return {
     email,
     amount: toPesewas(amount),
+    currency: PAYSTACK_CURRENCY,
     publicKey: PAYSTACK_PUBLIC_KEY,
     reference: reference || generatePaymentReference("hotel_booking"),
     metadata: {

@@ -16,7 +16,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
-import { generatePaymentReference, toPesewas, PAYSTACK_PUBLIC_KEY } from "@/lib/paystack";
+import { generatePaymentReference, toPesewas, PAYSTACK_PUBLIC_KEY, PAYSTACK_CURRENCY } from "@/lib/paystack";
 
 export default function BusinessSubscriptionCheckout() {
   const navigate = useNavigate();
@@ -93,6 +93,7 @@ export default function BusinessSubscriptionCheckout() {
   const paystackConfig = {
     email: user?.email || "",
     amount: toPesewas(total),
+    currency: PAYSTACK_CURRENCY,
     publicKey: PAYSTACK_PUBLIC_KEY,
     reference: paymentReference,
     text: "Complete Purchase",
