@@ -2,6 +2,7 @@ import { Users, Maximize, Bed } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
 
 interface RoomTypeCardProps {
   room: {
@@ -19,9 +20,11 @@ interface RoomTypeCardProps {
 }
 
 const RoomTypeCard = ({ room, hotelId }: RoomTypeCardProps) => {
+  const navigate = useNavigate();
+  
   const handleBookNow = () => {
-    // Navigate to booking page with room selected
-    window.location.href = `/hotels/${hotelId}/book?room=${room.id}`;
+    // Navigate to hotel detail with room pre-selected in BookingWidget
+    navigate(`/hotels/${hotelId}?selectRoom=${room.id}`);
   };
 
   return (

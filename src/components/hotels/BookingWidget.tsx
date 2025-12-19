@@ -19,13 +19,14 @@ interface BookingWidgetProps {
     base_price_per_night: number;
     max_occupancy: number;
   }>;
+  preSelectedRoom?: string;
 }
 
-const BookingWidget = ({ hotelId, roomTypes }: BookingWidgetProps) => {
+const BookingWidget = ({ hotelId, roomTypes, preSelectedRoom }: BookingWidgetProps) => {
   const navigate = useNavigate();
   const [checkIn, setCheckIn] = useState<Date>();
   const [checkOut, setCheckOut] = useState<Date>();
-  const [selectedRoom, setSelectedRoom] = useState<string>("");
+  const [selectedRoom, setSelectedRoom] = useState<string>(preSelectedRoom || "");
   const [guests, setGuests] = useState("2");
   const [rooms, setRooms] = useState("1");
 
