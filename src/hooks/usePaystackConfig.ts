@@ -1,5 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { PAYSTACK_PUBLIC_KEY, generatePaymentReference, toPesewas, type PaymentType } from "@/lib/paystack";
+import { PAYSTACK_PUBLIC_KEY, PAYSTACK_CURRENCY, generatePaymentReference, toPesewas, type PaymentType } from "@/lib/paystack";
 
 interface UsePaystackConfigOptions {
   amount: number; // in GHS
@@ -23,6 +23,7 @@ export function usePaystackConfig({
   const config = {
     email: user?.email || "",
     amount: toPesewas(amount),
+    currency: PAYSTACK_CURRENCY,
     publicKey: PAYSTACK_PUBLIC_KEY,
     reference: generatePaymentReference(type, entityId),
     metadata: {

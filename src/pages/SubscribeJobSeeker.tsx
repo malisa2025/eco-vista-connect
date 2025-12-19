@@ -9,6 +9,7 @@ import { CheckCircle2, Shield, CreditCard } from "lucide-react";
 import { usePaystackPayment } from "react-paystack";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { PAYSTACK_PUBLIC_KEY, PAYSTACK_CURRENCY } from "@/lib/paystack";
 
 const SubscribeJobSeeker = () => {
   const { user } = useAuth();
@@ -19,7 +20,8 @@ const SubscribeJobSeeker = () => {
     reference: `sub_${user?.id}_${Date.now()}`,
     email: user?.email || "",
     amount: 10 * 100, // 10 GHS in pesewas
-    publicKey: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || "",
+    currency: PAYSTACK_CURRENCY,
+    publicKey: PAYSTACK_PUBLIC_KEY,
   };
 
   const onSuccess = async (reference: any) => {
