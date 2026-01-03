@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Building2, Menu, User, Heart, LogOut, LayoutDashboard, MessageCircle, TrendingUp, Bookmark, Bell, CreditCard, Database, Hotel, Briefcase, X } from "lucide-react";
+import logoImage from "@/assets/logo-ghkonect.jpg";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -98,9 +99,11 @@ const Navbar = () => {
             className="flex items-center gap-2 cursor-pointer" 
             onClick={() => navigate('/')}
           >
-            <div className="w-10 h-10 rounded-xl gradient-hero flex items-center justify-center">
-              <Building2 className="h-6 w-6 text-white" />
-            </div>
+            <img 
+              src={logoImage} 
+              alt="GHKonect Logo" 
+              className="w-10 h-10 rounded-xl object-cover"
+            />
             <span className="text-xl font-display font-bold">GHKonect</span>
           </div>
 
@@ -278,9 +281,11 @@ const Navbar = () => {
             <SheetContent side="right" className="w-[300px] sm:w-[350px] p-0">
               <SheetHeader className="p-4 pb-2 border-b border-border/50">
                 <SheetTitle className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg gradient-hero flex items-center justify-center">
-                    <Building2 className="h-4 w-4 text-white" />
-                  </div>
+                  <img 
+                    src={logoImage} 
+                    alt="GHKonect Logo" 
+                    className="w-8 h-8 rounded-lg object-cover"
+                  />
                   <span className="font-display font-bold">GHKonect</span>
                 </SheetTitle>
               </SheetHeader>
