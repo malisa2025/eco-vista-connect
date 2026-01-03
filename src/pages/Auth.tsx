@@ -27,7 +27,7 @@ const signUpSchema = z.object({
 
 const Auth = () => {
   const navigate = useNavigate();
-  const { user, signIn, signUp, hasRole, roles } = useAuth();
+  const { user, signIn, signUp, hasRole, rolesLoaded } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
 
   const getRedirectPath = useCallback(() => {
@@ -38,10 +38,10 @@ const Auth = () => {
 
   // Redirect if already logged in and roles are loaded
   useEffect(() => {
-    if (user && roles.length > 0) {
+    if (user && rolesLoaded) {
       navigate(getRedirectPath());
     }
-  }, [user, roles, navigate, getRedirectPath]);
+  }, [user, rolesLoaded, navigate, getRedirectPath]);
 
   const [signInForm, setSignInForm] = useState({
     email: '',

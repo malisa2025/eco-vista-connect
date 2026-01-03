@@ -32,6 +32,7 @@ interface AuthContextType {
   session: Session | null;
   profile: Profile | null;
   roles: string[];
+  rolesLoaded: boolean;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signUp: (email: string, password: string, fullName: string, userType?: 'user' | 'business_owner') => Promise<{ error: any }>;
@@ -47,6 +48,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [roles, setRoles] = useState<string[]>([]);
+  const [rolesLoaded, setRolesLoaded] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const fetchProfile = async (userId: string) => {
@@ -62,6 +64,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const fetchRoles = async (userId: string) => {
+    setRolesLoaded(false);
     const { data: rolesData } = await supabase
       .from('user_roles')
       .select('role')
@@ -70,6 +73,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (rolesData) {
       setRoles(rolesData.map((r: UserRole) => r.role));
     }
+    setRolesLoaded(true);
   };
 
   useEffect(() => {
@@ -88,6 +92,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         } else {
           setProfile(null);
           setRoles([]);
+          setRolesLoaded(false);
         }
       }
     );
@@ -176,6 +181,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         session,
         profile,
         roles,
+        rolesLoaded,
         loading,
         signIn,
         signUp,
