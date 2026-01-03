@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -27,15 +27,21 @@ const signUpSchema = z.object({
 
 const Auth = () => {
   const navigate = useNavigate();
-  const { user, signIn, signUp } = useAuth();
+  const { user, signIn, signUp, hasRole, roles } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
 
-  // Redirect if already logged in
+  const getRedirectPath = useCallback(() => {
+    if (hasRole('admin')) return '/admin/dashboard';
+    if (hasRole('business_owner')) return '/my-businesses';
+    return '/';
+  }, [hasRole]);
+
+  // Redirect if already logged in and roles are loaded
   useEffect(() => {
-    if (user) {
-      navigate('/');
+    if (user && roles.length > 0) {
+      navigate(getRedirectPath());
     }
-  }, [user, navigate]);
+  }, [user, roles, navigate, getRedirectPath]);
 
   const [signInForm, setSignInForm] = useState({
     email: '',
@@ -61,11 +67,11 @@ const Auth = () => {
 
     setIsLoading(true);
     const { error } = await signIn(signInForm.email, signInForm.password);
-    setIsLoading(false);
-
-    if (!error) {
-      navigate('/');
+    
+    if (error) {
+      setIsLoading(false);
     }
+    // Navigation will be handled by the useEffect when roles are loaded
   };
 
   const handleSignUp = async (e: React.FormEvent) => {
@@ -88,7 +94,6 @@ const Auth = () => {
 
     if (!error) {
       toast.success('Account created! Please check your email to verify your account.');
-      navigate('/');
     }
   };
 
