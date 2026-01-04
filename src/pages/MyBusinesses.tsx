@@ -198,13 +198,12 @@ const MyBusinesses = () => {
                           </div>
                           <p className="text-sm text-muted-foreground">views</p>
                         </div>
-                        <div className="text-center">
+                        <div className="text-center space-y-2">
                           <Button
-                            variant="outline"
                             className="w-full"
-                            onClick={() => navigate(`/businesses/${business.id}`)}
+                            onClick={() => navigate(`/dashboard/business/${business.id}`)}
                           >
-                            View Page
+                            Dashboard
                           </Button>
                         </div>
                       </div>
