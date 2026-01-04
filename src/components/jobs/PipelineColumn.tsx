@@ -34,7 +34,7 @@ const PipelineColumn = ({
 
   return (
     <div
-      className="flex-1 min-w-[280px] bg-muted/30 rounded-lg p-4"
+      className="flex-1 min-w-full sm:min-w-[280px] bg-muted/30 rounded-lg p-4"
       onDragOver={handleDragOver}
       onDrop={handleDrop}
     >

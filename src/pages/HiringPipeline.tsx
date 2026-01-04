@@ -14,7 +14,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import PipelineColumn from '@/components/jobs/PipelineColumn';
+import ApplicantCard from '@/components/jobs/ApplicantCard';
 import ApplicantComparison from '@/components/jobs/ApplicantComparison';
 import ApplicantNotes from '@/components/jobs/ApplicantNotes';
 import { usePipeline, useUpdateApplicationStatus } from '@/hooks/usePipelineManagement';
@@ -57,6 +65,7 @@ const HiringPipeline = () => {
   const [interviewDate, setInterviewDate] = useState('');
   const [interviewLocation, setInterviewLocation] = useState('');
   const [meetingLink, setMeetingLink] = useState('');
+  const [mobileSelectedStatus, setMobileSelectedStatus] = useState<string>('pending');
 
   const statuses: Array<{
     key: 'pending' | 'reviewed' | 'shortlisted' | 'rejected' | 'accepted';
@@ -114,6 +123,10 @@ const HiringPipeline = () => {
     });
   };
 
+  const getMobileStatusApplications = () => {
+    return applications?.filter((app) => app.status === mobileSelectedStatus) || [];
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col">
@@ -130,42 +143,41 @@ const HiringPipeline = () => {
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
 
-      <main className="flex-1 container mx-auto px-4 py-8">
+      <main className="flex-1 container mx-auto px-4 py-6 sm:py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" asChild>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+          <div className="flex items-start sm:items-center gap-3 sm:gap-4">
+            <Button variant="ghost" size="sm" asChild className="shrink-0">
               <Link to="/my-businesses">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back
+                <ArrowLeft className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Back</span>
               </Link>
             </Button>
             <div>
-              <h1 className="text-3xl font-bold">{job?.title}</h1>
-              <p className="text-muted-foreground">
+              <h1 className="text-xl sm:text-3xl font-bold">{job?.title}</h1>
+              <p className="text-sm text-muted-foreground">
                 {applications?.length || 0} total applications
               </p>
             </div>
           </div>
 
-          <div className="flex gap-2">
-            <Button
-              variant={compareMode ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => {
-                setCompareMode(!compareMode);
-                setSelectedForCompare([]);
-              }}
-            >
-              <GitCompare className="h-4 w-4 mr-2" />
-              Compare ({selectedForCompare.length}/3)
-            </Button>
-          </div>
+          <Button
+            variant={compareMode ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => {
+              setCompareMode(!compareMode);
+              setSelectedForCompare([]);
+            }}
+            className="self-end sm:self-auto"
+          >
+            <GitCompare className="h-4 w-4 mr-2" />
+            Compare ({selectedForCompare.length}/3)
+          </Button>
         </div>
 
         {/* Empty State */}
         {applications?.length === 0 && (
-          <Card className="p-12">
+          <Card className="p-8 sm:p-12">
             <div className="text-center space-y-4">
               <div className="mx-auto w-16 h-16 rounded-full bg-muted flex items-center justify-center">
                 <UserCheck className="h-8 w-8 text-muted-foreground" />
@@ -184,34 +196,80 @@ const HiringPipeline = () => {
           </Card>
         )}
 
-        {/* Pipeline Columns */}
+        {/* Pipeline */}
         {applications && applications.length > 0 && (
-          <ScrollArea className="w-full">
-            <div className="flex gap-4 pb-4">
-              {statuses.map((status) => {
-                const statusApplications = applications?.filter(
-                  (app) => app.status === status.key
-                ) || [];
+          <>
+            {/* Mobile View - Dropdown + Vertical List */}
+            <div className="sm:hidden space-y-4">
+              <Select value={mobileSelectedStatus} onValueChange={setMobileSelectedStatus}>
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {statuses.map((status) => {
+                    const count = applications?.filter((app) => app.status === status.key).length || 0;
+                    return (
+                      <SelectItem key={status.key} value={status.key}>
+                        {status.label} ({count})
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
 
-                return (
-                  <PipelineColumn
-                    key={status.key}
-                    status={status.key}
-                    title={status.label}
-                    applications={statusApplications}
-                    onViewDetails={(app) => {
+              <div className="space-y-3">
+                {getMobileStatusApplications().map((application) => (
+                  <ApplicantCard
+                    key={application.id}
+                    application={application}
+                    onViewDetails={() => {
                       if (compareMode) {
-                        toggleCompareSelection(app);
+                        toggleCompareSelection(application);
                       } else {
-                        setSelectedApplication(app);
+                        setSelectedApplication(application);
                       }
                     }}
-                    onDrop={handleDrop}
+                    draggable={false}
                   />
-                );
-              })}
+                ))}
+                {getMobileStatusApplications().length === 0 && (
+                  <div className="text-center text-muted-foreground text-sm py-12 bg-muted/30 rounded-lg">
+                    No applicants in this stage
+                  </div>
+                )}
+              </div>
             </div>
-          </ScrollArea>
+
+            {/* Desktop View - Horizontal Kanban */}
+            <div className="hidden sm:block">
+              <ScrollArea className="w-full">
+                <div className="flex gap-4 pb-4">
+                  {statuses.map((status) => {
+                    const statusApplications = applications?.filter(
+                      (app) => app.status === status.key
+                    ) || [];
+
+                    return (
+                      <PipelineColumn
+                        key={status.key}
+                        status={status.key}
+                        title={status.label}
+                        applications={statusApplications}
+                        onViewDetails={(app) => {
+                          if (compareMode) {
+                            toggleCompareSelection(app);
+                          } else {
+                            setSelectedApplication(app);
+                          }
+                        }}
+                        onDrop={handleDrop}
+                      />
+                    );
+                  })}
+                </div>
+              </ScrollArea>
+            </div>
+          </>
         )}
 
         {/* Application Detail Modal */}
@@ -226,11 +284,11 @@ const HiringPipeline = () => {
 
             {selectedApplication && (
               <Tabs defaultValue="overview" className="w-full">
-                <TabsList>
-                  <TabsTrigger value="overview">Overview</TabsTrigger>
-                  <TabsTrigger value="notes">Notes</TabsTrigger>
-                  <TabsTrigger value="interview">Interview</TabsTrigger>
-                  <TabsTrigger value="tags">Tags</TabsTrigger>
+                <TabsList className="w-full sm:w-auto grid grid-cols-4 sm:flex">
+                  <TabsTrigger value="overview" className="text-xs sm:text-sm">Overview</TabsTrigger>
+                  <TabsTrigger value="notes" className="text-xs sm:text-sm">Notes</TabsTrigger>
+                  <TabsTrigger value="interview" className="text-xs sm:text-sm">Interview</TabsTrigger>
+                  <TabsTrigger value="tags" className="text-xs sm:text-sm">Tags</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="overview" className="space-y-4">
@@ -238,21 +296,21 @@ const HiringPipeline = () => {
                     <div className="space-y-4 pr-4">
                       {/* Profile */}
                       <Card className="p-4">
-                        <div className="flex items-start gap-4">
-                          <Avatar className="h-16 w-16">
+                        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4">
+                          <Avatar className="h-20 w-20 sm:h-16 sm:w-16">
                             <AvatarImage src={selectedApplication.profiles?.avatar_url} />
                             <AvatarFallback>
                               {selectedApplication.profiles?.full_name?.charAt(0) || '?'}
                             </AvatarFallback>
                           </Avatar>
-                          <div className="flex-1">
+                          <div className="flex-1 text-center sm:text-left">
                             <h3 className="font-semibold text-lg">
                               {selectedApplication.profiles?.full_name}
                             </h3>
                             <p className="text-muted-foreground">
                               {selectedApplication.profiles?.email}
                             </p>
-                            <div className="flex items-center gap-4 mt-2">
+                            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 sm:gap-4 mt-2">
                               <Badge variant="secondary" className="capitalize">
                                 {selectedApplication.status}
                               </Badge>
@@ -278,9 +336,9 @@ const HiringPipeline = () => {
                       {/* Attachments */}
                       <Card className="p-4">
                         <h4 className="font-semibold mb-2">Attachments</h4>
-                        <div className="flex gap-2">
+                        <div className="flex flex-col sm:flex-row gap-2">
                           {selectedApplication.resume_url && (
-                            <Button variant="outline" size="sm" asChild>
+                            <Button variant="outline" size="sm" asChild className="w-full sm:w-auto">
                               <a
                                 href={selectedApplication.resume_url}
                                 target="_blank"
@@ -292,7 +350,7 @@ const HiringPipeline = () => {
                             </Button>
                           )}
                           {selectedApplication.video_url && (
-                            <Button variant="outline" size="sm" asChild>
+                            <Button variant="outline" size="sm" asChild className="w-full sm:w-auto">
                               <a
                                 href={selectedApplication.video_url}
                                 target="_blank"
@@ -345,6 +403,7 @@ const HiringPipeline = () => {
                     <Button
                       onClick={handleScheduleInterview}
                       disabled={!interviewDate || scheduleInterview.isPending}
+                      className="w-full sm:w-auto"
                     >
                       <Calendar className="h-4 w-4 mr-2" />
                       Schedule Interview
@@ -357,7 +416,7 @@ const HiringPipeline = () => {
                       <div className="space-y-2">
                         {selectedApplication.interview_schedule.map((interview: any) => (
                           <Card key={interview.id} className="p-3">
-                            <div className="flex items-center justify-between">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                               <div>
                                 <p className="font-medium">
                                   {new Date(interview.scheduled_at).toLocaleString()}
@@ -366,7 +425,7 @@ const HiringPipeline = () => {
                                   {interview.location || 'No location specified'}
                                 </p>
                               </div>
-                              <Badge className="capitalize">{interview.status}</Badge>
+                              <Badge className="capitalize self-start sm:self-center">{interview.status}</Badge>
                             </div>
                           </Card>
                         ))}
@@ -378,13 +437,14 @@ const HiringPipeline = () => {
                 <TabsContent value="tags" className="space-y-4">
                   <div className="space-y-2">
                     <Label>Add Tag</Label>
-                    <div className="flex gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2">
                       <Input
                         placeholder="e.g., Strong candidate, Culture fit..."
                         value={newTag}
                         onChange={(e) => setNewTag(e.target.value)}
+                        className="flex-1"
                       />
-                      <Button onClick={handleAddTag} disabled={!newTag.trim() || addTag.isPending}>
+                      <Button onClick={handleAddTag} disabled={!newTag.trim() || addTag.isPending} className="w-full sm:w-auto">
                         <Tag className="h-4 w-4 mr-2" />
                         Add
                       </Button>
@@ -399,7 +459,7 @@ const HiringPipeline = () => {
                           <Badge
                             key={tag.id}
                             variant="outline"
-                            className="cursor-pointer"
+                            className="cursor-pointer py-1 px-3"
                             style={{ borderColor: tag.color, color: tag.color }}
                             onClick={() => removeTag.mutate(tag.id)}
                           >

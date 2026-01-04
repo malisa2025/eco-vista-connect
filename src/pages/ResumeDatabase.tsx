@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Search, MapPin, Briefcase, Star, MessageSquare, Download, Filter } from 'lucide-react';
+import { Search, MapPin, Briefcase, MessageSquare, Download, Filter } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -188,17 +188,18 @@ const ResumeDatabase = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-1 container mx-auto px-4 py-8">
+      <main className="flex-1 container mx-auto px-4 py-6 sm:py-8">
         <div className="max-w-6xl mx-auto space-y-6">
           <div>
-            <h1 className="text-4xl font-display font-bold mb-2">Resume Database</h1>
-            <p className="text-muted-foreground">Browse qualified candidates for your open positions</p>
+            <h1 className="text-2xl sm:text-4xl font-display font-bold mb-2">Resume Database</h1>
+            <p className="text-sm sm:text-base text-muted-foreground">Browse qualified candidates for your open positions</p>
           </div>
 
           {/* Search & Filters */}
           <Card>
             <CardContent className="pt-6 space-y-4">
-              <div className="flex gap-4">
+              {/* Search row - stacks on mobile */}
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                 <div className="flex-1 relative">
                   <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -208,15 +209,16 @@ const ResumeDatabase = () => {
                     className="pl-10"
                   />
                 </div>
-                <Button onClick={exportProfiles} variant="outline">
+                <Button onClick={exportProfiles} variant="outline" className="w-full sm:w-auto">
                   <Download className="h-4 w-4 mr-2" />
                   Export
                 </Button>
               </div>
 
-              <div className="flex gap-4">
+              {/* Filters - stacks on mobile */}
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                 <Select value={filters.experienceLevel} onValueChange={(v) => setFilters(f => ({ ...f, experienceLevel: v }))}>
-                  <SelectTrigger className="w-[200px]">
+                  <SelectTrigger className="w-full sm:w-[200px]">
                     <SelectValue placeholder="Experience Level" />
                   </SelectTrigger>
                   <SelectContent>
@@ -228,7 +230,7 @@ const ResumeDatabase = () => {
                 </Select>
 
                 <Select value={filters.availability} onValueChange={(v) => setFilters(f => ({ ...f, availability: v }))}>
-                  <SelectTrigger className="w-[200px]">
+                  <SelectTrigger className="w-full sm:w-[200px]">
                     <SelectValue placeholder="Availability" />
                   </SelectTrigger>
                   <SelectContent>
@@ -244,7 +246,7 @@ const ResumeDatabase = () => {
 
           {/* Results */}
           {isLoading ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {[...Array(6)].map((_, i) => (
                 <Card key={i} className="animate-pulse">
                   <CardContent className="pt-6">
@@ -254,36 +256,45 @@ const ResumeDatabase = () => {
               ))}
             </div>
           ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {profiles?.map((profile) => (
-                <Card key={profile.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setSelectedProfile(profile)}>
+                <Card 
+                  key={profile.id} 
+                  className="hover:shadow-lg transition-shadow cursor-pointer" 
+                  onClick={() => setSelectedProfile(profile)}
+                >
                   <CardContent className="pt-6 space-y-4">
-                    <div className="flex items-start gap-3">
-                      <Avatar className="h-12 w-12">
+                    {/* Profile header - stacks on mobile */}
+                    <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3">
+                      <Avatar className="h-16 w-16 sm:h-12 sm:w-12">
                         <AvatarImage src={profile.avatar_url || ''} />
-                        <AvatarFallback>{profile.full_name?.charAt(0) || 'U'}</AvatarFallback>
+                        <AvatarFallback className="text-lg sm:text-base">
+                          {profile.full_name?.charAt(0) || 'U'}
+                        </AvatarFallback>
                       </Avatar>
-                      <div className="flex-1 min-w-0">
+                      <div className="flex-1 min-w-0 text-center sm:text-left">
                         <h3 className="font-semibold truncate">{profile.full_name || 'Anonymous'}</h3>
-                        <p className="text-sm text-muted-foreground truncate">{profile.bio || 'No bio'}</p>
+                        <p className="text-sm text-muted-foreground line-clamp-2">{profile.bio || 'No bio'}</p>
                       </div>
                     </div>
 
+                    {/* Info section */}
                     <div className="space-y-2 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-2">
-                        <Briefcase className="h-4 w-4" />
+                      <div className="flex items-center justify-center sm:justify-start gap-2">
+                        <Briefcase className="h-4 w-4 shrink-0" />
                         <span>{profile.experience_years || 0} years experience</span>
                       </div>
                       {profile.preferred_locations && profile.preferred_locations.length > 0 && (
-                        <div className="flex items-center gap-2">
-                          <MapPin className="h-4 w-4" />
+                        <div className="flex items-center justify-center sm:justify-start gap-2">
+                          <MapPin className="h-4 w-4 shrink-0" />
                           <span className="truncate">{profile.preferred_locations[0]}</span>
                         </div>
                       )}
                     </div>
 
+                    {/* Skills */}
                     {profile.skills && profile.skills.length > 0 && (
-                      <div className="flex flex-wrap gap-1">
+                      <div className="flex flex-wrap justify-center sm:justify-start gap-1.5">
                         {profile.skills.slice(0, 3).map((skill: string) => (
                           <Badge key={skill} variant="secondary" className="text-xs">
                             {skill}
@@ -297,12 +308,13 @@ const ResumeDatabase = () => {
                       </div>
                     )}
 
+                    {/* Contact button - full width */}
                     <Button 
                       onClick={(e) => {
                         e.stopPropagation();
                         handleContactCandidate(profile.id);
                       }}
-                      className="w-full"
+                      className="w-full h-11 sm:h-9"
                       size="sm"
                     >
                       <MessageSquare className="h-4 w-4 mr-2" />
@@ -348,21 +360,22 @@ const ResumeDatabase = () => {
 
       {/* Profile Detail Modal */}
       <Dialog open={!!selectedProfile} onOpenChange={() => setSelectedProfile(null)}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Candidate Profile</DialogTitle>
           </DialogHeader>
           {selectedProfile && (
             <div className="space-y-6">
-              <div className="flex items-start gap-4">
-                <Avatar className="h-20 w-20">
+              {/* Profile header - stacks on mobile */}
+              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4">
+                <Avatar className="h-24 w-24 sm:h-20 sm:w-20">
                   <AvatarImage src={selectedProfile.avatar_url || ''} />
-                  <AvatarFallback className="text-2xl">
+                  <AvatarFallback className="text-3xl sm:text-2xl">
                     {selectedProfile.full_name?.charAt(0) || 'U'}
                   </AvatarFallback>
                 </Avatar>
-                <div className="flex-1">
-                  <h2 className="text-2xl font-bold">{selectedProfile.full_name || 'Anonymous'}</h2>
+                <div className="flex-1 text-center sm:text-left">
+                  <h2 className="text-xl sm:text-2xl font-bold">{selectedProfile.full_name || 'Anonymous'}</h2>
                   <p className="text-muted-foreground">{selectedProfile.email}</p>
                   {selectedProfile.phone && (
                     <p className="text-muted-foreground">{selectedProfile.phone}</p>
@@ -377,7 +390,7 @@ const ResumeDatabase = () => {
                 </div>
               )}
 
-              <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <h3 className="font-semibold mb-2">Experience</h3>
                   <p className="text-muted-foreground">{selectedProfile.experience_years || 0} years</p>
@@ -419,13 +432,14 @@ const ResumeDatabase = () => {
                 </div>
               )}
 
-              <div className="flex gap-2">
-                <Button onClick={() => handleContactCandidate(selectedProfile.id)} className="flex-1">
+              {/* Action buttons - stack on mobile */}
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Button onClick={() => handleContactCandidate(selectedProfile.id)} className="flex-1 h-12 sm:h-10">
                   <MessageSquare className="h-4 w-4 mr-2" />
                   Send Message
                 </Button>
                 {selectedProfile.resume_url && (
-                  <Button variant="outline" asChild>
+                  <Button variant="outline" asChild className="h-12 sm:h-10">
                     <a href={selectedProfile.resume_url} target="_blank" rel="noopener noreferrer">
                       <Download className="h-4 w-4 mr-2" />
                       Resume
