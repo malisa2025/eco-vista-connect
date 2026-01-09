@@ -1,5 +1,5 @@
-import { Building2 } from "lucide-react";
 import { Link } from "react-router-dom";
+import logoImage from "@/assets/logo-ghkonect.jpg";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -11,9 +11,11 @@ const Footer = () => {
           {/* Brand */}
           <div className="md:col-span-2">
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-10 h-10 rounded-xl gradient-hero flex items-center justify-center">
-                <Building2 className="h-6 w-6 text-white" />
-              </div>
+              <img 
+                src={logoImage} 
+                alt="GHKonect Logo" 
+                className="w-10 h-10 rounded-xl object-cover"
+              />
               <span className="text-2xl font-display font-bold">GHKonect</span>
             </div>
             <p className="text-muted-foreground mb-6 max-w-md">
