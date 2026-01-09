@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
@@ -280,6 +281,7 @@ const HiringPipeline = () => {
           <DialogContent className="max-w-4xl max-h-[90vh]">
             <DialogHeader>
               <DialogTitle>Applicant Details</DialogTitle>
+              <DialogDescription>Review applicant information, notes, and schedule interviews</DialogDescription>
             </DialogHeader>
 
             {selectedApplication && (

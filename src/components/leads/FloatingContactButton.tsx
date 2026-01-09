@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useLeadMutations } from "@/hooks/useLeadMutations";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -60,6 +60,7 @@ export function FloatingContactButton({ businessId, businessName }: FloatingCont
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Contact {businessName}</DialogTitle>
+            <DialogDescription>Send a message to this business</DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleSubmit} className="space-y-4">

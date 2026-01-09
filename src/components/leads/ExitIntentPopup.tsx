@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { X } from "lucide-react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -63,22 +63,14 @@ export function ExitIntentPopup({ businessId, businessName }: ExitIntentPopupPro
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute right-4 top-4"
-          onClick={handleClose}
-        >
-          <X className="h-4 w-4" />
-        </Button>
+        <DialogHeader>
+          <DialogTitle>Wait! Before you go...</DialogTitle>
+          <DialogDescription>
+            Get exclusive updates and special offers from {businessName}
+          </DialogDescription>
+        </DialogHeader>
 
-        <div className="space-y-4 pt-2">
-          <div>
-            <h2 className="text-2xl font-bold">Wait! Before you go...</h2>
-            <p className="text-muted-foreground mt-2">
-              Get exclusive updates and special offers from {businessName}
-            </p>
-          </div>
+        <div className="space-y-4">
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">

@@ -1,6 +1,7 @@
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
@@ -26,6 +27,7 @@ const ApplicantComparison = ({
       <DialogContent className="max-w-5xl max-h-[90vh]">
         <DialogHeader>
           <DialogTitle>Compare Applicants</DialogTitle>
+          <DialogDescription>Compare selected candidates side by side</DialogDescription>
         </DialogHeader>
 
         <ScrollArea className="h-[70vh]">
