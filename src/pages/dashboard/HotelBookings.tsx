@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Search, Eye, Calendar, Mail, Phone } from "lucide-react";
 import { format } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -177,6 +177,7 @@ export default function HotelBookings() {
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Booking Details</DialogTitle>
+            <DialogDescription>View reservation details and guest information</DialogDescription>
           </DialogHeader>
           {selectedBooking && (
             <div className="space-y-6">

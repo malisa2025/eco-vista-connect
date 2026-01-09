@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -41,6 +41,7 @@ export const CreatePartnerDialog = ({ open, onOpenChange }: CreatePartnerDialogP
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Add New Partner</DialogTitle>
+          <DialogDescription>Add a new partner organization to display on the homepage</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Plus, X, Star, GripVertical, Check, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ImageUploader } from './ImageUploader';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, useSortable, rectSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -214,6 +214,7 @@ export const GalleryManager = ({
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Add Gallery Image</DialogTitle>
+                <DialogDescription>Upload a new image to your business gallery</DialogDescription>
               </DialogHeader>
               <ImageUploader
                 label="Upload Image"

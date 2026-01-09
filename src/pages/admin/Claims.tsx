@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ClipboardCheck, CheckCircle, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
@@ -136,6 +136,7 @@ const AdminClaims = () => {
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Review Business Claim</DialogTitle>
+            <DialogDescription>Review and process this business claim request</DialogDescription>
           </DialogHeader>
           
           {selectedClaim && (
