@@ -25,22 +25,20 @@ export const useAllClaims = () => {
   return useQuery({
     queryKey: ['all-business-claims'],
     queryFn: async () => {
-      // Fetch claims with business info
+      // Fetch claims WITHOUT any joins to avoid FK issues
       const { data: claims, error } = await supabase
         .from('business_claims')
-        .select(`
-          *,
-          businesses (name)
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
       if (!claims || claims.length === 0) return [];
 
-      // Get unique user IDs
+      // Get unique user IDs and business IDs
       const userIds = [...new Set(claims.map(c => c.user_id))];
+      const businessIds = [...new Set(claims.map(c => c.business_id).filter(Boolean))] as string[];
       
-      // Fetch profiles separately (avoids FK join issue)
+      // Fetch profiles separately
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select('id, full_name, email')
@@ -48,13 +46,27 @@ export const useAllClaims = () => {
 
       if (profilesError) throw profilesError;
 
-      // Create a map for quick lookup
-      const profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
+      // Fetch businesses separately (only if there are any business IDs)
+      let businesses: { id: string; name: string }[] = [];
+      if (businessIds.length > 0) {
+        const { data: businessData, error: businessesError } = await supabase
+          .from('businesses')
+          .select('id, name')
+          .in('id', businessIds);
 
-      // Merge profiles into claims
+        if (businessesError) throw businessesError;
+        businesses = businessData || [];
+      }
+
+      // Create maps for quick lookup
+      const profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
+      const businessMap = new Map(businesses.map(b => [b.id, b]));
+
+      // Merge all data
       return claims.map(claim => ({
         ...claim,
-        profiles: profileMap.get(claim.user_id) || null
+        profiles: profileMap.get(claim.user_id) || null,
+        businesses: claim.business_id ? businessMap.get(claim.business_id) || null : null
       }));
     },
   });
