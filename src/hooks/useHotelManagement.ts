@@ -3,28 +3,33 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { format } from "date-fns";
 
-export function useHotelManagement() {
+export function useHotelManagement(businessId?: string | null) {
   const { user } = useAuth();
 
   const { data: hotel, isLoading: hotelLoading } = useQuery({
-    queryKey: ["hotel-management", user?.id],
+    queryKey: ["hotel-management", user?.id, businessId],
     queryFn: async () => {
       if (!user) return null;
 
-      // Get business owned by user
-      const { data: businessOwner } = await supabase
-        .from("business_owners")
-        .select("business_id")
-        .eq("user_id", user.id)
-        .single();
+      let targetBusinessId = businessId;
 
-      if (!businessOwner) return null;
+      // If no businessId provided, get the first owned business
+      if (!targetBusinessId) {
+        const { data: businessOwner } = await supabase
+          .from("business_owners")
+          .select("business_id")
+          .eq("user_id", user.id)
+          .single();
+
+        if (!businessOwner) return null;
+        targetBusinessId = businessOwner.business_id;
+      }
 
       // Get business details
       const { data: business } = await supabase
         .from("businesses")
         .select("*")
-        .eq("id", businessOwner.business_id)
+        .eq("id", targetBusinessId)
         .single();
 
       if (!business) return null;

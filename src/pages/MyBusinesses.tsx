@@ -201,7 +201,18 @@ const MyBusinesses = () => {
                         <div className="text-center space-y-2">
                           <Button
                             className="w-full"
-                            onClick={() => navigate(`/dashboard/business/${business.id}`)}
+                            onClick={() => {
+                              switch (business.business_type) {
+                                case 'hotel':
+                                  navigate(`/dashboard/hotel?business=${business.id}`);
+                                  break;
+                                case 'restaurant':
+                                  navigate(`/dashboard/restaurant/${business.id}`);
+                                  break;
+                                default:
+                                  navigate(`/dashboard/business/${business.id}`);
+                              }
+                            }}
                           >
                             Dashboard
                           </Button>
