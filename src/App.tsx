@@ -67,6 +67,9 @@ import RestaurantReservations from "./pages/dashboard/RestaurantReservations";
 import MyReservations from "./pages/MyReservations";
 import UserDashboard from "./pages/UserDashboard";
 import Contact from "./pages/Contact";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
+import Cookies from "./pages/Cookies";
 
 const queryClient = new QueryClient();
 
@@ -149,6 +152,9 @@ const App = () => (
                 />
             <Route path="/auth" element={<Auth />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/cookies" element={<Cookies />} />
             <Route path="/subscription-plans" element={<SubscriptionPlans />} />
             <Route path="/business-subscription-checkout" element={<ProtectedRoute requireRole="business_owner"><BusinessSubscriptionCheckout /></ProtectedRoute>} />
             <Route path="/manage-subscription" element={<ProtectedRoute><ManageSubscription /></ProtectedRoute>} />
