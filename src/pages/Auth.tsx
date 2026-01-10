@@ -6,8 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Building2 } from 'lucide-react';
 import { z } from 'zod';
+import logoImage from '@/assets/logo-ghkonect.jpg';
 import { toast } from 'sonner';
 
 const signInSchema = z.object({
@@ -102,9 +102,11 @@ const Auth = () => {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 mb-4">
-            <div className="w-12 h-12 rounded-xl gradient-hero flex items-center justify-center">
-              <Building2 className="h-7 w-7 text-white" />
-            </div>
+            <img 
+              src={logoImage} 
+              alt="GHKonect Logo" 
+              className="w-12 h-12 rounded-xl object-cover"
+            />
             <span className="text-2xl font-display font-bold">GHKonect</span>
           </div>
           <h1 className="text-3xl font-display font-bold mb-2">Welcome</h1>

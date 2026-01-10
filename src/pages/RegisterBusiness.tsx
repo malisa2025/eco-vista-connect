@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Building2, Search } from 'lucide-react';
+import logoImage from '@/assets/logo-ghkonect.jpg';
 import { useBusinessCategories } from '@/hooks/useBusinessCategories';
 import { useBusinesses } from '@/hooks/useBusinesses';
 import { z } from 'zod';
@@ -109,9 +109,11 @@ const RegisterBusiness = () => {
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-xl gradient-hero mb-4">
-              <Building2 className="h-8 w-8 text-white" />
-            </div>
+            <img 
+              src={logoImage} 
+              alt="GHKonect Logo" 
+              className="w-16 h-16 rounded-xl object-cover mx-auto mb-4"
+            />
             <h1 className="text-4xl font-display font-bold mb-2">Register Your Business</h1>
             <p className="text-muted-foreground">
               Get your business listed on GHKonect and reach thousands of potential customers
