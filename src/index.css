@@ -17,7 +17,7 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 220 15% 15%;
 
-    /* Warm amber/gold for primary brand */
+    /* Warm amber/gold for primary */
     --primary: 35 92% 52%;
     --primary-foreground: 0 0% 100%;
     --primary-glow: 35 100% 65%;
@@ -93,6 +93,25 @@ All colors MUST be HSL.
     --shadow-elegant: 0 10px 40px -10px hsl(0 0% 0% / 0.3);
     --shadow-card: 0 4px 20px -2px hsl(0 0% 0% / 0.2);
     --shadow-glow: 0 0 60px hsl(35 92% 52% / 0.25);
+  }
+
+  /* Dashboard Dark Theme */
+  .dashboard-dark {
+    --bg-main: 240 33% 9%;
+    --bg-card: 0 0% 100% / 0.05;
+    --bg-card-hover: 0 0% 100% / 0.08;
+    --text-primary: 0 0% 100%;
+    --text-secondary: 240 10% 73%;
+    --border-glass: 0 0% 100% / 0.1;
+    --accent-purple: 245 58% 66%;
+    --accent-cyan: 190 100% 50%;
+    --accent-orange: 18 100% 57%;
+    
+    /* Dashboard Gradients */
+    --gradient-purple: linear-gradient(135deg, hsl(231 65% 63%) 0%, hsl(270 53% 56%) 100%);
+    --gradient-pink: linear-gradient(135deg, hsl(296 89% 78%) 0%, hsl(351 91% 63%) 100%);
+    --gradient-blue: linear-gradient(135deg, hsl(209 98% 65%) 0%, hsl(181 100% 50%) 100%);
+    --gradient-warm: linear-gradient(135deg, hsl(342 92% 73%) 0%, hsl(48 98% 63%) 100%);
   }
 }
 
@@ -176,5 +195,103 @@ All colors MUST be HSL.
     100% {
       transform: translateX(-50%);
     }
+  }
+
+  /* Dashboard Dark Theme Utilities */
+  .bg-dashboard {
+    background: hsl(240 33% 9%);
+  }
+
+  .bg-dashboard-animated {
+    position: relative;
+  }
+
+  .bg-dashboard-animated::before {
+    content: '';
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: 
+      radial-gradient(circle at 20% 50%, hsl(245 58% 66% / 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, hsl(18 100% 57% / 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 40% 20%, hsl(190 100% 50% / 0.1) 0%, transparent 50%);
+    z-index: 0;
+    animation: backgroundShift 20s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  @keyframes backgroundShift {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    33% { transform: translate(5%, 5%) rotate(5deg); }
+    66% { transform: translate(-5%, 5%) rotate(-5deg); }
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-3px); }
+  }
+
+  @keyframes pulseGlow {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .animate-pulse-glow {
+    animation: pulseGlow 2s ease-in-out infinite;
+  }
+
+  /* Glass Card Styles */
+  .glass-card {
+    background: hsl(0 0% 100% / 0.05);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid hsl(0 0% 100% / 0.1);
+    border-radius: 1rem;
+  }
+
+  .glass-card-hover:hover {
+    background: hsl(0 0% 100% / 0.08);
+    box-shadow: 0 8px 32px hsl(245 58% 66% / 0.2);
+    border-color: hsl(245 58% 66% / 0.5);
+    transform: translateY(-4px);
+  }
+
+  /* Gradient Text */
+  .text-gradient {
+    background: linear-gradient(135deg, hsl(0 0% 100%) 0%, hsl(240 10% 73%) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Dashboard Gradients */
+  .gradient-purple-bg {
+    background: linear-gradient(135deg, hsl(231 65% 63% / 0.2) 0%, hsl(270 53% 56% / 0.2) 100%);
+  }
+
+  .gradient-pink-bg {
+    background: linear-gradient(135deg, hsl(296 89% 78% / 0.2) 0%, hsl(351 91% 63% / 0.2) 100%);
+  }
+
+  .gradient-blue-bg {
+    background: linear-gradient(135deg, hsl(209 98% 65% / 0.2) 0%, hsl(181 100% 50% / 0.2) 100%);
+  }
+
+  .gradient-warm-bg {
+    background: linear-gradient(135deg, hsl(342 92% 73% / 0.2) 0%, hsl(48 98% 63% / 0.2) 100%);
+  }
+
+  /* Font families */
+  .font-serif-display {
+    font-family: 'Instrument Serif', serif;
+  }
+
+  .font-dm-sans {
+    font-family: 'DM Sans', sans-serif;
   }
 }
