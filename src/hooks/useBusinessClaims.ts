@@ -68,8 +68,8 @@ export const useClaimMutations = () => {
     mutationFn: async (claim: {
       business_id?: string;
       claim_type: 'new_business' | 'claim_existing';
-      business_data?: any;
-      documents?: any;
+      business_data?: Record<string, unknown>;
+      documents?: Record<string, unknown>;
     }) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Must be logged in');
@@ -77,6 +77,10 @@ export const useClaimMutations = () => {
       const { data, error } = await supabase
         .from('business_claims')
         .insert({
+          business_id: claim.business_id,
+          claim_type: claim.claim_type,
+          business_data: claim.business_data as any,
+          documents: claim.documents as any,
           ...claim,
           user_id: user.id,
         })

@@ -929,6 +929,7 @@ export type Database = {
         Row: {
           address: string | null
           business_hours: Json | null
+          business_type: Database["public"]["Enums"]["business_type"] | null
           category: string
           created_at: string | null
           description: string | null
@@ -964,6 +965,7 @@ export type Database = {
         Insert: {
           address?: string | null
           business_hours?: Json | null
+          business_type?: Database["public"]["Enums"]["business_type"] | null
           category: string
           created_at?: string | null
           description?: string | null
@@ -999,6 +1001,7 @@ export type Database = {
         Update: {
           address?: string | null
           business_hours?: Json | null
+          business_type?: Database["public"]["Enums"]["business_type"] | null
           category?: string
           created_at?: string | null
           description?: string | null
@@ -3039,6 +3042,13 @@ export type Database = {
         | "checked_in"
         | "checked_out"
         | "cancelled"
+      business_type:
+        | "restaurant"
+        | "hotel"
+        | "retail"
+        | "services"
+        | "healthcare"
+        | "other"
       claim_status: "pending" | "approved" | "rejected"
       claim_type: "new_business" | "claim_existing"
       experience_level: "entry" | "mid" | "senior" | "executive"
@@ -3195,6 +3205,14 @@ export const Constants = {
         "checked_in",
         "checked_out",
         "cancelled",
+      ],
+      business_type: [
+        "restaurant",
+        "hotel",
+        "retail",
+        "services",
+        "healthcare",
+        "other",
       ],
       claim_status: ["pending", "approved", "rejected"],
       claim_type: ["new_business", "claim_existing"],
