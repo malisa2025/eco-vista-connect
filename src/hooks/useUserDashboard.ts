@@ -51,7 +51,7 @@ export interface RecentApplication {
 
 export interface SavedJob {
   id: string;
-  saved_at: string;
+  created_at: string;
   job: {
     id: string;
     title: string;
@@ -213,7 +213,7 @@ export const useUserDashboard = () => {
         .from('saved_jobs')
         .select(`
           id,
-          saved_at,
+          created_at,
           job:jobs(
             id,
             title,
@@ -223,7 +223,7 @@ export const useUserDashboard = () => {
           )
         `)
         .eq('user_id', user.id)
-        .order('saved_at', { ascending: false })
+        .order('created_at', { ascending: false })
         .limit(3);
 
       if (error) throw error;
