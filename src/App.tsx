@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Businesses from "./pages/Businesses";
 import BusinessDetail from "./pages/BusinessDetail";
 import Auth from "./pages/Auth";
+import CheckEmail from "./pages/CheckEmail";
 import Profile from "./pages/Profile";
 import RegisterBusiness from "./pages/RegisterBusiness";
 import MyBusinesses from "./pages/MyBusinesses";
@@ -78,6 +79,8 @@ const App = () => (
         <BrowserRouter>
           <Routes>
                 <Route path="/" element={<Index />} />
+        <Route path="/auth" element={<Auth />} />
+        <Route path="/check-email" element={<CheckEmail />} />
         <Route path="/businesses" element={<Businesses />} />
         <Route path="/businesses/:id" element={<BusinessDetail />} />
         <Route path="/businesses/:id/edit" element={<ProtectedRoute><EditBusiness /></ProtectedRoute>} />

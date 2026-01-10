@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import BusinessTypeSelector, { BusinessType } from '@/components/business/BusinessTypeSelector';
 import { z } from 'zod';
 import logoImage from '@/assets/logo-ghkonect.jpg';
 import { toast } from 'sonner';
@@ -54,6 +55,7 @@ const Auth = () => {
     password: '',
     confirmPassword: '',
     userType: 'user' as 'user' | 'business_owner',
+    businessType: null as BusinessType | null,
   });
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -83,17 +85,25 @@ const Auth = () => {
       return;
     }
 
+    // Require business type selection for business owners
+    if (signUpForm.userType === 'business_owner' && !signUpForm.businessType) {
+      toast.error('Please select your business type');
+      return;
+    }
+
     setIsLoading(true);
     const { error } = await signUp(
       signUpForm.email,
       signUpForm.password,
       signUpForm.fullName,
-      signUpForm.userType
+      signUpForm.userType,
+      signUpForm.businessType
     );
     setIsLoading(false);
 
     if (!error) {
-      toast.success('Account created! Please check your email to verify your account.');
+      // Navigate to check-email page with the email
+      navigate('/check-email', { state: { email: signUpForm.email } });
     }
   };
 
@@ -113,7 +123,7 @@ const Auth = () => {
           <p className="text-muted-foreground">Sign in to your account or create a new one</p>
         </div>
 
-        <Card>
+        <Card className={signUpForm.userType === 'business_owner' ? 'max-w-2xl mx-auto' : ''}>
           <CardHeader>
             <CardTitle>Authentication</CardTitle>
             <CardDescription>Choose your preferred method below</CardDescription>
@@ -162,12 +172,28 @@ const Auth = () => {
                       id="signup-type"
                       className="w-full rounded-md border border-input bg-background px-3 py-2"
                       value={signUpForm.userType}
-                      onChange={(e) => setSignUpForm({ ...signUpForm, userType: e.target.value as 'user' | 'business_owner' })}
+                      onChange={(e) => setSignUpForm({ 
+                        ...signUpForm, 
+                        userType: e.target.value as 'user' | 'business_owner',
+                        businessType: null // Reset business type when switching
+                      })}
                     >
                       <option value="user">Browse and review businesses</option>
                       <option value="business_owner">Register and manage my business</option>
                     </select>
                   </div>
+
+                  {/* Business Type Selection - Only shown for business owners */}
+                  {signUpForm.userType === 'business_owner' && (
+                    <div className="space-y-3">
+                      <Label>What type of business do you have?</Label>
+                      <BusinessTypeSelector
+                        value={signUpForm.businessType}
+                        onChange={(type) => setSignUpForm({ ...signUpForm, businessType: type })}
+                      />
+                    </div>
+                  )}
+
                   <div className="space-y-2">
                     <Label htmlFor="signup-name">Full Name</Label>
                     <Input
