@@ -130,21 +130,23 @@ const UserDashboard = () => {
               <p className="text-[hsl(240_10%_73%)] text-sm">
                 Here's what's happening with your account
               </p>
-              {isBusinessOwner && businessTypeInfo ? (
+              {/* User Role Badge */}
+              <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold uppercase tracking-wide border ${
+                isAdmin 
+                  ? 'bg-gradient-to-r from-red-500/20 to-orange-500/20 border-red-500/40 text-red-400'
+                  : isModerator
+                  ? 'bg-gradient-to-r from-green-500/20 to-emerald-500/20 border-green-500/40 text-green-400'
+                  : 'bg-[linear-gradient(135deg,hsl(190_100%_50%_/_0.2),hsl(245_58%_66%_/_0.2))] border-[hsl(190_100%_50%_/_0.4)] text-[hsl(190_100%_50%)]'
+              }`}>
+                <User className="h-3.5 w-3.5" />
+                {getUserTypeLabel()}
+              </span>
+              
+              {/* Business Type Badge (if business owner) */}
+              {isBusinessOwner && businessTypeInfo && (
                 <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold uppercase tracking-wide bg-gradient-to-r ${businessTypeInfo.gradient} bg-opacity-20 border border-white/20 text-white`}>
                   <BusinessIcon className="h-3.5 w-3.5" />
                   {businessTypeInfo.label}
-                </span>
-              ) : (
-                <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold uppercase tracking-wide border ${
-                  isAdmin 
-                    ? 'bg-gradient-to-r from-red-500/20 to-orange-500/20 border-red-500/40 text-red-400'
-                    : isModerator
-                    ? 'bg-gradient-to-r from-green-500/20 to-emerald-500/20 border-green-500/40 text-green-400'
-                    : 'bg-[linear-gradient(135deg,hsl(190_100%_50%_/_0.2),hsl(245_58%_66%_/_0.2))] border-[hsl(190_100%_50%_/_0.4)] text-[hsl(190_100%_50%)]'
-                }`}>
-                  <User className="h-3.5 w-3.5" />
-                  {getUserTypeLabel()}
                 </span>
               )}
             </div>
