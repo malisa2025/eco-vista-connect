@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,7 +11,9 @@ import { format } from "date-fns";
 export default function HotelDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { hotel, stats, loading } = useHotelManagement();
+  const [searchParams] = useSearchParams();
+  const businessId = searchParams.get('business');
+  const { hotel, stats, loading } = useHotelManagement(businessId);
   const [todayArrivals, setTodayArrivals] = useState<any[]>([]);
   const [recentBookings, setRecentBookings] = useState<any[]>([]);
 

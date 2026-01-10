@@ -28,6 +28,12 @@ import {
   Mail,
   Phone,
   Building2,
+  UtensilsCrossed,
+  Bed,
+  Package,
+  Calendar,
+  Wrench,
+  Stethoscope,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
@@ -75,7 +81,8 @@ export default function BusinessDashboard() {
     );
   }
 
-  const quickActions = [
+  // Base quick actions for all business types
+  const baseActions = [
     {
       title: "Edit Profile",
       description: "Update business info",
@@ -119,6 +126,80 @@ export default function BusinessDashboard() {
       color: "text-pink-500",
     },
   ];
+
+  // Type-specific actions
+  const getTypeSpecificActions = () => {
+    switch (business.business_type) {
+      case 'restaurant':
+        return [
+          {
+            title: "Manage Menu",
+            description: "Add/edit items",
+            icon: UtensilsCrossed,
+            href: `/dashboard/menu/${id}`,
+            color: "text-orange-500",
+          },
+          {
+            title: "Reservations",
+            description: "View bookings",
+            icon: Calendar,
+            href: `/dashboard/reservations/${id}`,
+            color: "text-teal-500",
+          },
+        ];
+      case 'hotel':
+        return [
+          {
+            title: "Manage Rooms",
+            description: "Room types & pricing",
+            icon: Bed,
+            href: `/dashboard/hotel/rooms`,
+            color: "text-indigo-500",
+          },
+          {
+            title: "Bookings",
+            description: "View reservations",
+            icon: Calendar,
+            href: `/dashboard/hotel/bookings`,
+            color: "text-teal-500",
+          },
+        ];
+      case 'retail':
+        return [
+          {
+            title: "Products",
+            description: "Manage catalog",
+            icon: Package,
+            href: `/dashboard/products/${id}`,
+            color: "text-amber-500",
+          },
+        ];
+      case 'services':
+        return [
+          {
+            title: "Services",
+            description: "Manage offerings",
+            icon: Wrench,
+            href: `/businesses/${id}/edit`,
+            color: "text-slate-500",
+          },
+        ];
+      case 'healthcare':
+        return [
+          {
+            title: "Services",
+            description: "Medical services",
+            icon: Stethoscope,
+            href: `/businesses/${id}/edit`,
+            color: "text-red-500",
+          },
+        ];
+      default:
+        return [];
+    }
+  };
+
+  const quickActions = [...getTypeSpecificActions(), ...baseActions];
 
   return (
     <div className="min-h-screen flex flex-col">

@@ -55,6 +55,7 @@ import HotelBooking from "./pages/HotelBooking";
 import MyBookings from "./pages/MyBookings";
 import HotelDashboard from "./pages/dashboard/HotelDashboard";
 import BusinessDashboard from "./pages/dashboard/BusinessDashboard";
+import RestaurantDashboard from "./pages/dashboard/RestaurantDashboard";
 import HotelRooms from "./pages/dashboard/HotelRooms";
 import HotelBookings from "./pages/dashboard/HotelBookings";
 import HotelSettings from "./pages/dashboard/HotelSettings";
@@ -94,8 +95,9 @@ const App = () => (
           <Route path="/dashboard/menu/:id" element={<ProtectedRoute requireRole="business_owner"><MenuManager /></ProtectedRoute>} />
           <Route path="/dashboard/products/:id" element={<ProtectedRoute requireRole="business_owner"><ProductManager /></ProtectedRoute>} />
           <Route path="/dashboard/reservations/:id" element={<ProtectedRoute requireRole="business_owner"><RestaurantReservations /></ProtectedRoute>} />
-          {/* Business Owner Dashboard */}
+          {/* Business Owner Dashboards by Type */}
           <Route path="/dashboard/business/:id" element={<ProtectedRoute requireRole="business_owner"><BusinessDashboard /></ProtectedRoute>} />
+          <Route path="/dashboard/restaurant/:id" element={<ProtectedRoute requireRole="business_owner"><RestaurantDashboard /></ProtectedRoute>} />
           
           <Route path="/jobs" element={<Jobs />} />
                 <Route path="/jobs/:id" element={<JobDetail />} />
