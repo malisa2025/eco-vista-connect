@@ -58,6 +58,10 @@ import BusinessDashboard from "./pages/dashboard/BusinessDashboard";
 import HotelRooms from "./pages/dashboard/HotelRooms";
 import HotelBookings from "./pages/dashboard/HotelBookings";
 import HotelSettings from "./pages/dashboard/HotelSettings";
+import MenuManager from "./pages/dashboard/MenuManager";
+import ProductManager from "./pages/dashboard/ProductManager";
+import RestaurantReservations from "./pages/dashboard/RestaurantReservations";
+import MyReservations from "./pages/MyReservations";
 import Contact from "./pages/Contact";
 
 const queryClient = new QueryClient();
@@ -79,13 +83,15 @@ const App = () => (
         <Route path="/hotels/:id" element={<HotelDetail />} />
         <Route path="/hotels/:id/book" element={<ProtectedRoute><HotelBooking /></ProtectedRoute>} />
           <Route path="/my-bookings" element={<ProtectedRoute><MyBookings /></ProtectedRoute>} />
-          
+          <Route path="/my-reservations" element={<ProtectedRoute><MyReservations /></ProtectedRoute>} />
           {/* Hotel Owner Dashboard Routes */}
           <Route path="/dashboard/hotel" element={<ProtectedRoute requireRole="business_owner"><HotelDashboard /></ProtectedRoute>} />
           <Route path="/dashboard/hotel/rooms" element={<ProtectedRoute requireRole="business_owner"><HotelRooms /></ProtectedRoute>} />
           <Route path="/dashboard/hotel/bookings" element={<ProtectedRoute requireRole="business_owner"><HotelBookings /></ProtectedRoute>} />
           <Route path="/dashboard/hotel/settings" element={<ProtectedRoute requireRole="business_owner"><HotelSettings /></ProtectedRoute>} />
-          
+          <Route path="/dashboard/menu/:id" element={<ProtectedRoute requireRole="business_owner"><MenuManager /></ProtectedRoute>} />
+          <Route path="/dashboard/products/:id" element={<ProtectedRoute requireRole="business_owner"><ProductManager /></ProtectedRoute>} />
+          <Route path="/dashboard/reservations/:id" element={<ProtectedRoute requireRole="business_owner"><RestaurantReservations /></ProtectedRoute>} />
           {/* Business Owner Dashboard */}
           <Route path="/dashboard/business/:id" element={<ProtectedRoute requireRole="business_owner"><BusinessDashboard /></ProtectedRoute>} />
           
