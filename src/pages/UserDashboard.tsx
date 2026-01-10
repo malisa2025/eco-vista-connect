@@ -33,17 +33,21 @@ const UserDashboard = () => {
   const getUserTypeLabel = () => {
     if (roles?.includes('admin')) return 'Administrator';
     if (roles?.includes('moderator')) return 'Moderator';
+    if (roles?.includes('business_owner')) return 'Business Owner';
     return 'General User';
   };
 
   const getUserTypeGradient = () => {
     if (roles?.includes('admin')) return 'from-red-500 to-orange-500';
     if (roles?.includes('moderator')) return 'from-green-500 to-emerald-500';
+    if (roles?.includes('business_owner')) return 'from-purple-500 to-pink-500';
     return '';
   };
 
   const isAdmin = roles?.includes('admin');
   const isModerator = roles?.includes('moderator');
+  const isBusinessOwnerRole = roles?.includes('business_owner');
+
   const { 
     stats, 
     recentReservations, 
@@ -54,30 +58,35 @@ const UserDashboard = () => {
   } = useUserDashboard();
   const { data: ownerships } = useBusinessOwners(user?.id);
 
-  // Get user's business info if they own any
+  // Get user's business info if they own any (registered businesses)
   const userBusinesses = ownerships?.filter((o: any) => o.businesses).map((o: any) => o.businesses) || [];
-  const isBusinessOwner = userBusinesses.length > 0;
+  const hasRegisteredBusiness = userBusinesses.length > 0;
   const primaryBusiness = userBusinesses[0];
+
+  // Get business type from user metadata (set during signup)
+  const userBusinessType = user?.user_metadata?.business_type;
 
   // Get business type icon and label
   const getBusinessTypeInfo = (type: string) => {
     switch (type) {
       case 'restaurant':
-        return { icon: UtensilsCrossed, label: 'Restaurant Owner', gradient: 'from-orange-500 to-red-500' };
+        return { icon: UtensilsCrossed, label: 'Restaurant', gradient: 'from-orange-500 to-red-500' };
       case 'hotel':
-        return { icon: Bed, label: 'Hotel Owner', gradient: 'from-indigo-500 to-purple-500' };
+        return { icon: Bed, label: 'Hotel', gradient: 'from-indigo-500 to-purple-500' };
       case 'retail':
-        return { icon: Package, label: 'Retail Owner', gradient: 'from-amber-500 to-yellow-500' };
+        return { icon: Package, label: 'Retail', gradient: 'from-amber-500 to-yellow-500' };
       case 'services':
-        return { icon: Wrench, label: 'Service Provider', gradient: 'from-slate-500 to-gray-500' };
+        return { icon: Wrench, label: 'Services', gradient: 'from-slate-500 to-gray-500' };
       case 'healthcare':
-        return { icon: Stethoscope, label: 'Healthcare Provider', gradient: 'from-red-500 to-pink-500' };
+        return { icon: Stethoscope, label: 'Healthcare', gradient: 'from-red-500 to-pink-500' };
       default:
-        return { icon: Store, label: 'Business Owner', gradient: 'from-purple-500 to-pink-500' };
+        return { icon: Store, label: 'Business', gradient: 'from-purple-500 to-pink-500' };
     }
   };
 
-  const businessTypeInfo = primaryBusiness ? getBusinessTypeInfo(primaryBusiness.business_type) : null;
+  // Use registered business type, or fallback to user metadata business type
+  const activeBusinessType = primaryBusiness?.business_type || userBusinessType;
+  const businessTypeInfo = activeBusinessType ? getBusinessTypeInfo(activeBusinessType) : null;
   const BusinessIcon = businessTypeInfo?.icon || Store;
 
   const getStatusBadge = (status: string) => {
@@ -93,11 +102,14 @@ const UserDashboard = () => {
     return <Badge variant={variants[status] || "secondary"} className="bg-opacity-20">{status}</Badge>;
   };
 
-  const quickActions = isBusinessOwner ? [
-    { icon: "🏢", title: "My Businesses", path: "/my-businesses" },
-    { icon: "📊", title: "Dashboard", path: `/dashboard/business/${primaryBusiness?.id}` },
-    { icon: "💼", title: "Post Job", path: `/post-job?business=${primaryBusiness?.id}` },
-    { icon: "📢", title: "Run Ads", path: `/purchase-ad?business=${primaryBusiness?.id}` },
+  // Show business actions if user has business_owner role (even if no business registered yet)
+  const quickActions = (isBusinessOwnerRole || hasRegisteredBusiness) ? [
+    { icon: "🏢", title: hasRegisteredBusiness ? "My Businesses" : "Register Business", path: hasRegisteredBusiness ? "/my-businesses" : "/register-business" },
+    ...(hasRegisteredBusiness ? [{ icon: "📊", title: "Dashboard", path: `/dashboard/business/${primaryBusiness?.id}` }] : []),
+    ...(hasRegisteredBusiness ? [{ icon: "💼", title: "Post Job", path: `/post-job?business=${primaryBusiness?.id}` }] : []),
+    ...(hasRegisteredBusiness ? [{ icon: "📢", title: "Run Ads", path: `/purchase-ad?business=${primaryBusiness?.id}` }] : []),
+    ...(!hasRegisteredBusiness ? [{ icon: "📰", title: "Business News", path: "/business-news" }] : []),
+    ...(!hasRegisteredBusiness ? [{ icon: "💼", title: "Browse Jobs", path: "/jobs" }] : []),
   ] : [
     { icon: "🏢", title: "Browse Businesses", path: "/businesses" },
     { icon: "💼", title: "Find Jobs", path: "/jobs" },
@@ -142,8 +154,8 @@ const UserDashboard = () => {
                 {getUserTypeLabel()}
               </span>
               
-              {/* Business Type Badge (if business owner) */}
-              {isBusinessOwner && businessTypeInfo && (
+              {/* Business Type Badge (if business owner role or has registered business) */}
+              {(isBusinessOwnerRole || hasRegisteredBusiness) && businessTypeInfo && (
                 <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold uppercase tracking-wide bg-gradient-to-r ${businessTypeInfo.gradient} bg-opacity-20 border border-white/20 text-white`}>
                   <BusinessIcon className="h-3.5 w-3.5" />
                   {businessTypeInfo.label}
@@ -151,8 +163,8 @@ const UserDashboard = () => {
               )}
             </div>
             
-            {/* Business info for business owners */}
-            {isBusinessOwner && primaryBusiness && (
+            {/* Business info for business owners with registered business */}
+            {hasRegisteredBusiness && primaryBusiness && (
               <div 
                 className="mt-4 p-3 rounded-xl bg-white/5 border border-white/10 flex items-center gap-3 cursor-pointer hover:bg-white/10 transition-colors relative z-10"
                 onClick={() => navigate(`/dashboard/business/${primaryBusiness.id}`)}
