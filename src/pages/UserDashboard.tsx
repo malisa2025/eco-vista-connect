@@ -3,6 +3,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserDashboard } from "@/hooks/useUserDashboard";
+import { useBusinessOwners } from "@/hooks/useBusinessClaims";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
@@ -15,13 +16,18 @@ import {
   Building2,
   ArrowRight,
   Clock,
-  User
+  User,
+  Store,
+  Bed,
+  Wrench,
+  Stethoscope,
+  Package,
 } from "lucide-react";
 import { format } from "date-fns";
 
 const UserDashboard = () => {
   const navigate = useNavigate();
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
   const { 
     stats, 
     recentReservations, 
@@ -30,6 +36,33 @@ const UserDashboard = () => {
     savedJobs,
     isLoading 
   } = useUserDashboard();
+  const { data: ownerships } = useBusinessOwners(user?.id);
+
+  // Get user's business info if they own any
+  const userBusinesses = ownerships?.filter((o: any) => o.businesses).map((o: any) => o.businesses) || [];
+  const isBusinessOwner = userBusinesses.length > 0;
+  const primaryBusiness = userBusinesses[0];
+
+  // Get business type icon and label
+  const getBusinessTypeInfo = (type: string) => {
+    switch (type) {
+      case 'restaurant':
+        return { icon: UtensilsCrossed, label: 'Restaurant Owner', gradient: 'from-orange-500 to-red-500' };
+      case 'hotel':
+        return { icon: Bed, label: 'Hotel Owner', gradient: 'from-indigo-500 to-purple-500' };
+      case 'retail':
+        return { icon: Package, label: 'Retail Owner', gradient: 'from-amber-500 to-yellow-500' };
+      case 'services':
+        return { icon: Wrench, label: 'Service Provider', gradient: 'from-slate-500 to-gray-500' };
+      case 'healthcare':
+        return { icon: Stethoscope, label: 'Healthcare Provider', gradient: 'from-red-500 to-pink-500' };
+      default:
+        return { icon: Store, label: 'Business Owner', gradient: 'from-purple-500 to-pink-500' };
+    }
+  };
+
+  const businessTypeInfo = primaryBusiness ? getBusinessTypeInfo(primaryBusiness.business_type) : null;
+  const BusinessIcon = businessTypeInfo?.icon || Store;
 
   const getStatusBadge = (status: string) => {
     const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
@@ -44,7 +77,12 @@ const UserDashboard = () => {
     return <Badge variant={variants[status] || "secondary"} className="bg-opacity-20">{status}</Badge>;
   };
 
-  const quickActions = [
+  const quickActions = isBusinessOwner ? [
+    { icon: "🏢", title: "My Businesses", path: "/my-businesses" },
+    { icon: "📊", title: "Dashboard", path: `/dashboard/business/${primaryBusiness?.id}` },
+    { icon: "💼", title: "Post Job", path: `/post-job?business=${primaryBusiness?.id}` },
+    { icon: "📢", title: "Run Ads", path: `/purchase-ad?business=${primaryBusiness?.id}` },
+  ] : [
     { icon: "🏢", title: "Browse Businesses", path: "/businesses" },
     { icon: "💼", title: "Find Jobs", path: "/jobs" },
     { icon: "🏨", title: "Book Hotels", path: "/hotels" },
@@ -76,11 +114,39 @@ const UserDashboard = () => {
               <p className="text-[hsl(240_10%_73%)] text-sm">
                 Here's what's happening with your account
               </p>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold uppercase tracking-wide bg-[linear-gradient(135deg,hsl(190_100%_50%_/_0.2),hsl(245_58%_66%_/_0.2))] border border-[hsl(190_100%_50%_/_0.4)] text-[hsl(190_100%_50%)]">
-                <User className="h-3.5 w-3.5" />
-                General User
-              </span>
+              {isBusinessOwner && businessTypeInfo ? (
+                <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold uppercase tracking-wide bg-gradient-to-r ${businessTypeInfo.gradient} bg-opacity-20 border border-white/20 text-white`}>
+                  <BusinessIcon className="h-3.5 w-3.5" />
+                  {businessTypeInfo.label}
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold uppercase tracking-wide bg-[linear-gradient(135deg,hsl(190_100%_50%_/_0.2),hsl(245_58%_66%_/_0.2))] border border-[hsl(190_100%_50%_/_0.4)] text-[hsl(190_100%_50%)]">
+                  <User className="h-3.5 w-3.5" />
+                  General User
+                </span>
+              )}
             </div>
+            
+            {/* Business info for business owners */}
+            {isBusinessOwner && primaryBusiness && (
+              <div 
+                className="mt-4 p-3 rounded-xl bg-white/5 border border-white/10 flex items-center gap-3 cursor-pointer hover:bg-white/10 transition-colors relative z-10"
+                onClick={() => navigate(`/dashboard/business/${primaryBusiness.id}`)}
+              >
+                <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center overflow-hidden">
+                  {primaryBusiness.logo_url ? (
+                    <img src={primaryBusiness.logo_url} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    <Building2 className="h-5 w-5 text-white/60" />
+                  )}
+                </div>
+                <div className="flex-1">
+                  <p className="text-white font-medium text-sm">{primaryBusiness.name}</p>
+                  <p className="text-white/50 text-xs">{primaryBusiness.category} • {primaryBusiness.region}</p>
+                </div>
+                <ArrowRight className="h-4 w-4 text-white/40" />
+              </div>
+            )}
           </div>
 
           {/* Quick Actions */}

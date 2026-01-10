@@ -177,11 +177,19 @@ const PurchaseAd = () => {
                         <SelectValue placeholder="Choose a business" />
                       </SelectTrigger>
                       <SelectContent>
-                        {ownerships?.map((ownership: any) => (
-                          <SelectItem key={ownership.businesses.id} value={ownership.businesses.id}>
-                            {ownership.businesses.name}
-                          </SelectItem>
-                        ))}
+                        {ownerships && ownerships.length > 0 ? (
+                          ownerships
+                            .filter((ownership: any) => ownership.businesses)
+                            .map((ownership: any) => (
+                              <SelectItem key={ownership.businesses.id} value={ownership.businesses.id}>
+                                {ownership.businesses.name}
+                              </SelectItem>
+                            ))
+                        ) : (
+                          <div className="px-2 py-4 text-sm text-muted-foreground text-center">
+                            No businesses found. Please register a business first.
+                          </div>
+                        )}
                       </SelectContent>
                     </Select>
                   </div>

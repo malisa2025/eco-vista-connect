@@ -3,12 +3,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useConversations, useMessages, useMessageMutations } from '@/hooks/useMessages';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { MessageCircle, Send } from 'lucide-react';
+import { MessageCircle, Send, ArrowLeft, Search } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
 const Inbox = () => {
@@ -18,6 +17,9 @@ const Inbox = () => {
   const { data: messages = [] } = useMessages(selectedConversationId || undefined);
   const { sendMessage } = useMessageMutations();
   const [messageText, setMessageText] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const selectedConversation = conversations?.find((c: any) => c.id === selectedConversationId);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,12 +34,21 @@ const Inbox = () => {
     setMessageText('');
   };
 
+  const filteredConversations = conversations?.filter((conv: any) =>
+    conv.businesses?.name?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   if (isLoading) {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col bg-dashboard bg-dashboard-animated">
         <Navbar />
         <main className="flex-1 container mx-auto px-4 py-8">
-          <div className="text-center py-20">Loading...</div>
+          <div className="glass-card rounded-2xl p-8 text-center">
+            <div className="animate-pulse flex flex-col items-center gap-4">
+              <div className="h-12 w-12 rounded-full bg-white/10" />
+              <div className="h-4 w-32 bg-white/10 rounded" />
+            </div>
+          </div>
         </main>
         <Footer />
       </div>
@@ -45,89 +56,126 @@ const Inbox = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-dashboard bg-dashboard-animated">
       <Navbar />
       
       <main className="flex-1 container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-6">Messages</h1>
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-white">Messages</h1>
+          <p className="text-white/60 mt-1">Chat with businesses</p>
+        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-[600px]">
+        <div className="glass-card rounded-2xl overflow-hidden h-[600px] flex">
           {/* Conversations List */}
-          <Card className="md:col-span-1">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MessageCircle className="h-5 w-5" />
-                Conversations
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              <ScrollArea className="h-[500px]">
-                {conversations && conversations.length > 0 ? (
-                  conversations.map((conv: any) => (
-                    <div
-                      key={conv.id}
-                      onClick={() => setSelectedConversationId(conv.id)}
-                      className={`p-4 border-b cursor-pointer hover:bg-muted transition-colors ${
-                        selectedConversationId === conv.id ? 'bg-muted' : ''
-                      }`}
-                    >
-                      <div className="flex items-start gap-3">
-                        <Avatar>
-                          <AvatarImage src={conv.businesses?.logo_url} />
-                          <AvatarFallback>
-                            {conv.businesses?.name?.charAt(0)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-semibold truncate">
-                            {conv.businesses?.name}
-                          </h4>
-                          <p className="text-sm text-muted-foreground truncate">
-                            {conv.messages?.[0]?.content}
-                          </p>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {formatDistanceToNow(new Date(conv.last_message_at), {
-                              addSuffix: true,
-                            })}
-                          </p>
-                        </div>
+          <div className={`w-full md:w-80 border-r border-white/10 flex flex-col ${selectedConversationId ? 'hidden md:flex' : 'flex'}`}>
+            <div className="p-4 border-b border-white/10">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
+                <Input
+                  placeholder="Search conversations..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9 bg-white/5 border-white/10 text-white placeholder:text-white/40"
+                />
+              </div>
+            </div>
+            
+            <ScrollArea className="flex-1">
+              {filteredConversations && filteredConversations.length > 0 ? (
+                filteredConversations.map((conv: any) => (
+                  <div
+                    key={conv.id}
+                    onClick={() => setSelectedConversationId(conv.id)}
+                    className={`p-4 border-b border-white/5 cursor-pointer transition-all duration-200 ${
+                      selectedConversationId === conv.id 
+                        ? 'bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border-l-2 border-l-cyan-400' 
+                        : 'hover:bg-white/5'
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <Avatar className="h-12 w-12 border-2 border-white/10">
+                        <AvatarImage src={conv.businesses?.logo_url} />
+                        <AvatarFallback className="bg-gradient-to-br from-purple-500 to-pink-500 text-white">
+                          {conv.businesses?.name?.charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-semibold text-white truncate">
+                          {conv.businesses?.name}
+                        </h4>
+                        <p className="text-sm text-white/50 truncate mt-0.5">
+                          {conv.messages?.[0]?.content || 'No messages yet'}
+                        </p>
+                        <p className="text-xs text-white/30 mt-1">
+                          {formatDistanceToNow(new Date(conv.last_message_at), {
+                            addSuffix: true,
+                          })}
+                        </p>
                       </div>
                     </div>
-                  ))
-                ) : (
-                  <div className="p-8 text-center text-muted-foreground">
-                    No conversations yet. Start chatting with businesses!
                   </div>
-                )}
-              </ScrollArea>
-            </CardContent>
-          </Card>
+                ))
+              ) : (
+                <div className="p-8 text-center">
+                  <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-4">
+                    <MessageCircle className="h-8 w-8 text-white/20" />
+                  </div>
+                  <p className="text-white/50">No conversations yet</p>
+                  <p className="text-sm text-white/30 mt-1">Start chatting with businesses!</p>
+                </div>
+              )}
+            </ScrollArea>
+          </div>
 
           {/* Messages */}
-          <Card className="md:col-span-2">
+          <div className={`flex-1 flex flex-col ${selectedConversationId ? 'flex' : 'hidden md:flex'}`}>
             {selectedConversationId ? (
               <>
-                <CardHeader>
-                  <CardTitle>Chat</CardTitle>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <ScrollArea className="h-[440px] p-4">
+                {/* Chat Header */}
+                <div className="p-4 border-b border-white/10 flex items-center gap-3">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="md:hidden text-white hover:bg-white/10"
+                    onClick={() => setSelectedConversationId(null)}
+                  >
+                    <ArrowLeft className="h-5 w-5" />
+                  </Button>
+                  <Avatar className="h-10 w-10 border-2 border-white/10">
+                    <AvatarImage src={selectedConversation?.businesses?.logo_url} />
+                    <AvatarFallback className="bg-gradient-to-br from-purple-500 to-pink-500 text-white">
+                      {selectedConversation?.businesses?.name?.charAt(0)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <h4 className="font-semibold text-white">
+                      {selectedConversation?.businesses?.name}
+                    </h4>
+                    <p className="text-xs text-white/50">Online</p>
+                  </div>
+                </div>
+
+                {/* Messages Area */}
+                <ScrollArea className="flex-1 p-4">
+                  <div className="space-y-4">
                     {messages.map((message: any) => (
                       <div
                         key={message.id}
-                        className={`mb-4 flex ${
+                        className={`flex ${
                           message.sender_id === user?.id ? 'justify-end' : 'justify-start'
                         }`}
                       >
                         <div
-                          className={`max-w-[70%] rounded-lg p-3 ${
+                          className={`max-w-[75%] rounded-2xl p-4 ${
                             message.sender_id === user?.id
-                              ? 'bg-primary text-primary-foreground'
-                              : 'bg-muted'
+                              ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-br-sm'
+                              : 'bg-white/10 text-white rounded-bl-sm'
                           }`}
                         >
-                          <p>{message.content}</p>
-                          <p className="text-xs opacity-70 mt-1">
+                          <p className="text-sm leading-relaxed">{message.content}</p>
+                          <p className={`text-xs mt-2 ${
+                            message.sender_id === user?.id ? 'text-white/70' : 'text-white/40'
+                          }`}>
                             {formatDistanceToNow(new Date(message.created_at), {
                               addSuffix: true,
                             })}
@@ -135,27 +183,41 @@ const Inbox = () => {
                         </div>
                       </div>
                     ))}
-                  </ScrollArea>
-                  <div className="p-4 border-t">
-                    <form onSubmit={handleSendMessage} className="flex gap-2">
-                      <Input
-                        placeholder="Type a message..."
-                        value={messageText}
-                        onChange={(e) => setMessageText(e.target.value)}
-                      />
-                      <Button type="submit" size="icon">
-                        <Send className="h-4 w-4" />
-                      </Button>
-                    </form>
                   </div>
-                </CardContent>
+                </ScrollArea>
+
+                {/* Input Area */}
+                <div className="p-4 border-t border-white/10">
+                  <form onSubmit={handleSendMessage} className="flex gap-3">
+                    <Input
+                      placeholder="Type a message..."
+                      value={messageText}
+                      onChange={(e) => setMessageText(e.target.value)}
+                      className="flex-1 bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl"
+                    />
+                    <Button 
+                      type="submit" 
+                      size="icon"
+                      disabled={!messageText.trim()}
+                      className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-xl h-10 w-10 disabled:opacity-50"
+                    >
+                      <Send className="h-4 w-4" />
+                    </Button>
+                  </form>
+                </div>
               </>
             ) : (
-              <div className="h-full flex items-center justify-center text-muted-foreground">
-                Select a conversation to start chatting
+              <div className="flex-1 flex items-center justify-center">
+                <div className="text-center">
+                  <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-4">
+                    <MessageCircle className="h-10 w-10 text-white/20" />
+                  </div>
+                  <p className="text-white/50 text-lg">Select a conversation</p>
+                  <p className="text-sm text-white/30 mt-1">Choose from your existing conversations</p>
+                </div>
               </div>
             )}
-          </Card>
+          </div>
         </div>
       </main>
 
