@@ -6,7 +6,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import BusinessTypeSelector, { BusinessType } from '@/components/business/BusinessTypeSelector';
+import { BusinessType } from '@/components/business/BusinessTypeSelector';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { z } from 'zod';
 import logoImage from '@/assets/logo-ghkonect.jpg';
 import { toast } from 'sonner';
@@ -123,7 +130,7 @@ const Auth = () => {
           <p className="text-muted-foreground">Sign in to your account or create a new one</p>
         </div>
 
-        <Card className={signUpForm.userType === 'business_owner' ? 'max-w-2xl mx-auto' : ''}>
+        <Card>
           <CardHeader>
             <CardTitle>Authentication</CardTitle>
             <CardDescription>Choose your preferred method below</CardDescription>
@@ -185,12 +192,27 @@ const Auth = () => {
 
                   {/* Business Type Selection - Only shown for business owners */}
                   {signUpForm.userType === 'business_owner' && (
-                    <div className="space-y-3">
-                      <Label>What type of business do you have?</Label>
-                      <BusinessTypeSelector
-                        value={signUpForm.businessType}
-                        onChange={(type) => setSignUpForm({ ...signUpForm, businessType: type })}
-                      />
+                    <div className="space-y-2">
+                      <Label htmlFor="business-type">What type of business do you have?</Label>
+                      <Select
+                        value={signUpForm.businessType || ''}
+                        onValueChange={(value) => setSignUpForm({ 
+                          ...signUpForm, 
+                          businessType: value as BusinessType 
+                        })}
+                      >
+                        <SelectTrigger id="business-type">
+                          <SelectValue placeholder="Select your business type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="restaurant">Restaurant / Food</SelectItem>
+                          <SelectItem value="hotel">Hotel / Accommodation</SelectItem>
+                          <SelectItem value="retail">Retail / Shop</SelectItem>
+                          <SelectItem value="services">Professional Services</SelectItem>
+                          <SelectItem value="healthcare">Healthcare</SelectItem>
+                          <SelectItem value="other">Other Business</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   )}
 
