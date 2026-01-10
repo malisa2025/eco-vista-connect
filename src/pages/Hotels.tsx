@@ -10,6 +10,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { format } from "date-fns";
 import HotelCard from "@/components/hotels/HotelCard";
 import { useHotelSearch } from "@/hooks/useHotelSearch";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 const Hotels = () => {
   const [region, setRegion] = useState<string>("");
@@ -31,7 +33,9 @@ const Hotels = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen flex flex-col bg-background">
+      <Navbar />
+      
       {/* Hero Search Section */}
       <section className="bg-gradient-to-br from-primary/10 via-background to-secondary/10 py-16">
         <div className="container mx-auto px-4">
@@ -147,7 +151,7 @@ const Hotels = () => {
       </section>
 
       {/* Results Section */}
-      <section className="container mx-auto px-4 py-12">
+      <section className="container mx-auto px-4 py-12 flex-1">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold">
             {hotels?.length || 0} Hotels Found
@@ -173,6 +177,8 @@ const Hotels = () => {
           </Card>
         )}
       </section>
+
+      <Footer />
     </div>
   );
 };
