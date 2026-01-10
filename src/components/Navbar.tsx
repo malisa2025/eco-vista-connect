@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Building2, Menu, User, Heart, LogOut, LayoutDashboard, MessageCircle, TrendingUp, Bookmark, Bell, CreditCard, Database, Hotel, Briefcase, X } from "lucide-react";
+import { Building2, Menu, User, Heart, LogOut, LayoutDashboard, MessageCircle, TrendingUp, Bookmark, Bell, CreditCard, Database, Hotel, Briefcase, UtensilsCrossed } from "lucide-react";
 import logoImage from "@/assets/logo-ghkonect.jpg";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useState } from "react";
@@ -190,8 +190,12 @@ const Navbar = () => {
                       Favorites
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate('/my-bookings')}>
-                      <Building2 className="mr-2 h-4 w-4" />
+                      <Hotel className="mr-2 h-4 w-4" />
                       My Bookings
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/my-reservations')}>
+                      <UtensilsCrossed className="mr-2 h-4 w-4" />
+                      My Reservations
                     </DropdownMenuItem>
                     {!hasRole('business_owner') && !hasRole('admin') && (
                       <>
@@ -388,6 +392,10 @@ const Navbar = () => {
                         <Button variant="ghost" className="w-full justify-start h-11 text-base" onClick={() => handleNavigate('/my-bookings')}>
                           <Hotel className="mr-3 h-5 w-5" />
                           My Bookings
+                        </Button>
+                        <Button variant="ghost" className="w-full justify-start h-11 text-base" onClick={() => handleNavigate('/my-reservations')}>
+                          <UtensilsCrossed className="mr-3 h-5 w-5" />
+                          My Reservations
                         </Button>
                         
                         {!hasRole('business_owner') && !hasRole('admin') && (
