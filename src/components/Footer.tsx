@@ -28,24 +28,19 @@ const Footer = () => {
             <h4 className="font-bold mb-4">Platform</h4>
             <ul className="space-y-3">
               <li>
-                <a href="#" className="text-muted-foreground hover:text-primary transition-smooth">
+                <Link to="/businesses" className="text-muted-foreground hover:text-primary transition-smooth">
                   Business Directory
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-muted-foreground hover:text-primary transition-smooth">
-                  Advertising
-                </a>
+                <Link to="/hotels" className="text-muted-foreground hover:text-primary transition-smooth">
+                  Hotels
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-muted-foreground hover:text-primary transition-smooth">
-                  Events
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-muted-foreground hover:text-primary transition-smooth">
+                <Link to="/jobs" className="text-muted-foreground hover:text-primary transition-smooth">
                   Jobs
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -55,14 +50,9 @@ const Footer = () => {
             <h4 className="font-bold mb-4">Company</h4>
             <ul className="space-y-3">
               <li>
-                <a href="#" className="text-muted-foreground hover:text-primary transition-smooth">
-                  About Us
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-muted-foreground hover:text-primary transition-smooth">
+                <Link to="/subscription-plans" className="text-muted-foreground hover:text-primary transition-smooth">
                   Pricing
-                </a>
+                </Link>
               </li>
               <li>
                 <Link to="/contact" className="text-muted-foreground hover:text-primary transition-smooth">
@@ -70,9 +60,9 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <a href="#" className="text-muted-foreground hover:text-primary transition-smooth">
+                <Link to="/privacy" className="text-muted-foreground hover:text-primary transition-smooth">
                   Privacy Policy
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -84,15 +74,15 @@ const Footer = () => {
             © 2026 GHKonect. All rights reserved. A Golden Dream Company
           </p>
           <div className="flex gap-6">
-            <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-smooth">
+            <Link to="/terms" className="text-sm text-muted-foreground hover:text-primary transition-smooth">
               Terms of Service
-            </a>
-            <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-smooth">
+            </Link>
+            <Link to="/privacy" className="text-sm text-muted-foreground hover:text-primary transition-smooth">
               Privacy
-            </a>
-            <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-smooth">
+            </Link>
+            <Link to="/cookies" className="text-sm text-muted-foreground hover:text-primary transition-smooth">
               Cookies
-            </a>
+            </Link>
           </div>
         </div>
       </div>
