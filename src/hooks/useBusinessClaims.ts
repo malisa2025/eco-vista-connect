@@ -25,17 +25,37 @@ export const useAllClaims = () => {
   return useQuery({
     queryKey: ['all-business-claims'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // Fetch claims with business info
+      const { data: claims, error } = await supabase
         .from('business_claims')
         .select(`
           *,
-          profiles:user_id (full_name, email),
           businesses (name)
         `)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data;
+      if (!claims || claims.length === 0) return [];
+
+      // Get unique user IDs
+      const userIds = [...new Set(claims.map(c => c.user_id))];
+      
+      // Fetch profiles separately (avoids FK join issue)
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, full_name, email')
+        .in('id', userIds);
+
+      if (profilesError) throw profilesError;
+
+      // Create a map for quick lookup
+      const profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
+
+      // Merge profiles into claims
+      return claims.map(claim => ({
+        ...claim,
+        profiles: profileMap.get(claim.user_id) || null
+      }));
     },
   });
 };
