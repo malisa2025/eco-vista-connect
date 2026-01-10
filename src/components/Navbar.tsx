@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Building2, Menu, User, Heart, LogOut, LayoutDashboard, MessageCircle, TrendingUp, Bookmark, Bell, CreditCard, Database, Hotel, Briefcase, UtensilsCrossed } from "lucide-react";
+import { Building2, Menu, User, Heart, LogOut, LayoutDashboard, MessageCircle, TrendingUp, Bookmark, Bell, CreditCard, Database, Hotel, Briefcase, UtensilsCrossed, Home } from "lucide-react";
 import logoImage from "@/assets/logo-ghkonect.jpg";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useState } from "react";
@@ -177,6 +177,10 @@ const Navbar = () => {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem onClick={() => navigate('/dashboard')}>
+                      <Home className="mr-2 h-4 w-4" />
+                      Dashboard
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate('/profile')}>
                       <User className="mr-2 h-4 w-4" />
                       Profile
@@ -377,6 +381,10 @@ const Navbar = () => {
                         <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2 mb-2">
                           Account
                         </p>
+                        <Button variant="ghost" className="w-full justify-start h-11 text-base" onClick={() => handleNavigate('/dashboard')}>
+                          <Home className="mr-3 h-5 w-5" />
+                          Dashboard
+                        </Button>
                         <Button variant="ghost" className="w-full justify-start h-11 text-base" onClick={() => handleNavigate('/profile')}>
                           <User className="mr-3 h-5 w-5" />
                           Profile
