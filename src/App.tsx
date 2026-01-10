@@ -62,6 +62,7 @@ import MenuManager from "./pages/dashboard/MenuManager";
 import ProductManager from "./pages/dashboard/ProductManager";
 import RestaurantReservations from "./pages/dashboard/RestaurantReservations";
 import MyReservations from "./pages/MyReservations";
+import UserDashboard from "./pages/UserDashboard";
 import Contact from "./pages/Contact";
 
 const queryClient = new QueryClient();
@@ -82,6 +83,7 @@ const App = () => (
         <Route path="/hotels" element={<Hotels />} />
         <Route path="/hotels/:id" element={<HotelDetail />} />
         <Route path="/hotels/:id/book" element={<ProtectedRoute><HotelBooking /></ProtectedRoute>} />
+          <Route path="/dashboard" element={<ProtectedRoute><UserDashboard /></ProtectedRoute>} />
           <Route path="/my-bookings" element={<ProtectedRoute><MyBookings /></ProtectedRoute>} />
           <Route path="/my-reservations" element={<ProtectedRoute><MyReservations /></ProtectedRoute>} />
           {/* Hotel Owner Dashboard Routes */}

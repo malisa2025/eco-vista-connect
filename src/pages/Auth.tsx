@@ -33,7 +33,7 @@ const Auth = () => {
   const getRedirectPath = useCallback(() => {
     if (hasRole('admin')) return '/admin/dashboard';
     if (hasRole('business_owner')) return '/my-businesses';
-    return '/';
+    return '/dashboard';
   }, [hasRole]);
 
   // Redirect if already logged in and roles are loaded
