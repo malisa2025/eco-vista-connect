@@ -648,6 +648,62 @@ export type Database = {
           },
         ]
       }
+      business_menu_items: {
+        Row: {
+          business_id: string
+          category: string
+          created_at: string | null
+          description: string | null
+          dietary_tags: string[] | null
+          id: string
+          image_url: string | null
+          is_available: boolean | null
+          is_featured: boolean | null
+          name: string
+          price: number
+          sort_order: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          business_id: string
+          category?: string
+          created_at?: string | null
+          description?: string | null
+          dietary_tags?: string[] | null
+          id?: string
+          image_url?: string | null
+          is_available?: boolean | null
+          is_featured?: boolean | null
+          name: string
+          price?: number
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          business_id?: string
+          category?: string
+          created_at?: string | null
+          description?: string | null
+          dietary_tags?: string[] | null
+          id?: string
+          image_url?: string | null
+          is_available?: boolean | null
+          is_featured?: boolean | null
+          name?: string
+          price?: number
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_menu_items_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_owners: {
         Row: {
           business_id: string
@@ -673,6 +729,59 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "business_owners_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      business_products: {
+        Row: {
+          business_id: string
+          category: string
+          created_at: string | null
+          description: string | null
+          id: string
+          image_url: string | null
+          in_stock: boolean | null
+          is_featured: boolean | null
+          name: string
+          price: number
+          sort_order: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          business_id: string
+          category?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          in_stock?: boolean | null
+          is_featured?: boolean | null
+          name: string
+          price?: number
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          business_id?: string
+          category?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          in_stock?: boolean | null
+          is_featured?: boolean | null
+          name?: string
+          price?: number
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_products_business_id_fkey"
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
@@ -2130,6 +2239,80 @@ export type Database = {
           valid_until?: string | null
         }
         Relationships: []
+      }
+      restaurant_reservations: {
+        Row: {
+          booking_reference: string
+          business_id: string
+          cancellation_reason: string | null
+          cancelled_at: string | null
+          confirmed_at: string | null
+          created_at: string | null
+          guest_email: string
+          guest_name: string
+          guest_phone: string | null
+          id: string
+          occasion: string | null
+          party_size: number
+          reservation_date: string
+          reservation_time: string
+          special_requests: string | null
+          status: string
+          table_preference: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          booking_reference: string
+          business_id: string
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          confirmed_at?: string | null
+          created_at?: string | null
+          guest_email: string
+          guest_name: string
+          guest_phone?: string | null
+          id?: string
+          occasion?: string | null
+          party_size?: number
+          reservation_date: string
+          reservation_time: string
+          special_requests?: string | null
+          status?: string
+          table_preference?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          booking_reference?: string
+          business_id?: string
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          confirmed_at?: string | null
+          created_at?: string | null
+          guest_email?: string
+          guest_name?: string
+          guest_phone?: string | null
+          id?: string
+          occasion?: string | null
+          party_size?: number
+          reservation_date?: string
+          reservation_time?: string
+          special_requests?: string | null
+          status?: string
+          table_preference?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "restaurant_reservations_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       review_flags: {
         Row: {
