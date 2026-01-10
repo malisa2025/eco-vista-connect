@@ -54,6 +54,7 @@ import HotelDetail from "./pages/HotelDetail";
 import HotelBooking from "./pages/HotelBooking";
 import MyBookings from "./pages/MyBookings";
 import HotelDashboard from "./pages/dashboard/HotelDashboard";
+import HotelSetup from "./pages/dashboard/HotelSetup";
 import BusinessDashboard from "./pages/dashboard/BusinessDashboard";
 import RestaurantDashboard from "./pages/dashboard/RestaurantDashboard";
 import HotelRooms from "./pages/dashboard/HotelRooms";
@@ -89,6 +90,7 @@ const App = () => (
           <Route path="/my-reservations" element={<ProtectedRoute><MyReservations /></ProtectedRoute>} />
           {/* Hotel Owner Dashboard Routes */}
           <Route path="/dashboard/hotel" element={<ProtectedRoute requireRole="business_owner"><HotelDashboard /></ProtectedRoute>} />
+          <Route path="/dashboard/hotel/setup" element={<ProtectedRoute requireRole="business_owner"><HotelSetup /></ProtectedRoute>} />
           <Route path="/dashboard/hotel/rooms" element={<ProtectedRoute requireRole="business_owner"><HotelRooms /></ProtectedRoute>} />
           <Route path="/dashboard/hotel/bookings" element={<ProtectedRoute requireRole="business_owner"><HotelBookings /></ProtectedRoute>} />
           <Route path="/dashboard/hotel/settings" element={<ProtectedRoute requireRole="business_owner"><HotelSettings /></ProtectedRoute>} />
