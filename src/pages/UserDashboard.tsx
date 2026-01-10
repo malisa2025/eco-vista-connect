@@ -27,7 +27,23 @@ import { format } from "date-fns";
 
 const UserDashboard = () => {
   const navigate = useNavigate();
-  const { profile, user } = useAuth();
+  const { profile, user, roles } = useAuth();
+
+  // Get user type label based on roles
+  const getUserTypeLabel = () => {
+    if (roles?.includes('admin')) return 'Administrator';
+    if (roles?.includes('moderator')) return 'Moderator';
+    return 'General User';
+  };
+
+  const getUserTypeGradient = () => {
+    if (roles?.includes('admin')) return 'from-red-500 to-orange-500';
+    if (roles?.includes('moderator')) return 'from-green-500 to-emerald-500';
+    return '';
+  };
+
+  const isAdmin = roles?.includes('admin');
+  const isModerator = roles?.includes('moderator');
   const { 
     stats, 
     recentReservations, 
@@ -120,9 +136,15 @@ const UserDashboard = () => {
                   {businessTypeInfo.label}
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold uppercase tracking-wide bg-[linear-gradient(135deg,hsl(190_100%_50%_/_0.2),hsl(245_58%_66%_/_0.2))] border border-[hsl(190_100%_50%_/_0.4)] text-[hsl(190_100%_50%)]">
+                <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold uppercase tracking-wide border ${
+                  isAdmin 
+                    ? 'bg-gradient-to-r from-red-500/20 to-orange-500/20 border-red-500/40 text-red-400'
+                    : isModerator
+                    ? 'bg-gradient-to-r from-green-500/20 to-emerald-500/20 border-green-500/40 text-green-400'
+                    : 'bg-[linear-gradient(135deg,hsl(190_100%_50%_/_0.2),hsl(245_58%_66%_/_0.2))] border-[hsl(190_100%_50%_/_0.4)] text-[hsl(190_100%_50%)]'
+                }`}>
                   <User className="h-3.5 w-3.5" />
-                  General User
+                  {getUserTypeLabel()}
                 </span>
               )}
             </div>
