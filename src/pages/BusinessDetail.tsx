@@ -11,6 +11,9 @@ import AdSlot from "@/components/AdSlot";
 import { FloatingContactButton } from "@/components/leads/FloatingContactButton";
 import { ExitIntentPopup } from "@/components/leads/ExitIntentPopup";
 import { EmbeddedLeadForm } from "@/components/leads/EmbeddedLeadForm";
+import MenuSection from "@/components/business/MenuSection";
+import ProductCatalog from "@/components/business/ProductCatalog";
+import ReservationWidget from "@/components/business/ReservationWidget";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -30,7 +33,6 @@ import {
   Phone,
   Mail,
   Globe,
-  CheckCircle2,
 } from "lucide-react";
 
 const BusinessDetail = () => {
@@ -206,6 +208,15 @@ const BusinessDetail = () => {
                 </Card>
               )}
 
+              {/* Menu Section for Restaurants */}
+              {business.category?.toLowerCase().includes("restaurant") ||
+               business.category?.toLowerCase().includes("food") ||
+               business.category?.toLowerCase().includes("cafe") ? (
+                <MenuSection businessId={id!} />
+              ) : (
+                <ProductCatalog businessId={id!} />
+              )}
+
               {/* Message Business Button */}
               <ContactBusinessButton businessId={id!} />
 
@@ -290,6 +301,13 @@ const BusinessDetail = () => {
                </Card>
 
                {/* Business Hours */}
+               {/* Reservation Widget for Restaurants */}
+               {(business.category?.toLowerCase().includes("restaurant") ||
+                 business.category?.toLowerCase().includes("food") ||
+                 business.category?.toLowerCase().includes("cafe")) && (
+                 <ReservationWidget businessId={id!} businessName={business.name} />
+               )}
+
                {business.business_hours && (
                  <Card>
                    <CardContent className="pt-6">
