@@ -2918,6 +2918,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_update_claim_status: {
+        Args: {
+          p_admin_notes?: string
+          p_claim_id: string
+          p_status: Database["public"]["Enums"]["claim_status"]
+        }
+        Returns: undefined
+      }
       aggregate_daily_ad_stats: {
         Args: { target_date?: string }
         Returns: undefined
