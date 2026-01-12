@@ -68,13 +68,53 @@ export const useAdminVerification = () => {
   const pendingRequests = useQuery({
     queryKey: ['admin-verification-requests'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // Fetch verification requests without joins
+      const { data: requests, error } = await supabase
         .from('verification_requests')
-        .select('*, businesses(name, logo_url), profiles(full_name, email)')
+        .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data;
+      if (!requests || requests.length === 0) return [];
+
+      // Get unique business IDs and user IDs
+      const businessIds = [...new Set(requests.map(r => r.business_id).filter(Boolean))] as string[];
+      const userIds = [...new Set(requests.map(r => r.requested_by).filter(Boolean))] as string[];
+
+      // Fetch businesses separately
+      let businesses: { id: string; name: string; logo_url: string | null }[] = [];
+      if (businessIds.length > 0) {
+        const { data: businessData, error: businessesError } = await supabase
+          .from('businesses')
+          .select('id, name, logo_url')
+          .in('id', businessIds);
+
+        if (businessesError) throw businessesError;
+        businesses = businessData || [];
+      }
+
+      // Fetch profiles separately
+      let profiles: { id: string; full_name: string | null; email: string | null }[] = [];
+      if (userIds.length > 0) {
+        const { data: profileData, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id, full_name, email')
+          .in('id', userIds);
+
+        if (profilesError) throw profilesError;
+        profiles = profileData || [];
+      }
+
+      // Create lookup maps
+      const businessMap = new Map(businesses.map(b => [b.id, b]));
+      const profileMap = new Map(profiles.map(p => [p.id, p]));
+
+      // Merge all data
+      return requests.map(request => ({
+        ...request,
+        businesses: request.business_id ? businessMap.get(request.business_id) || null : null,
+        profiles: request.requested_by ? profileMap.get(request.requested_by) || null : null
+      }));
     }
   });
 
