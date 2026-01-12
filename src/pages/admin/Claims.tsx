@@ -133,7 +133,7 @@ const AdminClaims = () => {
       <Footer />
 
       <Dialog open={!!selectedClaim} onOpenChange={() => setSelectedClaim(null)}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Review Business Claim</DialogTitle>
             <DialogDescription>Review and process this business claim request</DialogDescription>
@@ -155,10 +155,57 @@ const AdminClaims = () => {
 
               {selectedClaim.business_data && (
                 <div>
-                  <h3 className="font-semibold mb-2">Submitted Data</h3>
-                  <pre className="text-sm bg-muted p-4 rounded overflow-auto max-h-48">
-                    {JSON.stringify(selectedClaim.business_data, null, 2)}
-                  </pre>
+                  <h3 className="font-semibold mb-2">Submitted Business Information</h3>
+                  <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+                    {selectedClaim.business_data.name && (
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Business Name</span>
+                        <span className="font-medium">{selectedClaim.business_data.name}</span>
+                      </div>
+                    )}
+                    {selectedClaim.business_data.category && (
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Category</span>
+                        <span className="font-medium">{selectedClaim.business_data.category}</span>
+                      </div>
+                    )}
+                    {selectedClaim.business_data.region && (
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Region</span>
+                        <span className="font-medium">{selectedClaim.business_data.region}</span>
+                      </div>
+                    )}
+                    {selectedClaim.business_data.address && (
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Address</span>
+                        <span className="font-medium text-right max-w-[60%]">{selectedClaim.business_data.address}</span>
+                      </div>
+                    )}
+                    {selectedClaim.business_data.phone && (
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Phone</span>
+                        <span className="font-medium">{selectedClaim.business_data.phone}</span>
+                      </div>
+                    )}
+                    {selectedClaim.business_data.email && (
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Email</span>
+                        <span className="font-medium">{selectedClaim.business_data.email}</span>
+                      </div>
+                    )}
+                    {selectedClaim.business_data.website && (
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Website</span>
+                        <span className="font-medium">{selectedClaim.business_data.website}</span>
+                      </div>
+                    )}
+                    {selectedClaim.business_data.description && (
+                      <div className="pt-2 border-t">
+                        <span className="text-muted-foreground text-sm">Description</span>
+                        <p className="mt-1 text-sm">{selectedClaim.business_data.description}</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
               
