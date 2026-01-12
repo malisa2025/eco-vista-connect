@@ -161,8 +161,9 @@ export const useClaimMutations = () => {
       queryClient.invalidateQueries({ queryKey: ['all-business-claims'] });
       toast.success('Claim status updated');
     },
-    onError: () => {
-      toast.error('Failed to update claim status');
+    onError: (error: Error) => {
+      console.error('Claim update error:', error);
+      toast.error(`Failed to update claim status: ${error.message}`);
     },
   });
 
