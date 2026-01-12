@@ -32,7 +32,24 @@ const newBusinessSchema = z.object({
   description: z.string().max(500).optional(),
   phone: z.string().optional(),
   email: z.string().email().optional().or(z.literal('')),
-  website: z.string().url().optional().or(z.literal('')),
+  website: z.string()
+    .transform((val) => val.trim())
+    .refine(
+      (val) => {
+        if (!val || val === '') return true;
+        try {
+          const urlToTest = val.startsWith('http://') || val.startsWith('https://') 
+            ? val 
+            : `https://${val}`;
+          new URL(urlToTest);
+          return true;
+        } catch {
+          return false;
+        }
+      },
+      { message: 'Please enter a valid website URL (e.g., example.com)' }
+    )
+    .optional(),
   address: z.string().optional(),
 });
 
