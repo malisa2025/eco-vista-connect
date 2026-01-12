@@ -144,15 +144,12 @@ export const useClaimMutations = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Must be logged in');
 
-      const { error } = await supabase
-        .from('business_claims')
-        .update({
-          status,
-          admin_notes: adminNotes,
-          reviewed_at: new Date().toISOString(),
-          reviewed_by: user.id,
-        })
-        .eq('id', claimId);
+      // Use the SECURITY DEFINER function to bypass RLS
+      const { error } = await supabase.rpc('admin_update_claim_status', {
+        p_claim_id: claimId,
+        p_status: status,
+        p_admin_notes: adminNotes || null,
+      });
 
       if (error) throw error;
     },
