@@ -1,11 +1,15 @@
+import { useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBusinessDashboard } from "@/hooks/useBusinessDashboard";
+import { useBusinessUpdate } from "@/hooks/useBusinessUpdate";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { ImageUploader } from "@/components/business/ImageUploader";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import {
@@ -31,6 +35,7 @@ import {
   Calendar,
   Wrench,
   Stethoscope,
+  Camera,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
@@ -40,6 +45,15 @@ export default function BusinessDashboard() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { business, stats, recentLeads, recentReviews, viewsTrend, isLoading } = useBusinessDashboard(id);
+  const updateBusiness = useBusinessUpdate(id || '');
+  const [showLogoUpload, setShowLogoUpload] = useState(false);
+
+  const handleLogoUpload = (url: string) => {
+    if (url) {
+      updateBusiness.mutate({ logo_url: url });
+      setShowLogoUpload(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -237,22 +251,42 @@ export default function BusinessDashboard() {
         <div className="container mx-auto px-4 py-8">
           {/* Header */}
           <div className="glass-card rounded-2xl p-6 mb-8">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center overflow-hidden">
-                  {business.logo_url ? (
-                    <img
-                      src={business.logo_url}
-                      alt={business.name}
-                      className="w-full h-full object-cover"
+            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+              <div className="flex items-start gap-4">
+                {/* Logo with upload capability */}
+                <Dialog open={showLogoUpload} onOpenChange={setShowLogoUpload}>
+                  <DialogTrigger asChild>
+                    <button className="relative w-16 h-16 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center overflow-hidden group cursor-pointer hover:border-cyan-400/50 transition-colors">
+                      {business.logo_url ? (
+                        <img
+                          src={business.logo_url}
+                          alt={business.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <Building2 className="h-8 w-8 text-white/60" />
+                      )}
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                        <Camera className="h-5 w-5 text-white" />
+                      </div>
+                    </button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>Upload Business Logo</DialogTitle>
+                    </DialogHeader>
+                    <ImageUploader
+                      label="Business Logo"
+                      aspectRatio="square"
+                      currentImageUrl={business.logo_url || undefined}
+                      onUploadComplete={handleLogoUpload}
+                      maxSizeMB={2}
                     />
-                  ) : (
-                    <Building2 className="h-8 w-8 text-white/60" />
-                  )}
-                </div>
-                <div>
+                  </DialogContent>
+                </Dialog>
+                <div className="flex-1">
                   <h1 className="text-2xl md:text-3xl font-bold text-white">{business.name}</h1>
-                  <div className="flex items-center gap-2 mt-1">
+                  <div className="flex items-center gap-2 mt-1 flex-wrap">
                     <Badge className="bg-white/10 text-white/80 border-white/20">{business.category}</Badge>
                     <Badge variant="outline" className="border-white/20 text-white/70">{business.region}</Badge>
                     {business.is_verified && (
@@ -262,9 +296,22 @@ export default function BusinessDashboard() {
                       </Badge>
                     )}
                   </div>
+                  {/* Business Description */}
+                  {business.description ? (
+                    <p className="text-white/70 text-sm mt-3 line-clamp-2 max-w-xl">
+                      {business.description}
+                    </p>
+                  ) : (
+                    <p className="text-white/40 text-sm mt-3 italic">
+                      No description yet.{' '}
+                      <Link to={`/businesses/${id}/edit`} className="text-cyan-400 hover:underline">
+                        Add one
+                      </Link>
+                    </p>
+                  )}
                 </div>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 shrink-0">
                 <Button 
                   variant="outline" 
                   onClick={() => navigate(`/businesses/${id}`)}

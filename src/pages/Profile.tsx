@@ -10,17 +10,20 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { User, Mail, Phone, FileText, Briefcase, GraduationCap, Settings, Link as LinkIcon } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { User, Mail, Phone, FileText, Briefcase, GraduationCap, Settings, Link as LinkIcon, Camera } from 'lucide-react';
 import ProfileCompletenessBar from '@/components/profile/ProfileCompletenessBar';
 import SkillsManager from '@/components/profile/SkillsManager';
 import PreferencesSection from '@/components/profile/PreferencesSection';
 import LinksSection from '@/components/profile/LinksSection';
 import { EmailPreferences } from '@/components/profile/EmailPreferences';
 import EducationSection from '@/components/profile/EducationSection';
+import { ImageUploader } from '@/components/business/ImageUploader';
 
 const Profile = () => {
   const { profile, roles, updateProfile, user } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
+  const [showAvatarUpload, setShowAvatarUpload] = useState(false);
   const [formData, setFormData] = useState({
     full_name: profile?.full_name || '',
     phone: profile?.phone || '',
@@ -37,6 +40,13 @@ const Profile = () => {
     salary_expectation: profile?.salary_expectation || '',
     availability: profile?.availability || 'immediate',
   });
+
+  const handleAvatarUpload = async (url: string) => {
+    if (url) {
+      await updateProfile({ avatar_url: url });
+      setShowAvatarUpload(false);
+    }
+  };
 
   // Update form data when profile changes
   useEffect(() => {
@@ -89,10 +99,31 @@ const Profile = () => {
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-4">
-                  <Avatar className="h-20 w-20">
-                    <AvatarImage src={profile?.avatar_url || ''} />
-                    <AvatarFallback className="text-2xl">{getInitials()}</AvatarFallback>
-                  </Avatar>
+                  <Dialog open={showAvatarUpload} onOpenChange={setShowAvatarUpload}>
+                    <DialogTrigger asChild>
+                      <button className="relative group cursor-pointer">
+                        <Avatar className="h-20 w-20">
+                          <AvatarImage src={profile?.avatar_url || ''} />
+                          <AvatarFallback className="text-2xl">{getInitials()}</AvatarFallback>
+                        </Avatar>
+                        <div className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                          <Camera className="h-6 w-6 text-white" />
+                        </div>
+                      </button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-md">
+                      <DialogHeader>
+                        <DialogTitle>Upload Profile Photo</DialogTitle>
+                      </DialogHeader>
+                      <ImageUploader
+                        label="Profile Photo"
+                        aspectRatio="square"
+                        currentImageUrl={profile?.avatar_url || undefined}
+                        onUploadComplete={handleAvatarUpload}
+                        maxSizeMB={2}
+                      />
+                    </DialogContent>
+                  </Dialog>
                   <div className="flex-1">
                     <CardTitle className="text-2xl">{profile?.full_name || 'User'}</CardTitle>
                     <CardDescription className="flex items-center gap-2 mt-1">
