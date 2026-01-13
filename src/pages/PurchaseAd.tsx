@@ -18,6 +18,8 @@ import { useNavigate } from 'react-router-dom';
 import { usePaystackPayment } from 'react-paystack';
 import { supabase } from '@/integrations/supabase/client';
 import { PAYSTACK_PUBLIC_KEY, PAYSTACK_CURRENCY } from '@/lib/paystack';
+import { VideoUploader } from '@/components/business/VideoUploader';
+import { ImageUploader } from '@/components/business/ImageUploader';
 
 const PurchaseAd = () => {
   const navigate = useNavigate();
@@ -32,6 +34,9 @@ const PurchaseAd = () => {
     title: '',
     description: '',
     image_url: '',
+    video_url: '',
+    video_thumbnail_url: '',
+    video_duration: 0,
     link_url: '',
     start_date: '',
     end_date: '',
@@ -47,8 +52,8 @@ const PurchaseAd = () => {
   const totalCost = selectedSpot && daysDiff > 0 ? selectedSpot.price_per_day * daysDiff : 0;
 
   const handlePayment = async () => {
-    if (!formData.business_id || !formData.ad_spot_id || !formData.title || !formData.image_url) {
-      toast.error('Please fill in all required fields');
+    if (!formData.business_id || !formData.ad_spot_id || !formData.title || (!formData.image_url && !formData.video_url)) {
+      toast.error('Please fill in all required fields (including an image or video)');
       return;
     }
 
@@ -214,12 +219,36 @@ const PurchaseAd = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Image URL</Label>
-                    <Input
-                      placeholder="https://example.com/image.jpg"
-                      value={formData.image_url}
-                      onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                      required
+                    <Label>Video Ad (Optional)</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Create a video advertisement for higher engagement
+                    </p>
+                    <VideoUploader
+                      onUploadComplete={(url, thumbnailUrl, duration) => {
+                        setFormData(prev => ({
+                          ...prev,
+                          video_url: url,
+                          video_thumbnail_url: thumbnailUrl || '',
+                          video_duration: duration || 0,
+                        }));
+                      }}
+                      currentVideoUrl={formData.video_url}
+                      prompt="Upload or record your advertisement video"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Ad Image {formData.video_url ? '(Poster/Fallback)' : '*'}</Label>
+                    <p className="text-sm text-muted-foreground">
+                      {formData.video_url 
+                        ? 'This image will be used as a poster for your video ad'
+                        : 'Upload an image for your advertisement'}
+                    </p>
+                    <ImageUploader
+                      onUploadComplete={(url) => setFormData(prev => ({ ...prev, image_url: url }))}
+                      currentImageUrl={formData.image_url}
+                      label="Upload ad image"
+                      aspectRatio="16:9"
                     />
                   </div>
 
