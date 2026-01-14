@@ -8,19 +8,40 @@ import { Badge } from '@/components/ui/badge';
 import { Users as UsersIcon } from 'lucide-react';
 
 const AdminUsers = () => {
-  const { data: users, isLoading } = useQuery({
+  const { data: users, isLoading, isError, error } = useQuery({
     queryKey: ['admin-users'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // Step 1: Fetch all profiles
+      const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
-        .select(`
-          *,
-          user_roles (role)
-        `)
+        .select('id, full_name, email, created_at')
         .order('created_at', { ascending: false });
       
-      if (error) throw error;
-      return data;
+      if (profilesError) throw profilesError;
+      if (!profiles || profiles.length === 0) return [];
+
+      // Step 2: Fetch roles for all these users
+      const userIds = profiles.map(p => p.id);
+      const { data: roles, error: rolesError } = await supabase
+        .from('user_roles')
+        .select('user_id, role')
+        .in('user_id', userIds);
+      
+      if (rolesError) throw rolesError;
+
+      // Step 3: Merge roles into profiles
+      const rolesMap = new Map<string, Array<{ role: string }>>();
+      roles?.forEach(r => {
+        if (!rolesMap.has(r.user_id)) {
+          rolesMap.set(r.user_id, []);
+        }
+        rolesMap.get(r.user_id)!.push({ role: r.role });
+      });
+
+      return profiles.map(profile => ({
+        ...profile,
+        user_roles: rolesMap.get(profile.id) || []
+      }));
     },
   });
 
@@ -44,6 +65,13 @@ const AdminUsers = () => {
             <CardContent>
               {isLoading ? (
                 <p className="text-center py-8 text-muted-foreground">Loading users...</p>
+              ) : isError ? (
+                <div className="text-center py-8">
+                  <p className="text-destructive font-medium">Failed to load users</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {(error as Error)?.message || 'Check admin permissions'}
+                  </p>
+                </div>
               ) : users && users.length > 0 ? (
                 <Table>
                   <TableHeader>
