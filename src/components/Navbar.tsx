@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Building2, Menu, User, Heart, LogOut, LayoutDashboard, MessageCircle, TrendingUp, Bookmark, Bell, CreditCard, Database, Hotel, Briefcase, UtensilsCrossed, Home } from "lucide-react";
+import { Building2, Menu, User, Heart, LogOut, LayoutDashboard, MessageCircle, TrendingUp, Bookmark, Bell, CreditCard, Database, Hotel, Briefcase, UtensilsCrossed, Home, Plus } from "lucide-react";
 import logoImage from "@/assets/logo-ghkonect.jpg";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useState } from "react";
@@ -14,6 +14,9 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useQuery } from "@tanstack/react-query";
@@ -52,6 +55,41 @@ const Navbar = () => {
       }
       
       return data?.business_id || null;
+    },
+    enabled: !!user?.id && hasRole('business_owner'),
+  });
+
+  // Get all user businesses for switcher
+  const { data: userBusinesses = [] } = useQuery({
+    queryKey: ['user-businesses-navbar', user?.id],
+    queryFn: async () => {
+      if (!user?.id || !hasRole('business_owner')) return [];
+      
+      const { data: ownerships, error } = await supabase
+        .from('business_owners')
+        .select(`
+          business_id,
+          is_primary,
+          businesses:business_id (
+            id,
+            name,
+            logo_url,
+            category
+          )
+        `)
+        .eq('user_id', user.id);
+      
+      if (error) {
+        console.error('Error fetching user businesses:', error);
+        return [];
+      }
+      
+      return ownerships
+        ?.filter(o => o.businesses)
+        .map(o => ({
+          ...o.businesses,
+          is_primary: o.is_primary
+        })) || [];
     },
     enabled: !!user?.id && hasRole('business_owner'),
   });
@@ -215,9 +253,40 @@ const Navbar = () => {
                     )}
                     {hasRole('business_owner') && (
                       <>
+                        {userBusinesses.length > 0 && (
+                          <DropdownMenuSub>
+                            <DropdownMenuSubTrigger>
+                              <Building2 className="mr-2 h-4 w-4" />
+                              <span>Switch Business</span>
+                            </DropdownMenuSubTrigger>
+                            <DropdownMenuSubContent className="w-56">
+                              {userBusinesses.map((business: any) => (
+                                <DropdownMenuItem 
+                                  key={business.id}
+                                  onClick={() => navigate(`/dashboard/business/${business.id}`)}
+                                  className="cursor-pointer"
+                                >
+                                  <Avatar className="h-6 w-6 mr-2">
+                                    <AvatarImage src={business.logo_url || ''} />
+                                    <AvatarFallback className="text-xs">{business.name?.[0]}</AvatarFallback>
+                                  </Avatar>
+                                  <span className="truncate flex-1">{business.name}</span>
+                                  {business.is_primary && (
+                                    <Badge variant="outline" className="ml-2 text-xs">Primary</Badge>
+                                  )}
+                                </DropdownMenuItem>
+                              ))}
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem onClick={() => navigate('/register-business')} className="cursor-pointer">
+                                <Plus className="mr-2 h-4 w-4" />
+                                Add New Business
+                              </DropdownMenuItem>
+                            </DropdownMenuSubContent>
+                          </DropdownMenuSub>
+                        )}
                         <DropdownMenuItem onClick={() => navigate('/my-businesses')}>
                           <Building2 className="mr-2 h-4 w-4" />
-                          My Businesses
+                          Manage Businesses
                           {subscription && (
                             <Badge variant="secondary" className="ml-auto text-xs">
                               {subscription.subscription_plans?.name}
@@ -426,11 +495,43 @@ const Navbar = () => {
                           <Separator />
                           <div className="space-y-1">
                             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2 mb-2">
-                              Business
+                              Your Businesses
                             </p>
+                            
+                            {/* Business List */}
+                            {userBusinesses.map((business: any) => (
+                              <Button 
+                                key={business.id}
+                                variant="ghost" 
+                                className="w-full justify-start h-11 text-base"
+                                onClick={() => handleNavigate(`/dashboard/business/${business.id}`)}
+                              >
+                                <Avatar className="h-6 w-6 mr-3">
+                                  <AvatarImage src={business.logo_url || ''} />
+                                  <AvatarFallback className="text-xs">{business.name?.[0]}</AvatarFallback>
+                                </Avatar>
+                                <span className="truncate flex-1 text-left">{business.name}</span>
+                                {business.is_primary && (
+                                  <Badge variant="outline" className="text-xs">Primary</Badge>
+                                )}
+                              </Button>
+                            ))}
+                            
+                            {/* Add New Business */}
+                            <Button 
+                              variant="ghost" 
+                              className="w-full justify-start h-11 text-base text-primary"
+                              onClick={() => handleNavigate('/register-business')}
+                            >
+                              <Plus className="mr-3 h-5 w-5" />
+                              Add New Business
+                            </Button>
+                            
+                            <Separator className="my-2" />
+                            
                             <Button variant="ghost" className="w-full justify-start h-11 text-base" onClick={() => handleNavigate('/my-businesses')}>
                               <Building2 className="mr-3 h-5 w-5" />
-                              My Businesses
+                              Manage All Businesses
                               {subscription && (
                                 <Badge variant="secondary" className="ml-auto text-xs">
                                   {subscription.subscription_plans?.name}
