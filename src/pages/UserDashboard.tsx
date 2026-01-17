@@ -165,15 +165,15 @@ const UserDashboard = () => {
             
             {/* Business info for business owners with registered business */}
             {hasRegisteredBusiness && userBusinesses.length > 0 && (
-              <div className="mt-4 relative z-10">
+              <div className="mt-4 relative z-10 overflow-hidden">
                 <p className="text-white/60 text-xs mb-2 font-medium">
                   Your Businesses ({userBusinesses.length})
                 </p>
-                <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide -mx-2 px-2">
                   {userBusinesses.map((business: any) => (
                     <div 
                       key={business.id}
-                      className="p-3 rounded-xl bg-white/5 border border-white/10 flex items-center gap-3 cursor-pointer hover:bg-white/10 hover:border-white/20 transition-all duration-300 min-w-[220px] flex-shrink-0 group"
+                      className="p-3 rounded-xl bg-white/5 border border-white/10 flex items-center gap-3 cursor-pointer hover:bg-white/10 hover:border-white/20 transition-all duration-300 min-w-[200px] max-w-[220px] flex-shrink-0 group"
                       onClick={() => navigate(`/dashboard/business/${business.id}`)}
                     >
                       <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center overflow-hidden flex-shrink-0">

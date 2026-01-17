@@ -186,8 +186,8 @@ export default function BusinessDashboard() {
       case 'retail':
         return [
           {
-            title: "Products",
-            description: "Manage catalog",
+            title: "Manage Shop",
+            description: "Products & catalog",
             icon: Package,
             href: `/dashboard/products/${id}`,
             gradient: "from-amber-500 to-yellow-500",

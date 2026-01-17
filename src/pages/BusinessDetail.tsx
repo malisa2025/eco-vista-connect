@@ -367,7 +367,16 @@ const BusinessDetail = () => {
                     </CollapsibleContent>
                   </Collapsible>
 
-                  {/* Collapsible Your Review */}
+                  {/* Visit Shop Button */}
+                  <Button 
+                    className="w-full bg-orange-500 hover:bg-orange-600 text-white"
+                    onClick={() => navigate(`/businesses/${id}/shop`)}
+                  >
+                    <ShoppingBag className="w-4 h-4 mr-2" />
+                    Visit Shop
+                  </Button>
+
+                  {/* Collapsible Your Review - After Visit Shop */}
                   {user && !userReview && (
                     <Collapsible open={writeReviewOpen} onOpenChange={setWriteReviewOpen}>
                       <CollapsibleTrigger asChild>
@@ -387,15 +396,6 @@ const BusinessDetail = () => {
                       </CollapsibleContent>
                     </Collapsible>
                   )}
-
-                  {/* Visit Shop Button */}
-                  <Button 
-                    className="w-full bg-orange-500 hover:bg-orange-600 text-white"
-                    onClick={() => navigate(`/businesses/${id}/shop`)}
-                  >
-                    <ShoppingBag className="w-4 h-4 mr-2" />
-                    Visit Shop
-                  </Button>
                 </CardContent>
               </Card>
             </div>
