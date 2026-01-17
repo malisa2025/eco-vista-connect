@@ -223,7 +223,7 @@ const BusinessDetail = () => {
                business.category?.toLowerCase().includes("cafe") ? (
                 <MenuSection businessId={id!} />
               ) : (
-                <ProductCatalog businessId={id!} />
+                <ProductCatalog businessId={id!} businessName={business.name} />
               )}
 
               {/* Message Business Button */}

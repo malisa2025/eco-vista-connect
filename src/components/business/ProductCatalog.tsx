@@ -1,16 +1,22 @@
+import { useState } from "react";
 import { useBusinessProducts } from "@/hooks/useBusinessProducts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Package, Star, CheckCircle, XCircle } from "lucide-react";
+import { Package, Star, CheckCircle, XCircle, ShoppingCart } from "lucide-react";
+import { ProductCheckoutDialog } from "./ProductCheckoutDialog";
 
 interface ProductCatalogProps {
   businessId: string;
+  businessName?: string;
 }
 
-const ProductCatalog = ({ businessId }: ProductCatalogProps) => {
+const ProductCatalog = ({ businessId, businessName = "this business" }: ProductCatalogProps) => {
   const { data: products, isLoading } = useBusinessProducts(businessId);
+  const [selectedProduct, setSelectedProduct] = useState<typeof products[0] | null>(null);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -43,6 +49,11 @@ const ProductCatalog = ({ businessId }: ProductCatalogProps) => {
     }).format(price);
   };
 
+  const handleBuyNow = (product: typeof products[0]) => {
+    setSelectedProduct(product);
+    setCheckoutOpen(true);
+  };
+
   const ProductCard = ({ product }: { product: typeof products[0] }) => (
     <div className="rounded-lg border overflow-hidden hover:shadow-md transition-shadow">
       {product.image_url ? (
@@ -68,7 +79,7 @@ const ProductCatalog = ({ businessId }: ProductCatalogProps) => {
             {product.description}
           </p>
         )}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-3">
           <span className="font-bold text-lg text-primary">
             {formatPrice(product.price)}
           </span>
@@ -89,6 +100,16 @@ const ProductCatalog = ({ businessId }: ProductCatalogProps) => {
             )}
           </Badge>
         </div>
+        {product.in_stock && (
+          <Button 
+            className="w-full gap-2" 
+            size="sm"
+            onClick={() => handleBuyNow(product)}
+          >
+            <ShoppingCart className="h-4 w-4" />
+            Buy Now
+          </Button>
+        )}
       </div>
     </div>
   );
@@ -148,6 +169,17 @@ const ProductCatalog = ({ businessId }: ProductCatalogProps) => {
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
+        )}
+
+        {/* Checkout Dialog */}
+        {selectedProduct && (
+          <ProductCheckoutDialog
+            open={checkoutOpen}
+            onOpenChange={setCheckoutOpen}
+            product={selectedProduct}
+            businessId={businessId}
+            businessName={businessName}
+          />
         )}
       </CardContent>
     </Card>
