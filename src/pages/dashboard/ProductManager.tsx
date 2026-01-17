@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Dialog,
   DialogContent,
@@ -38,7 +39,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ArrowLeft, Plus, Pencil, Trash2, Package, Star, CheckCircle, XCircle } from "lucide-react";
+import { ArrowLeft, Plus, Pencil, Trash2, Package, Star, CheckCircle, XCircle, Video, Images } from "lucide-react";
+import ProductImageManager from "@/components/business/ProductImageManager";
+import { VideoUploader } from "@/components/business/VideoUploader";
 
 const ProductManager = () => {
   const { id: businessId } = useParams();
@@ -55,9 +58,13 @@ const ProductManager = () => {
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [category, setCategory] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
   const [inStock, setInStock] = useState(true);
   const [isFeatured, setIsFeatured] = useState(false);
+  
+  // Media state - combined images (main + additional)
+  const [productImages, setProductImages] = useState<string[]>([]);
+  const [videoUrl, setVideoUrl] = useState("");
+  const [videoThumbnailUrl, setVideoThumbnailUrl] = useState("");
 
   // Get business info
   const { data: business } = useQuery({
@@ -78,9 +85,11 @@ const ProductManager = () => {
     setDescription("");
     setPrice("");
     setCategory("");
-    setImageUrl("");
     setInStock(true);
     setIsFeatured(false);
+    setProductImages([]);
+    setVideoUrl("");
+    setVideoThumbnailUrl("");
     setEditingProduct(null);
   };
 
@@ -90,20 +99,36 @@ const ProductManager = () => {
     setDescription(product.description || "");
     setPrice(product.price.toString());
     setCategory(product.category);
-    setImageUrl(product.image_url || "");
     setInStock(product.in_stock);
     setIsFeatured(product.is_featured);
+    
+    // Combine main image and additional images
+    const allImages: string[] = [];
+    if (product.image_url) allImages.push(product.image_url);
+    if (product.additional_images) allImages.push(...product.additional_images);
+    setProductImages(allImages);
+    
+    setVideoUrl(product.video_url || "");
+    setVideoThumbnailUrl(product.video_thumbnail_url || "");
     setIsDialogOpen(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // First image is main, rest are additional
+    const mainImage = productImages[0] || null;
+    const additionalImages = productImages.slice(1);
+    
     const productData = {
       name,
       description: description || null,
       price: parseFloat(price),
       category: category || "General",
-      image_url: imageUrl || null,
+      image_url: mainImage,
+      additional_images: additionalImages.length > 0 ? additionalImages : null,
+      video_url: videoUrl || null,
+      video_thumbnail_url: videoThumbnailUrl || null,
       in_stock: inStock,
       is_featured: isFeatured,
     };
@@ -125,6 +150,11 @@ const ProductManager = () => {
     }
   };
 
+  const handleVideoUpload = (url: string, thumbnailUrl?: string) => {
+    setVideoUrl(url);
+    if (thumbnailUrl) setVideoThumbnailUrl(thumbnailUrl);
+  };
+
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-GH", {
       style: "currency",
@@ -134,6 +164,13 @@ const ProductManager = () => {
 
   // Group by category
   const categories = [...new Set(products?.map((p) => p.category) || [])];
+
+  // Count media for display
+  const getMediaCount = (product: BusinessProduct) => {
+    let count = product.image_url ? 1 : 0;
+    count += product.additional_images?.length || 0;
+    return count;
+  };
 
   if (isLoading) {
     return (
@@ -175,88 +212,115 @@ const ProductManager = () => {
                 Add Product
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-md">
-              <DialogHeader>
+            <DialogContent className="max-w-2xl max-h-[90vh] p-0">
+              <DialogHeader className="p-6 pb-0">
                 <DialogTitle>
                   {editingProduct ? "Edit Product" : "Add Product"}
                 </DialogTitle>
               </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Name *</Label>
-                  <Input
-                    id="name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Product Name"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    placeholder="Product description..."
-                    rows={2}
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="price">Price (GHS) *</Label>
-                    <Input
-                      id="price"
-                      type="number"
-                      step="0.01"
-                      value={price}
-                      onChange={(e) => setPrice(e.target.value)}
-                      placeholder="100.00"
-                      required
+              <ScrollArea className="max-h-[calc(90vh-80px)]">
+                <form onSubmit={handleSubmit} className="p-6 pt-4 space-y-6">
+                  {/* Basic Info */}
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="name">Name *</Label>
+                      <Input
+                        id="name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="Product Name"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="description">Description</Label>
+                      <Textarea
+                        id="description"
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        placeholder="Product description..."
+                        rows={2}
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="price">Price (GHS) *</Label>
+                        <Input
+                          id="price"
+                          type="number"
+                          step="0.01"
+                          value={price}
+                          onChange={(e) => setPrice(e.target.value)}
+                          placeholder="100.00"
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="category">Category *</Label>
+                        <Input
+                          id="category"
+                          value={category}
+                          onChange={(e) => setCategory(e.target.value)}
+                          placeholder="Electronics"
+                          required
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Product Images Section */}
+                  <div className="space-y-3">
+                    <Label className="flex items-center gap-2">
+                      <Images className="h-4 w-4" />
+                      Product Images (up to 4)
+                    </Label>
+                    <ProductImageManager
+                      images={productImages}
+                      onChange={setProductImages}
+                      maxImages={4}
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="category">Category *</Label>
-                    <Input
-                      id="category"
-                      value={category}
-                      onChange={(e) => setCategory(e.target.value)}
-                      placeholder="Electronics"
-                      required
-                    />
+
+                  {/* Product Video Section */}
+                  <div className="space-y-3">
+                    <Label className="flex items-center gap-2">
+                      <Video className="h-4 w-4" />
+                      Product Video
+                    </Label>
+                    <div className="max-w-md">
+                      <VideoUploader
+                        onUploadComplete={handleVideoUpload}
+                        currentVideoUrl={videoUrl}
+                        prompt="Showcase your product in action"
+                      />
+                    </div>
                   </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="imageUrl">Image URL</Label>
-                  <Input
-                    id="imageUrl"
-                    value={imageUrl}
-                    onChange={(e) => setImageUrl(e.target.value)}
-                    placeholder="https://..."
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Switch
-                      id="inStock"
-                      checked={inStock}
-                      onCheckedChange={setInStock}
-                    />
-                    <Label htmlFor="inStock">In Stock</Label>
+
+                  {/* Toggles */}
+                  <div className="flex items-center justify-between pt-2">
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        id="inStock"
+                        checked={inStock}
+                        onCheckedChange={setInStock}
+                      />
+                      <Label htmlFor="inStock">In Stock</Label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        id="featured"
+                        checked={isFeatured}
+                        onCheckedChange={setIsFeatured}
+                      />
+                      <Label htmlFor="featured">Featured</Label>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Switch
-                      id="featured"
-                      checked={isFeatured}
-                      onCheckedChange={setIsFeatured}
-                    />
-                    <Label htmlFor="featured">Featured</Label>
-                  </div>
-                </div>
-                <Button type="submit" className="w-full" disabled={createProduct.isPending || updateProduct.isPending}>
-                  {editingProduct ? "Update Product" : "Add Product"}
-                </Button>
-              </form>
+
+                  <Button type="submit" className="w-full" disabled={createProduct.isPending || updateProduct.isPending}>
+                    {editingProduct ? "Update Product" : "Add Product"}
+                  </Button>
+                </form>
+              </ScrollArea>
             </DialogContent>
           </Dialog>
         </div>
@@ -287,6 +351,7 @@ const ProductManager = () => {
                     <TableHeader>
                       <TableRow>
                         <TableHead>Product</TableHead>
+                        <TableHead>Media</TableHead>
                         <TableHead>Price</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead className="text-right">Actions</TableHead>
@@ -323,6 +388,21 @@ const ProductManager = () => {
                                     </p>
                                   )}
                                 </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                {getMediaCount(product) > 0 && (
+                                  <Badge variant="outline" className="gap-1">
+                                    <Images className="h-3 w-3" />
+                                    {getMediaCount(product)}
+                                  </Badge>
+                                )}
+                                {product.video_url && (
+                                  <Badge variant="outline" className="gap-1">
+                                    <Video className="h-3 w-3" />
+                                  </Badge>
+                                )}
                               </div>
                             </TableCell>
                             <TableCell>{formatPrice(product.price)}</TableCell>

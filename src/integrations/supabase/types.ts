@@ -738,6 +738,7 @@ export type Database = {
       }
       business_products: {
         Row: {
+          additional_images: string[] | null
           business_id: string
           category: string
           created_at: string | null
@@ -750,8 +751,11 @@ export type Database = {
           price: number
           sort_order: number | null
           updated_at: string | null
+          video_thumbnail_url: string | null
+          video_url: string | null
         }
         Insert: {
+          additional_images?: string[] | null
           business_id: string
           category?: string
           created_at?: string | null
@@ -764,8 +768,11 @@ export type Database = {
           price?: number
           sort_order?: number | null
           updated_at?: string | null
+          video_thumbnail_url?: string | null
+          video_url?: string | null
         }
         Update: {
+          additional_images?: string[] | null
           business_id?: string
           category?: string
           created_at?: string | null
@@ -778,6 +785,8 @@ export type Database = {
           price?: number
           sort_order?: number | null
           updated_at?: string | null
+          video_thumbnail_url?: string | null
+          video_url?: string | null
         }
         Relationships: [
           {

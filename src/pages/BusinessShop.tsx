@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useBusinessProducts } from "@/hooks/useBusinessProducts";
+import { useBusinessProducts, BusinessProduct } from "@/hooks/useBusinessProducts";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -25,8 +25,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ArrowLeft, Search, LayoutGrid, List, ShoppingCart, Plus } from "lucide-react";
+import { ArrowLeft, Search, LayoutGrid, List, ShoppingCart, Plus, Play, Images } from "lucide-react";
 import { toast } from "sonner";
+import ImageLightbox from "@/components/ui/image-lightbox";
+import ProductVideoModal from "@/components/business/ProductVideoModal";
 
 const BusinessShop = () => {
   const { id } = useParams();
@@ -36,6 +38,15 @@ const BusinessShop = () => {
   const [sortBy, setSortBy] = useState("featured");
   const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
   const [cart, setCart] = useState<{ productId: string; quantity: number }[]>([]);
+
+  // Lightbox state
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxImages, setLightboxImages] = useState<string[]>([]);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+
+  // Video modal state
+  const [videoModalOpen, setVideoModalOpen] = useState(false);
+  const [selectedVideoProduct, setSelectedVideoProduct] = useState<BusinessProduct | null>(null);
 
   const { data: business, isLoading: businessLoading } = useQuery({
     queryKey: ["business", id],
@@ -110,6 +121,28 @@ const BusinessShop = () => {
   };
 
   const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+  // Get all images for a product
+  const getProductImages = (product: BusinessProduct): string[] => {
+    const images: string[] = [];
+    if (product.image_url) images.push(product.image_url);
+    if (product.additional_images) images.push(...product.additional_images);
+    return images;
+  };
+
+  const openLightbox = (product: BusinessProduct, startIndex = 0) => {
+    const images = getProductImages(product);
+    if (images.length > 0) {
+      setLightboxImages(images);
+      setLightboxIndex(startIndex);
+      setLightboxOpen(true);
+    }
+  };
+
+  const openVideoModal = (product: BusinessProduct) => {
+    setSelectedVideoProduct(product);
+    setVideoModalOpen(true);
+  };
 
   if (businessLoading || productsLoading) {
     return (
@@ -263,50 +296,94 @@ const BusinessShop = () => {
         {/* Grid View */}
         {viewMode === "grid" && filteredProducts.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredProducts.map((product) => (
-              <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                <div className="aspect-square bg-muted relative">
-                  {product.image_url ? (
-                    <img
-                      src={product.image_url}
-                      alt={product.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-4xl font-bold text-muted-foreground/50">
-                      {product.name.charAt(0)}
+            {filteredProducts.map((product) => {
+              const allImages = getProductImages(product);
+              const hasMultipleImages = allImages.length > 1;
+              const hasVideo = !!product.video_url;
+
+              return (
+                <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                  <div className="aspect-square bg-muted relative group">
+                    {product.image_url ? (
+                      <img
+                        src={product.image_url}
+                        alt={product.name}
+                        className="w-full h-full object-cover cursor-pointer"
+                        onClick={() => openLightbox(product)}
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-4xl font-bold text-muted-foreground/50">
+                        {product.name.charAt(0)}
+                      </div>
+                    )}
+                    
+                    {/* Featured Badge */}
+                    {product.is_featured && (
+                      <Badge className="absolute top-3 left-3 bg-green-500">Featured</Badge>
+                    )}
+
+                    {/* Media Indicators */}
+                    <div className="absolute top-3 right-3 flex gap-2">
+                      {hasMultipleImages && (
+                        <Badge 
+                          variant="secondary" 
+                          className="gap-1 cursor-pointer"
+                          onClick={() => openLightbox(product)}
+                        >
+                          <Images className="h-3 w-3" />
+                          +{allImages.length - 1}
+                        </Badge>
+                      )}
+                      {hasVideo && (
+                        <Badge 
+                          variant="secondary" 
+                          className="gap-1 cursor-pointer"
+                          onClick={() => openVideoModal(product)}
+                        >
+                          <Play className="h-3 w-3" />
+                        </Badge>
+                      )}
                     </div>
-                  )}
-                  {product.is_featured && (
-                    <Badge className="absolute top-3 right-3 bg-green-500">Featured</Badge>
-                  )}
-                </div>
-                <CardContent className="p-4">
-                  <h3 className="font-semibold text-lg mb-1">{product.name}</h3>
-                  {product.description && (
-                    <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                      {product.description}
-                    </p>
-                  )}
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-xl font-bold text-primary">
-                      GH₵ {product.price.toFixed(2)}
-                    </span>
-                    <Badge variant={product.in_stock ? "secondary" : "destructive"}>
-                      {product.in_stock ? "In Stock" : "Out of Stock"}
-                    </Badge>
+
+                    {/* Video Play Button Overlay */}
+                    {hasVideo && (
+                      <button
+                        onClick={() => openVideoModal(product)}
+                        className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <div className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center">
+                          <Play className="h-8 w-8 text-primary fill-primary ml-1" />
+                        </div>
+                      </button>
+                    )}
                   </div>
-                  <Button
-                    className="w-full"
-                    onClick={() => addToCart(product.id)}
-                    disabled={!product.in_stock}
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add to Cart
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
+                  <CardContent className="p-4">
+                    <h3 className="font-semibold text-lg mb-1">{product.name}</h3>
+                    {product.description && (
+                      <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                        {product.description}
+                      </p>
+                    )}
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="text-xl font-bold text-primary">
+                        GH₵ {product.price.toFixed(2)}
+                      </span>
+                      <Badge variant={product.in_stock ? "secondary" : "destructive"}>
+                        {product.in_stock ? "In Stock" : "Out of Stock"}
+                      </Badge>
+                    </div>
+                    <Button
+                      className="w-full"
+                      onClick={() => addToCart(product.id)}
+                      disabled={!product.in_stock}
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add to Cart
+                    </Button>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         )}
 
@@ -324,53 +401,85 @@ const BusinessShop = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredProducts.map((product) => (
-                  <TableRow key={product.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-lg overflow-hidden bg-muted flex-shrink-0">
-                          {product.image_url ? (
-                            <img
-                              src={product.image_url}
-                              alt={product.name}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-lg font-bold text-muted-foreground/50">
-                              {product.name.charAt(0)}
+                {filteredProducts.map((product) => {
+                  const allImages = getProductImages(product);
+                  const hasVideo = !!product.video_url;
+
+                  return (
+                    <TableRow key={product.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <div 
+                            className="w-12 h-12 rounded-lg overflow-hidden bg-muted flex-shrink-0 relative cursor-pointer group"
+                            onClick={() => openLightbox(product)}
+                          >
+                            {product.image_url ? (
+                              <img
+                                src={product.image_url}
+                                alt={product.name}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-lg font-bold text-muted-foreground/50">
+                                {product.name.charAt(0)}
+                              </div>
+                            )}
+                            {hasVideo && (
+                              <div 
+                                className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  openVideoModal(product);
+                                }}
+                              >
+                                <Play className="h-4 w-4 text-white" />
+                              </div>
+                            )}
+                          </div>
+                          <div>
+                            <p className="font-medium">{product.name}</p>
+                            {product.description && (
+                              <p className="text-sm text-muted-foreground line-clamp-1">
+                                {product.description}
+                              </p>
+                            )}
+                            <div className="flex gap-1 mt-1">
+                              {allImages.length > 1 && (
+                                <Badge variant="outline" className="text-xs gap-1">
+                                  <Images className="h-2 w-2" />
+                                  {allImages.length}
+                                </Badge>
+                              )}
+                              {hasVideo && (
+                                <Badge variant="outline" className="text-xs gap-1">
+                                  <Play className="h-2 w-2" />
+                                </Badge>
+                              )}
                             </div>
-                          )}
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-medium">{product.name}</p>
-                          {product.description && (
-                            <p className="text-sm text-muted-foreground line-clamp-1">
-                              {product.description}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>{product.category}</TableCell>
-                    <TableCell className="font-semibold text-primary">
-                      GH₵ {product.price.toFixed(2)}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={product.in_stock ? "secondary" : "destructive"}>
-                        {product.in_stock ? "In Stock" : "Out of Stock"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        size="sm"
-                        onClick={() => addToCart(product.id)}
-                        disabled={!product.in_stock}
-                      >
-                        Add to Cart
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                      </TableCell>
+                      <TableCell>{product.category}</TableCell>
+                      <TableCell className="font-semibold text-primary">
+                        GH₵ {product.price.toFixed(2)}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={product.in_stock ? "secondary" : "destructive"}>
+                          {product.in_stock ? "In Stock" : "Out of Stock"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          size="sm"
+                          onClick={() => addToCart(product.id)}
+                          disabled={!product.in_stock}
+                        >
+                          Add to Cart
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </Card>
@@ -378,6 +487,25 @@ const BusinessShop = () => {
       </main>
 
       <Footer />
+
+      {/* Image Lightbox */}
+      <ImageLightbox
+        images={lightboxImages}
+        initialIndex={lightboxIndex}
+        open={lightboxOpen}
+        onOpenChange={setLightboxOpen}
+      />
+
+      {/* Video Modal */}
+      {selectedVideoProduct && (
+        <ProductVideoModal
+          open={videoModalOpen}
+          onOpenChange={setVideoModalOpen}
+          videoUrl={selectedVideoProduct.video_url!}
+          thumbnailUrl={selectedVideoProduct.video_thumbnail_url || undefined}
+          productName={selectedVideoProduct.name}
+        />
+      )}
     </div>
   );
 };
