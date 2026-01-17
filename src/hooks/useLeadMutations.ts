@@ -9,50 +9,17 @@ export const useLeadMutations = (businessId: string) => {
     mutationFn: async (lead: any) => {
       console.log('Creating lead:', lead);
       
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('business_leads')
-        .insert(lead)
-        .select()
-        .single();
+        .insert(lead);
 
       if (error) {
         console.error('Failed to insert lead:', error);
         throw error;
       }
 
-      console.log('Lead created successfully:', data.id);
-
-      // Non-blocking notifications - don't fail the mutation if these fail
-      try {
-        console.log('Triggering lead notification...');
-        const notifyResult = await supabase.functions.invoke('send-lead-notification', {
-          body: { leadId: data.id },
-        });
-        if (notifyResult.error) {
-          console.error('Lead notification failed:', notifyResult.error);
-        } else {
-          console.log('Lead notification sent successfully');
-        }
-      } catch (notifyError) {
-        console.error('Failed to send lead notification:', notifyError);
-      }
-
-      // Non-blocking lead scoring - don't fail the mutation if this fails
-      try {
-        console.log('Generating lead score...');
-        const scoreResult = await supabase.functions.invoke('generate-lead-score', {
-          body: { leadId: data.id },
-        });
-        if (scoreResult.error) {
-          console.error('Lead score generation failed:', scoreResult.error);
-        } else {
-          console.log('Lead score generated successfully');
-        }
-      } catch (scoreError) {
-        console.error('Failed to generate lead score:', scoreError);
-      }
-
-      return data;
+      console.log('Lead created successfully');
+      return { success: true };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['business-leads', businessId] });
