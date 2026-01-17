@@ -191,6 +191,20 @@ const BusinessDetail = () => {
                 </div>
               </div>
 
+              {/* Video Section - Compact inline display */}
+              {business.video_url && (
+                <div className="w-full">
+                  <h2 className="text-xl font-semibold mb-3">Business Introduction</h2>
+                  <div className="aspect-video rounded-xl overflow-hidden shadow-lg bg-black max-w-xl">
+                    <VideoPlayer
+                      videoUrl={business.video_url}
+                      thumbnailUrl={business.video_thumbnail_url || business.image_url}
+                      title={business.name}
+                    />
+                  </div>
+                </div>
+              )}
+
               {/* Description */}
               {business.description && (
                 <Card>
@@ -199,24 +213,6 @@ const BusinessDetail = () => {
                     <p className="text-muted-foreground leading-relaxed">
                       {business.description}
                     </p>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Video Section */}
-              {business.video_url && (
-                <Card>
-                  <CardContent className="pt-6">
-                    <h2 className="text-2xl font-bold mb-4">Business Introduction</h2>
-                    <div className="max-w-md lg:max-w-lg mx-auto">
-                      <div className="aspect-video">
-                        <VideoPlayer
-                          videoUrl={business.video_url}
-                          thumbnailUrl={business.video_thumbnail_url || business.image_url}
-                          title={business.name}
-                        />
-                      </div>
-                    </div>
                   </CardContent>
                 </Card>
               )}

@@ -164,23 +164,33 @@ const UserDashboard = () => {
             </div>
             
             {/* Business info for business owners with registered business */}
-            {hasRegisteredBusiness && primaryBusiness && (
-              <div 
-                className="mt-4 p-3 rounded-xl bg-white/5 border border-white/10 flex items-center gap-3 cursor-pointer hover:bg-white/10 transition-colors relative z-10"
-                onClick={() => navigate(`/dashboard/business/${primaryBusiness.id}`)}
-              >
-                <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center overflow-hidden">
-                  {primaryBusiness.logo_url ? (
-                    <img src={primaryBusiness.logo_url} alt="" className="w-full h-full object-cover" />
-                  ) : (
-                    <Building2 className="h-5 w-5 text-white/60" />
-                  )}
+            {hasRegisteredBusiness && userBusinesses.length > 0 && (
+              <div className="mt-4 relative z-10">
+                <p className="text-white/60 text-xs mb-2 font-medium">
+                  Your Businesses ({userBusinesses.length})
+                </p>
+                <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                  {userBusinesses.map((business: any) => (
+                    <div 
+                      key={business.id}
+                      className="p-3 rounded-xl bg-white/5 border border-white/10 flex items-center gap-3 cursor-pointer hover:bg-white/10 hover:border-white/20 transition-all duration-300 min-w-[220px] flex-shrink-0 group"
+                      onClick={() => navigate(`/dashboard/business/${business.id}`)}
+                    >
+                      <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center overflow-hidden flex-shrink-0">
+                        {business.logo_url ? (
+                          <img src={business.logo_url} alt="" className="w-full h-full object-cover" />
+                        ) : (
+                          <Building2 className="h-5 w-5 text-white/60" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white font-medium text-sm truncate">{business.name}</p>
+                        <p className="text-white/50 text-xs truncate">{business.category} • {business.region}</p>
+                      </div>
+                      <ArrowRight className="h-4 w-4 text-white/40 group-hover:text-white/60 group-hover:translate-x-0.5 transition-all flex-shrink-0" />
+                    </div>
+                  ))}
                 </div>
-                <div className="flex-1">
-                  <p className="text-white font-medium text-sm">{primaryBusiness.name}</p>
-                  <p className="text-white/50 text-xs">{primaryBusiness.category} • {primaryBusiness.region}</p>
-                </div>
-                <ArrowRight className="h-4 w-4 text-white/40" />
               </div>
             )}
           </div>
