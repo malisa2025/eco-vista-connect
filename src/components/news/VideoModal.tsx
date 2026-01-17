@@ -5,6 +5,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import Hls from "hls.js";
 
 interface VideoModalProps {
   video: BusinessVideo | null;
@@ -16,11 +17,42 @@ interface VideoModalProps {
 
 export const VideoModal = ({ video, relatedVideos, isOpen, onClose, onVideoSelect }: VideoModalProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const hlsRef = useRef<Hls | null>(null);
 
   useEffect(() => {
-    if (isOpen && videoRef.current) {
-      videoRef.current.play();
+    const videoElement = videoRef.current;
+    if (!isOpen || !videoElement || !video?.videoUrl) return;
+
+    // Clean up previous HLS instance
+    if (hlsRef.current) {
+      hlsRef.current.destroy();
+      hlsRef.current = null;
     }
+
+    const isHLS = video.videoUrl.includes('.m3u8');
+
+    if (isHLS && Hls.isSupported()) {
+      const hls = new Hls();
+      hlsRef.current = hls;
+      hls.loadSource(video.videoUrl);
+      hls.attachMedia(videoElement);
+      hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        videoElement.play();
+      });
+    } else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
+      videoElement.src = video.videoUrl;
+      videoElement.play();
+    } else {
+      videoElement.src = video.videoUrl;
+      videoElement.play();
+    }
+
+    return () => {
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+        hlsRef.current = null;
+      }
+    };
   }, [isOpen, video]);
 
   if (!video) return null;
@@ -53,9 +85,8 @@ export const VideoModal = ({ video, relatedVideos, isOpen, onClose, onVideoSelec
               <video
                 ref={videoRef}
                 className="w-full h-full object-contain"
-                src={video.videoUrl}
                 controls
-                autoPlay
+                playsInline
               />
             </div>
 

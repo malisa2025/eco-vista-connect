@@ -58,9 +58,19 @@ serve(async (req) => {
 
       const videoData = result[resultKey];
       
+      // Cloudflare Stream uses format: https://customer-{subdomain}.cloudflarestream.com/{uid}/manifest/video.m3u8
+      // The subdomain is in the playback property or we can use iframe embed
+      // For direct HLS playback, use the watch URL pattern
+      const hlsUrl = `https://customer-${videoData.preview?.split('customer-')[1]?.split('.')[0] || CLOUDFLARE_ACCOUNT_ID}.cloudflarestream.com/${videoData.uid}/manifest/video.m3u8`;
+      
+      // Also provide MP4 download URL for fallback
+      const mp4Url = `https://customer-${videoData.preview?.split('customer-')[1]?.split('.')[0] || CLOUDFLARE_ACCOUNT_ID}.cloudflarestream.com/${videoData.uid}/downloads/default.mp4`;
+      
       return new Response(JSON.stringify({
         success: true,
-        url: `https://customer-${CLOUDFLARE_ACCOUNT_ID}.cloudflarestream.com/${videoData.uid}/manifest/video.m3u8`,
+        url: hlsUrl,
+        mp4Url: mp4Url,
+        previewUrl: videoData.preview,
         thumbnailUrl: videoData.thumbnail,
         duration: videoData.duration,
         uid: videoData.uid,

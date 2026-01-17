@@ -5,6 +5,7 @@ import { Volume2, VolumeX, Play } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import Hls from "hls.js";
 
 interface VideoAd {
   id: string;
@@ -24,6 +25,7 @@ export const SponsoredVideoCarousel = ({ className }: { className?: string }) =>
   const [isMuted, setIsMuted] = useState(true);
   const [isInView, setIsInView] = useState(false);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
+  const hlsInstances = useRef<(Hls | null)[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
@@ -55,13 +57,36 @@ export const SponsoredVideoCarousel = ({ className }: { className?: string }) =>
     fetchVideoAds();
   }, []);
 
+  // Setup HLS for videos and cleanup
+  useEffect(() => {
+    videoAds.forEach((ad, index) => {
+      const video = videoRefs.current[index];
+      if (!video) return;
+
+      const isHLS = ad.video_url.includes('.m3u8');
+      if (isHLS && Hls.isSupported() && !hlsInstances.current[index]) {
+        const hls = new Hls();
+        hls.loadSource(ad.video_url);
+        hls.attachMedia(video);
+        hlsInstances.current[index] = hls;
+      } else if (!isHLS && video.src !== ad.video_url) {
+        video.src = ad.video_url;
+      }
+    });
+
+    return () => {
+      hlsInstances.current.forEach((hls) => hls?.destroy());
+      hlsInstances.current = [];
+    };
+  }, [videoAds]);
+
   // Intersection Observer for viewport detection
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
         setIsInView(entry.isIntersecting);
       },
-      { threshold: 0.1 } // Lower threshold to trigger earlier
+      { threshold: 0.1 }
     );
 
     if (containerRef.current) {
@@ -248,7 +273,6 @@ export const SponsoredVideoCarousel = ({ className }: { className?: string }) =>
                         <div className="relative aspect-video">
                           <video
                             ref={(el) => (videoRefs.current[globalIndex] = el)}
-                            src={ad.video_url}
                             poster={ad.video_thumbnail_url || undefined}
                             muted={true}
                             playsInline

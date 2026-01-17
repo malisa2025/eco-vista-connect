@@ -1,10 +1,11 @@
 import { useState, useRef } from 'react';
-import { Upload, X, Loader2, Video } from 'lucide-react';
+import { X, Loader2, Video } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import VideoRecorder from '@/components/jobs/VideoRecorder';
 import { useCloudflareUpload } from '@/hooks/useCloudflareUpload';
+import HLSVideoPlayer from '@/components/HLSVideoPlayer';
 
 interface VideoUploaderProps {
   onUploadComplete: (url: string, thumbnailUrl?: string, duration?: number) => void;
@@ -76,10 +77,10 @@ export const VideoUploader = ({
       
       {preview ? (
         <div className="relative">
-          <video
+          <HLSVideoPlayer
             src={preview}
-            controls
             className="w-full rounded-lg"
+            controls
           />
           {!uploading && (
             <Button

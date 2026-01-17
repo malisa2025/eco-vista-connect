@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ExternalLink, Volume2, VolumeX } from "lucide-react";
+import Hls from "hls.js";
 
 interface VideoAd {
   id: string;
@@ -20,6 +21,7 @@ const VerticalSponsoredVideos = ({ limit = 5 }: VerticalSponsoredVideosProps) =>
   const [playingVideoId, setPlayingVideoId] = useState<string | null>(null);
   const [mutedVideos, setMutedVideos] = useState<Set<string>>(new Set());
   const videoRefs = useRef<Map<string, HTMLVideoElement>>(new Map());
+  const hlsInstances = useRef<Map<string, Hls>>(new Map());
   const observerRef = useRef<IntersectionObserver | null>(null);
 
   useEffect(() => {
@@ -83,6 +85,9 @@ const VerticalSponsoredVideos = ({ limit = 5 }: VerticalSponsoredVideosProps) =>
 
     return () => {
       observerRef.current?.disconnect();
+      // Clean up HLS instances
+      hlsInstances.current.forEach((hls) => hls.destroy());
+      hlsInstances.current.clear();
     };
   }, [videoAds, playingVideoId]);
 
@@ -153,10 +158,20 @@ const VerticalSponsoredVideos = ({ limit = 5 }: VerticalSponsoredVideosProps) =>
               ref={(el) => {
                 if (el) {
                   videoRefs.current.set(ad.id, el);
+                  
+                  // Setup HLS if needed
+                  const isHLS = ad.video_url.includes('.m3u8');
+                  if (isHLS && Hls.isSupported() && !hlsInstances.current.has(ad.id)) {
+                    const hls = new Hls();
+                    hls.loadSource(ad.video_url);
+                    hls.attachMedia(el);
+                    hlsInstances.current.set(ad.id, hls);
+                  } else if (!isHLS && el.src !== ad.video_url) {
+                    el.src = ad.video_url;
+                  }
                 }
               }}
               data-video-id={ad.id}
-              src={ad.video_url}
               poster={ad.video_thumbnail_url || undefined}
               className="w-full h-full object-cover"
               loop
