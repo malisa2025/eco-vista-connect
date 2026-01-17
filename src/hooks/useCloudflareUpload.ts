@@ -6,6 +6,8 @@ interface UploadResult {
   url: string;
   thumbnailUrl?: string;
   duration?: number;
+  previewUrl?: string;
+  mp4Url?: string;
 }
 
 export const useCloudflareUpload = () => {
