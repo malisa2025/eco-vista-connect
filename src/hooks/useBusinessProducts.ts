@@ -10,6 +10,9 @@ export interface BusinessProduct {
   price: number;
   category: string;
   image_url: string | null;
+  video_url: string | null;
+  video_thumbnail_url: string | null;
+  additional_images: string[] | null;
   in_stock: boolean;
   is_featured: boolean;
   sort_order: number;
