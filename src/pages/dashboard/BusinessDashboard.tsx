@@ -36,6 +36,7 @@ import {
   Wrench,
   Stethoscope,
   Camera,
+  AlarmClock,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
@@ -100,6 +101,13 @@ export default function BusinessDashboard() {
       icon: Edit,
       href: `/businesses/${id}/edit`,
       gradient: "from-blue-500 to-cyan-500",
+    },
+    {
+      title: "Set Hours",
+      description: "Opening times",
+      icon: AlarmClock,
+      href: `/businesses/${id}/edit?tab=hours`,
+      gradient: "from-indigo-500 to-violet-500",
     },
     {
       title: "Post a Job",

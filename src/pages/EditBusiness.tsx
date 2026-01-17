@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import Navbar from '@/components/Navbar';
@@ -30,6 +30,8 @@ const GHANA_REGIONS = [
 export default function EditBusiness() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const defaultTab = searchParams.get('tab') || 'basic';
   const { user } = useAuth();
   const { data: categories } = useBusinessCategories();
   
@@ -117,7 +119,7 @@ export default function EditBusiness() {
           <div className="grid lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2">
               <Card className="p-6">
-                <Tabs defaultValue="basic" className="space-y-6">
+                <Tabs defaultValue={defaultTab} className="space-y-6">
                   <TabsList className="grid w-full grid-cols-5">
                     <TabsTrigger value="basic">Basic</TabsTrigger>
                     <TabsTrigger value="hours">Hours</TabsTrigger>

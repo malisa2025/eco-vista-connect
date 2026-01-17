@@ -13,16 +13,29 @@ export function useHotelManagement(businessId?: string | null) {
 
       let targetBusinessId = businessId;
 
-      // If no businessId provided, get the first owned business
+      // If no businessId provided, get the primary owned business (or first if no primary)
       if (!targetBusinessId) {
-        const { data: businessOwner } = await supabase
+        // Try to get primary business first
+        const { data: primaryOwner } = await supabase
           .from("business_owners")
           .select("business_id")
           .eq("user_id", user.id)
-          .single();
+          .eq("is_primary", true)
+          .maybeSingle();
 
-        if (!businessOwner) return null;
-        targetBusinessId = businessOwner.business_id;
+        if (primaryOwner) {
+          targetBusinessId = primaryOwner.business_id;
+        } else {
+          // Fallback to first business if no primary is set
+          const { data: firstOwner } = await supabase
+            .from("business_owners")
+            .select("business_id")
+            .eq("user_id", user.id)
+            .limit(1);
+
+          if (!firstOwner || firstOwner.length === 0) return null;
+          targetBusinessId = firstOwner[0].business_id;
+        }
       }
 
       // Get business details
