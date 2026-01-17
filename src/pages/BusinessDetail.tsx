@@ -208,11 +208,15 @@ const BusinessDetail = () => {
                 <Card>
                   <CardContent className="pt-6">
                     <h2 className="text-2xl font-bold mb-4">Business Introduction</h2>
-                    <VideoPlayer
-                      videoUrl={business.video_url}
-                      thumbnailUrl={business.video_thumbnail_url || business.image_url}
-                      title={business.name}
-                    />
+                    <div className="max-w-md lg:max-w-lg mx-auto">
+                      <div className="aspect-video">
+                        <VideoPlayer
+                          videoUrl={business.video_url}
+                          thumbnailUrl={business.video_thumbnail_url || business.image_url}
+                          title={business.name}
+                        />
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
               )}
