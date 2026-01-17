@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBusinessOwners } from '@/hooks/useBusinessClaims';
 import { useAdSpots, useAdMutations } from '@/hooks/useAdvertisements';
@@ -21,6 +21,17 @@ import { PAYSTACK_PUBLIC_KEY, PAYSTACK_CURRENCY } from '@/lib/paystack';
 import { VideoUploader } from '@/components/business/VideoUploader';
 import { ImageUploader } from '@/components/business/ImageUploader';
 
+interface PendingPayment {
+  reference: string;
+  amount: number;
+  adId: string;
+  metadata: {
+    advertisement_id: string;
+    business_id: string;
+    custom_fields: any[];
+  };
+}
+
 const PurchaseAd = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -42,6 +53,9 @@ const PurchaseAd = () => {
     end_date: '',
   });
 
+  const [pendingPayment, setPendingPayment] = useState<PendingPayment | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+
   const selectedSpot = adSpots?.find((s) => s.id === formData.ad_spot_id);
   const daysDiff = formData.start_date && formData.end_date
     ? Math.ceil(
@@ -51,40 +65,21 @@ const PurchaseAd = () => {
     : 0;
   const totalCost = selectedSpot && daysDiff > 0 ? selectedSpot.price_per_day * daysDiff : 0;
 
-  const handlePayment = async () => {
-    if (!formData.business_id || !formData.ad_spot_id || !formData.title || (!formData.image_url && !formData.video_url)) {
-      toast.error('Please fill in all required fields (including an image or video)');
-      return;
-    }
+  // Paystack configuration - must be at component level
+  const paystackConfig = {
+    reference: pendingPayment?.reference || '',
+    email: user?.email || '',
+    amount: pendingPayment?.amount || 0,
+    currency: PAYSTACK_CURRENCY,
+    publicKey: PAYSTACK_PUBLIC_KEY,
+    metadata: pendingPayment?.metadata || { custom_fields: [] },
+  };
 
-    if (totalCost <= 0) {
-      toast.error('Invalid ad duration');
-      return;
-    }
+  const initializePayment = usePaystackPayment(paystackConfig);
 
-    try {
-      // Create the advertisement first
-      const ad = await createAd.mutateAsync({
-        ...formData,
-        total_cost: totalCost,
-      });
-
-      // Initialize Paystack payment
-      const config = {
-        reference: `ad_${ad.id}_${Date.now()}`,
-        email: user?.email || '',
-        amount: Math.round(totalCost * 100), // Convert to pesewas
-        currency: PAYSTACK_CURRENCY,
-        publicKey: PAYSTACK_PUBLIC_KEY,
-        metadata: {
-          advertisement_id: ad.id,
-          business_id: formData.business_id,
-          custom_fields: [],
-        },
-      };
-
-      const initializePayment = usePaystackPayment(config);
-      
+  // Effect to trigger payment when pendingPayment is set
+  useEffect(() => {
+    if (pendingPayment && pendingPayment.reference) {
       initializePayment({
         onSuccess: async (reference: any) => {
           toast.success('Payment successful! Verifying...');
@@ -101,14 +96,55 @@ const PurchaseAd = () => {
             toast.success('Advertisement activated successfully!');
             navigate('/my-businesses');
           }
+          
+          setPendingPayment(null);
+          setIsProcessing(false);
         },
         onClose: () => {
           toast.error('Payment cancelled');
+          setPendingPayment(null);
+          setIsProcessing(false);
         }
+      });
+    }
+  }, [pendingPayment, initializePayment, navigate]);
+
+  const handlePayment = async () => {
+    if (!formData.business_id || !formData.ad_spot_id || !formData.title || (!formData.image_url && !formData.video_url)) {
+      toast.error('Please fill in all required fields (including an image or video)');
+      return;
+    }
+
+    if (totalCost <= 0) {
+      toast.error('Invalid ad duration');
+      return;
+    }
+
+    setIsProcessing(true);
+
+    try {
+      // Create the advertisement first
+      const ad = await createAd.mutateAsync({
+        ...formData,
+        total_cost: totalCost,
+      });
+
+      // Set pending payment to trigger useEffect
+      const reference = `ad_${ad.id}_${Date.now()}`;
+      setPendingPayment({
+        reference,
+        amount: Math.round(totalCost * 100), // Convert to pesewas
+        adId: ad.id,
+        metadata: {
+          advertisement_id: ad.id,
+          business_id: formData.business_id,
+          custom_fields: [],
+        },
       });
     } catch (error) {
       console.error('Error creating advertisement:', error);
       toast.error('Failed to create advertisement');
+      setIsProcessing(false);
     }
   };
 
@@ -286,8 +322,8 @@ const PurchaseAd = () => {
                     </div>
                   )}
 
-                  <Button type="submit" className="w-full" disabled={createAd.isPending}>
-                    {createAd.isPending ? 'Creating...' : 'Purchase Advertisement'}
+                  <Button type="submit" className="w-full" disabled={createAd.isPending || isProcessing}>
+                    {createAd.isPending || isProcessing ? 'Processing...' : 'Purchase Advertisement'}
                   </Button>
                 </form>
               </CardContent>

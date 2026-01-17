@@ -96,6 +96,13 @@ export default function BusinessDashboard() {
   // Base quick actions for all business types
   const baseActions = [
     {
+      title: "Manage Shop",
+      description: "Products & catalog",
+      icon: Package,
+      href: `/dashboard/products/${id}`,
+      gradient: "from-amber-500 to-yellow-500",
+    },
+    {
       title: "Edit Profile",
       description: "Update business info",
       icon: Edit,

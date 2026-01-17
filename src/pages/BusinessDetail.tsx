@@ -56,6 +56,7 @@ const BusinessDetail = () => {
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [getInTouchOpen, setGetInTouchOpen] = useState(false);
   const [writeReviewOpen, setWriteReviewOpen] = useState(false);
+  const [updateReviewOpen, setUpdateReviewOpen] = useState(false);
 
   // Track business view
   useTrackBusinessView(id!);
@@ -376,14 +377,14 @@ const BusinessDetail = () => {
                     Visit Shop
                   </Button>
 
-                  {/* Collapsible Your Review - After Visit Shop */}
+                  {/* Collapsible Write Review - For users who haven't reviewed */}
                   {user && !userReview && (
                     <Collapsible open={writeReviewOpen} onOpenChange={setWriteReviewOpen}>
                       <CollapsibleTrigger asChild>
-                        <Button variant="outline" className="w-full justify-between group">
+                        <Button variant="outline" className="w-full justify-between group border-orange-300">
                           <span className="flex items-center gap-2">
-                            <Star className="w-4 h-4" />
-                            Your Review
+                            <Star className="w-4 h-4 text-orange-500" />
+                            Write a Review
                           </span>
                           <ChevronDown className="w-4 h-4 transition-transform duration-200 group-data-[state=open]:rotate-180" />
                         </Button>
@@ -392,6 +393,28 @@ const BusinessDetail = () => {
                         <ReviewForm
                           businessId={id!}
                           onSuccess={() => setWriteReviewOpen(false)}
+                        />
+                      </CollapsibleContent>
+                    </Collapsible>
+                  )}
+
+                  {/* Collapsible Your Review - For users who already reviewed */}
+                  {user && userReview && (
+                    <Collapsible open={updateReviewOpen} onOpenChange={setUpdateReviewOpen}>
+                      <CollapsibleTrigger asChild>
+                        <Button variant="outline" className="w-full justify-between group border-orange-300">
+                          <span className="flex items-center gap-2">
+                            <Star className="w-4 h-4 text-orange-500" />
+                            Your Review
+                          </span>
+                          <ChevronDown className="w-4 h-4 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                        </Button>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent className="pt-4">
+                        <ReviewForm
+                          businessId={id!}
+                          existingReview={userReview}
+                          onSuccess={() => setUpdateReviewOpen(false)}
                         />
                       </CollapsibleContent>
                     </Collapsible>
@@ -421,18 +444,6 @@ const BusinessDetail = () => {
               canWriteReview={!!user && !userReview}
             />
 
-            {userReview && (
-              <Card className="border-primary">
-                <CardContent className="pt-6">
-                  <h3 className="text-xl font-semibold mb-4">Your Review</h3>
-                  <ReviewForm
-                    businessId={id!}
-                    existingReview={userReview}
-                    onSuccess={() => {}}
-                  />
-                </CardContent>
-              </Card>
-            )}
 
             <ReviewsList
               reviews={reviews || []}
