@@ -8,6 +8,7 @@ import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import Index from "./pages/Index";
 import Businesses from "./pages/Businesses";
 import BusinessDetail from "./pages/BusinessDetail";
+import BusinessShop from "./pages/BusinessShop";
 import Auth from "./pages/Auth";
 import CheckEmail from "./pages/CheckEmail";
 import Profile from "./pages/Profile";
@@ -86,6 +87,7 @@ const App = () => (
         <Route path="/check-email" element={<CheckEmail />} />
         <Route path="/businesses" element={<Businesses />} />
         <Route path="/businesses/:id" element={<BusinessDetail />} />
+        <Route path="/businesses/:id/shop" element={<BusinessShop />} />
         <Route path="/businesses/:id/edit" element={<ProtectedRoute><EditBusiness /></ProtectedRoute>} />
         <Route path="/business-news" element={<BusinessNews />} />
         <Route path="/hotels" element={<Hotels />} />
