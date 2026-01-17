@@ -30,8 +30,11 @@ export const HLSVideoPlayer = ({
     const video = videoRef.current;
     if (!video || !src) return;
 
-    // Check if this is a Cloudflare watch URL (needs iframe)
-    if (src.includes('watch.cloudflarestream.com') || src.includes('cloudflarestream.com/') && !src.includes('.m3u8')) {
+    // Check if this is a Cloudflare Stream URL (needs iframe to avoid CORS)
+    // Cloudflare Stream URLs contain 'cloudflarestream.com' in various formats
+    const isCloudflareStream = src.includes('cloudflarestream.com');
+    
+    if (isCloudflareStream) {
       setUseIframe(true);
       return;
     }
@@ -97,10 +100,27 @@ export const HLSVideoPlayer = ({
     };
   }, [src, autoPlay, onError]);
 
-  // For Cloudflare watch URLs, use iframe embed
+  // For Cloudflare Stream URLs, use iframe embed to avoid CORS issues
   if (useIframe) {
-    // Extract video ID from watch URL
-    const videoId = src.split('/').pop()?.split('?')[0] || '';
+    // Extract video ID from various Cloudflare Stream URL formats:
+    // - https://watch.cloudflarestream.com/{uid}
+    // - https://customer-{subdomain}.cloudflarestream.com/{uid}/manifest/video.m3u8
+    // - https://customer-{subdomain}.cloudflarestream.com/{uid}/thumbnails/thumbnail.jpg
+    let videoId = '';
+    
+    if (src.includes('watch.cloudflarestream.com')) {
+      videoId = src.split('/').pop()?.split('?')[0] || '';
+    } else if (src.includes('cloudflarestream.com')) {
+      // Extract UID from paths like /uid/manifest/video.m3u8 or /uid/thumbnails/...
+      const match = src.match(/cloudflarestream\.com\/([a-zA-Z0-9]+)/);
+      videoId = match ? match[1] : '';
+    }
+    
+    if (!videoId) {
+      console.error('Could not extract video ID from Cloudflare URL:', src);
+      return null;
+    }
+    
     return (
       <iframe
         src={`https://iframe.cloudflarestream.com/${videoId}?${autoPlay ? 'autoplay=true&' : ''}${muted ? 'muted=true&' : ''}${loop ? 'loop=true&' : ''}controls=${controls}`}

@@ -5,7 +5,17 @@ import { Volume2, VolumeX, Play } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import Hls from "hls.js";
+
+// Helper to extract Cloudflare video ID
+const extractCloudflareVideoId = (url: string): string | null => {
+  if (url.includes('watch.cloudflarestream.com')) {
+    return url.split('/').pop()?.split('?')[0] || null;
+  } else if (url.includes('cloudflarestream.com')) {
+    const match = url.match(/cloudflarestream\.com\/([a-zA-Z0-9]+)/);
+    return match ? match[1] : null;
+  }
+  return null;
+};
 
 interface VideoAd {
   id: string;
@@ -24,8 +34,7 @@ export const SponsoredVideoCarousel = ({ className }: { className?: string }) =>
   const [currentPlayingIndex, setCurrentPlayingIndex] = useState(0);
   const [isMuted, setIsMuted] = useState(true);
   const [isInView, setIsInView] = useState(false);
-  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
-  const hlsInstances = useRef<(Hls | null)[]>([]);
+  const iframeRefs = useRef<(HTMLIFrameElement | null)[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
@@ -57,27 +66,10 @@ export const SponsoredVideoCarousel = ({ className }: { className?: string }) =>
     fetchVideoAds();
   }, []);
 
-  // Setup HLS for videos and cleanup
+  // Track video ads loaded
   useEffect(() => {
-    videoAds.forEach((ad, index) => {
-      const video = videoRefs.current[index];
-      if (!video) return;
-
-      const isHLS = ad.video_url.includes('.m3u8');
-      if (isHLS && Hls.isSupported() && !hlsInstances.current[index]) {
-        const hls = new Hls();
-        hls.loadSource(ad.video_url);
-        hls.attachMedia(video);
-        hlsInstances.current[index] = hls;
-      } else if (!isHLS && video.src !== ad.video_url) {
-        video.src = ad.video_url;
-      }
-    });
-
-    return () => {
-      hlsInstances.current.forEach((hls) => hls?.destroy());
-      hlsInstances.current = [];
-    };
+    // Initialize iframe refs array
+    iframeRefs.current = new Array(videoAds.length).fill(null);
   }, [videoAds]);
 
   // Intersection Observer for viewport detection
@@ -96,32 +88,9 @@ export const SponsoredVideoCarousel = ({ className }: { className?: string }) =>
     return () => observer.disconnect();
   }, []);
 
-  // Play first video immediately when component is ready
-  useEffect(() => {
-    if (videoAds.length > 0 && videoRefs.current[0]) {
-      const firstVideo = videoRefs.current[0];
-      if (firstVideo) {
-        firstVideo.muted = isMuted;
-        firstVideo.currentTime = 0;
-        firstVideo.play().catch((error) => {
-          console.log("Initial autoplay blocked, waiting for user interaction");
-        });
-      }
-    }
-  }, [videoAds.length, isMuted]);
-
   // Embla carousel event listeners
   useEffect(() => {
     if (!emblaApi) return;
-
-    const onScroll = () => {
-      // Pause all videos when carousel starts scrolling
-      videoRefs.current.forEach(video => {
-        if (video && !video.paused) {
-          video.pause();
-        }
-      });
-    };
 
     const onSettle = () => {
       // Carousel has settled, play first video of new slide immediately
@@ -130,80 +99,38 @@ export const SponsoredVideoCarousel = ({ className }: { className?: string }) =>
       setCurrentPlayingIndex(firstVideoOfSlide);
     };
 
-    emblaApi.on('scroll', onScroll);
     emblaApi.on('settle', onSettle);
 
     return () => {
-      emblaApi.off('scroll', onScroll);
       emblaApi.off('settle', onSettle);
     };
   }, [emblaApi]);
 
-  // Auto-play logic
+  // Auto-advance slides with timer (since iframe controls are harder to track)
   useEffect(() => {
     if (!isInView || videoAds.length === 0) return;
 
-    const currentSlideStartIndex = Math.floor(currentPlayingIndex / 3) * 3;
-    const indexInSlide = currentPlayingIndex % 3;
-    const video = videoRefs.current[currentPlayingIndex];
-
-    if (!video) return;
-
-    // Pause all other videos first
-    videoRefs.current.forEach((v, idx) => {
-      if (v && idx !== currentPlayingIndex && !v.paused) {
-        v.pause();
+    const timer = setInterval(() => {
+      const indexInSlide = currentPlayingIndex % 3;
+      const currentSlide = Math.floor(currentPlayingIndex / 3);
+      const totalSlides = Math.ceil(videoAds.length / 3);
+      const videosInCurrentSlide = Math.min(3, videoAds.length - currentSlide * 3);
+      
+      if (indexInSlide < videosInCurrentSlide - 1) {
+        // Move to next video in current slide
+        setCurrentPlayingIndex(currentPlayingIndex + 1);
+      } else if (currentSlide < totalSlides - 1) {
+        // Move to next slide
+        emblaApi?.scrollNext();
+      } else {
+        // Loop back to beginning
+        emblaApi?.scrollTo(0);
+        setCurrentPlayingIndex(0);
       }
-    });
+    }, PREVIEW_DURATION * 1000);
 
-    const playVideo = async () => {
-      try {
-        video.muted = isMuted;
-        video.currentTime = 0;
-        await video.play();
-        console.log(`Playing video ${currentPlayingIndex}`);
-      } catch (error) {
-        console.error(`Video ${currentPlayingIndex} play failed:`, error);
-        // If autoplay fails, try again after a brief moment
-        setTimeout(async () => {
-          try {
-            await video.play();
-          } catch (retryError) {
-            console.log("Retry failed - user interaction may be required");
-          }
-        }, 500);
-      }
-    };
-
-    playVideo();
-
-    const handleTimeUpdate = () => {
-      if (video.currentTime >= PREVIEW_DURATION) {
-        video.pause();
-        
-        // Move to next video in sequence
-        if (indexInSlide < 2 && currentPlayingIndex < videoAds.length - 1) {
-          // Play next video in current slide
-          setCurrentPlayingIndex(currentPlayingIndex + 1);
-        } else if (currentPlayingIndex < videoAds.length - 1) {
-          // All 3 videos played, move to next slide
-          emblaApi?.scrollNext();
-          // Don't set index here - let onSettle handle it
-        } else {
-          // Loop back to beginning
-          emblaApi?.scrollTo(0);
-          // Don't set index here - let onSettle handle it
-        }
-      }
-    };
-
-    video.addEventListener("timeupdate", handleTimeUpdate);
-
-    return () => {
-      video.removeEventListener("timeupdate", handleTimeUpdate);
-      video.pause();
-    };
-  }, [currentPlayingIndex, isInView, videoAds.length, emblaApi, isMuted]);
+    return () => clearInterval(timer);
+  }, [currentPlayingIndex, isInView, videoAds.length, emblaApi]);
 
   const handleVideoClick = async (ad: VideoAd, index: number) => {
     // Track click
@@ -221,13 +148,7 @@ export const SponsoredVideoCarousel = ({ className }: { className?: string }) =>
 
   const toggleMute = (e: React.MouseEvent) => {
     e.stopPropagation();
-    const newMutedState = !isMuted;
-    setIsMuted(newMutedState);
-    videoRefs.current.forEach((video) => {
-      if (video) {
-        video.muted = newMutedState;
-      }
-    });
+    setIsMuted(!isMuted);
   };
 
   if (videoAds.length === 0) return null;
@@ -271,20 +192,36 @@ export const SponsoredVideoCarousel = ({ className }: { className?: string }) =>
                         onClick={() => handleVideoClick(ad, globalIndex)}
                       >
                         <div className="relative aspect-video">
-                          <video
-                            ref={(el) => (videoRefs.current[globalIndex] = el)}
-                            poster={ad.video_thumbnail_url || undefined}
-                            muted={true}
-                            playsInline
-                            preload={globalIndex === currentPlayingIndex ? "auto" : "metadata"}
-                            className="w-full h-full object-cover"
-                            onError={() => {
-                              console.log('Video failed to load, skipping to next');
-                              if (globalIndex < videoAds.length - 1) {
-                                setCurrentPlayingIndex(globalIndex + 1);
-                              }
-                            }}
-                          />
+                          {(() => {
+                            const videoId = extractCloudflareVideoId(ad.video_url);
+                            const shouldAutoplay = isPlaying && isInView;
+                            
+                            if (videoId) {
+                              // Use Cloudflare Stream iframe embed
+                              return (
+                                <iframe
+                                  ref={(el) => (iframeRefs.current[globalIndex] = el)}
+                                  src={`https://iframe.cloudflarestream.com/${videoId}?autoplay=${shouldAutoplay}&loop=true&muted=${isMuted}&controls=false&poster=${ad.video_thumbnail_url || ''}`}
+                                  className="w-full h-full"
+                                  allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
+                                  style={{ border: 'none' }}
+                                />
+                              );
+                            } else {
+                              // Fallback for non-Cloudflare videos
+                              return (
+                                <video
+                                  poster={ad.video_thumbnail_url || undefined}
+                                  src={ad.video_url}
+                                  muted={isMuted}
+                                  playsInline
+                                  autoPlay={shouldAutoplay}
+                                  loop
+                                  className="w-full h-full object-cover"
+                                />
+                              );
+                            }
+                          })()}
                           
                           {/* Video sequence indicator */}
                           <div className="absolute top-2 left-2 z-10">
@@ -310,10 +247,7 @@ export const SponsoredVideoCarousel = ({ className }: { className?: string }) =>
                             <div className="absolute top-2 right-2">
                               <div className="h-2 w-16 bg-background/20 rounded-full overflow-hidden">
                                 <div
-                                  className="h-full bg-primary transition-all duration-1000"
-                                  style={{
-                                    width: `${(videoRefs.current[globalIndex]?.currentTime || 0) / PREVIEW_DURATION * 100}%`,
-                                  }}
+                                  className="h-full bg-primary animate-pulse"
                                 />
                               </div>
                             </div>

@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ExternalLink, Volume2, VolumeX } from "lucide-react";
-import Hls from "hls.js";
 
 interface VideoAd {
   id: string;
@@ -16,12 +15,22 @@ interface VerticalSponsoredVideosProps {
   limit?: number;
 }
 
+// Helper to extract Cloudflare video ID
+const extractCloudflareVideoId = (url: string): string | null => {
+  if (url.includes('watch.cloudflarestream.com')) {
+    return url.split('/').pop()?.split('?')[0] || null;
+  } else if (url.includes('cloudflarestream.com')) {
+    const match = url.match(/cloudflarestream\.com\/([a-zA-Z0-9]+)/);
+    return match ? match[1] : null;
+  }
+  return null;
+};
+
 const VerticalSponsoredVideos = ({ limit = 5 }: VerticalSponsoredVideosProps) => {
   const [videoAds, setVideoAds] = useState<VideoAd[]>([]);
   const [playingVideoId, setPlayingVideoId] = useState<string | null>(null);
   const [mutedVideos, setMutedVideos] = useState<Set<string>>(new Set());
-  const videoRefs = useRef<Map<string, HTMLVideoElement>>(new Map());
-  const hlsInstances = useRef<Map<string, Hls>>(new Map());
+  const iframeRefs = useRef<Map<string, HTMLIFrameElement>>(new Map());
   const observerRef = useRef<IntersectionObserver | null>(null);
 
   useEffect(() => {
@@ -52,42 +61,32 @@ const VerticalSponsoredVideos = ({ limit = 5 }: VerticalSponsoredVideosProps) =>
   };
 
   useEffect(() => {
-    // Set up Intersection Observer for auto-play
+    // Set up Intersection Observer for tracking visibility
     observerRef.current = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           const videoId = entry.target.getAttribute("data-video-id");
           if (!videoId) return;
 
-          const video = videoRefs.current.get(videoId);
-          if (!video) return;
-
           if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
-            // Video is 50% visible - play it
-            video.play().catch(console.error);
             setPlayingVideoId(videoId);
-          } else {
-            // Video left viewport - pause it
-            video.pause();
-            if (playingVideoId === videoId) {
-              setPlayingVideoId(null);
-            }
+          } else if (playingVideoId === videoId) {
+            setPlayingVideoId(null);
           }
         });
       },
       { threshold: [0.5] }
     );
 
-    // Observe all video elements
-    videoRefs.current.forEach((video) => {
-      observerRef.current?.observe(video);
+    // Observe all iframe containers
+    iframeRefs.current.forEach((iframe) => {
+      if (iframe.parentElement) {
+        observerRef.current?.observe(iframe.parentElement);
+      }
     });
 
     return () => {
       observerRef.current?.disconnect();
-      // Clean up HLS instances
-      hlsInstances.current.forEach((hls) => hls.destroy());
-      hlsInstances.current.clear();
     };
   }, [videoAds, playingVideoId]);
 
@@ -105,16 +104,11 @@ const VerticalSponsoredVideos = ({ limit = 5 }: VerticalSponsoredVideosProps) =>
 
   const toggleMute = (e: React.MouseEvent, videoId: string) => {
     e.stopPropagation();
-    const video = videoRefs.current.get(videoId);
-    if (!video) return;
-
     const newMutedVideos = new Set(mutedVideos);
     if (mutedVideos.has(videoId)) {
       newMutedVideos.delete(videoId);
-      video.muted = false;
     } else {
       newMutedVideos.add(videoId);
-      video.muted = true;
     }
     setMutedVideos(newMutedVideos);
   };
@@ -152,33 +146,44 @@ const VerticalSponsoredVideos = ({ limit = 5 }: VerticalSponsoredVideosProps) =>
             Sponsored
           </div>
 
-          {/* Video */}
-          <div className="relative aspect-video bg-muted">
-            <video
-              ref={(el) => {
-                if (el) {
-                  videoRefs.current.set(ad.id, el);
-                  
-                  // Setup HLS if needed
-                  const isHLS = ad.video_url.includes('.m3u8');
-                  if (isHLS && Hls.isSupported() && !hlsInstances.current.has(ad.id)) {
-                    const hls = new Hls();
-                    hls.loadSource(ad.video_url);
-                    hls.attachMedia(el);
-                    hlsInstances.current.set(ad.id, hls);
-                  } else if (!isHLS && el.src !== ad.video_url) {
-                    el.src = ad.video_url;
-                  }
-                }
-              }}
-              data-video-id={ad.id}
-              poster={ad.video_thumbnail_url || undefined}
-              className="w-full h-full object-cover"
-              loop
-              playsInline
-              muted={mutedVideos.has(ad.id)}
-              onLoadedMetadata={() => recordImpression(ad.id)}
-            />
+          {/* Video - Use iframe for Cloudflare Stream */}
+          <div className="relative aspect-video bg-muted" data-video-id={ad.id}>
+            {(() => {
+              const videoId = extractCloudflareVideoId(ad.video_url);
+              const isMuted = mutedVideos.has(ad.id);
+              
+              if (videoId) {
+                // Use Cloudflare Stream iframe embed
+                return (
+                  <iframe
+                    ref={(el) => {
+                      if (el) {
+                        iframeRefs.current.set(ad.id, el);
+                        recordImpression(ad.id);
+                      }
+                    }}
+                    src={`https://iframe.cloudflarestream.com/${videoId}?autoplay=true&loop=true&muted=${isMuted}&controls=false`}
+                    className="w-full h-full"
+                    allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
+                    style={{ border: 'none' }}
+                  />
+                );
+              } else {
+                // Fallback for non-Cloudflare videos
+                return (
+                  <video
+                    poster={ad.video_thumbnail_url || undefined}
+                    className="w-full h-full object-cover"
+                    src={ad.video_url}
+                    loop
+                    playsInline
+                    autoPlay
+                    muted={isMuted}
+                    onLoadedMetadata={() => recordImpression(ad.id)}
+                  />
+                );
+              }
+            })()}
 
             {/* Mute/Unmute Button */}
             <button
@@ -192,15 +197,6 @@ const VerticalSponsoredVideos = ({ limit = 5 }: VerticalSponsoredVideosProps) =>
                 <Volume2 className="h-4 w-4 text-foreground" />
               )}
             </button>
-
-            {/* Play indicator when not playing */}
-            {playingVideoId !== ad.id && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                <div className="w-12 h-12 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center">
-                  <div className="w-0 h-0 border-l-8 border-l-foreground border-t-6 border-t-transparent border-b-6 border-b-transparent ml-1" />
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Title and Description Overlay */}
