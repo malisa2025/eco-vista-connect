@@ -46,6 +46,10 @@ export const VideoUploader = ({
     // Upload to Cloudflare
     const result = await uploadToCloudflare(file, 'video');
     if (result) {
+      // Use previewUrl for display if available (Cloudflare watch URL works immediately)
+      if (result.previewUrl) {
+        setPreview(result.previewUrl);
+      }
       onUploadComplete(result.url, result.thumbnailUrl, result.duration);
     }
   };
@@ -59,6 +63,10 @@ export const VideoUploader = ({
     // Upload to Cloudflare
     const result = await uploadToCloudflare(file, 'video');
     if (result) {
+      // Use previewUrl for display if available
+      if (result.previewUrl) {
+        setPreview(result.previewUrl);
+      }
       onUploadComplete(result.url, result.thumbnailUrl, result.duration);
     }
   };
@@ -77,11 +85,20 @@ export const VideoUploader = ({
       
       {preview ? (
         <div className="relative">
-          <HLSVideoPlayer
-            src={preview}
-            className="w-full rounded-lg"
-            controls
-          />
+          {/* Use native video for local previews (data URLs), HLS for remote URLs */}
+          {preview.startsWith('data:') ? (
+            <video
+              src={preview}
+              className="w-full rounded-lg"
+              controls
+            />
+          ) : (
+            <HLSVideoPlayer
+              src={preview}
+              className="w-full rounded-lg"
+              controls
+            />
+          )}
           {!uploading && (
             <Button
               size="icon"
