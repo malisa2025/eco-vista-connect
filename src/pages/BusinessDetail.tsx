@@ -168,9 +168,18 @@ const BusinessDetail = () => {
             <div className="lg:col-span-2 space-y-8">
               {/* Header */}
               <div>
-                <h1 className="text-4xl md:text-5xl font-bold mb-4">
-                  {business.name}
-                </h1>
+                <div className="flex items-center gap-4 flex-wrap mb-4">
+                  <h1 className="text-4xl md:text-5xl font-bold">
+                    {business.name}
+                  </h1>
+                  <Button 
+                    className="bg-orange-500 hover:bg-orange-600 text-white"
+                    onClick={() => navigate(`/businesses/${id}/shop`)}
+                  >
+                    <ShoppingBag className="w-4 h-4 mr-2" />
+                    Visit Shop
+                  </Button>
+                </div>
                 <div className="flex items-center gap-3 flex-wrap mb-4">
                   <Badge variant="secondary" className="text-sm">
                     {business.category}
@@ -358,14 +367,14 @@ const BusinessDetail = () => {
                     </CollapsibleContent>
                   </Collapsible>
 
-                  {/* Collapsible Write Review */}
+                  {/* Collapsible Your Review */}
                   {user && !userReview && (
                     <Collapsible open={writeReviewOpen} onOpenChange={setWriteReviewOpen}>
                       <CollapsibleTrigger asChild>
                         <Button variant="outline" className="w-full justify-between group">
                           <span className="flex items-center gap-2">
                             <Star className="w-4 h-4" />
-                            Write a Review
+                            Your Review
                           </span>
                           <ChevronDown className="w-4 h-4 transition-transform duration-200 group-data-[state=open]:rotate-180" />
                         </Button>
@@ -379,23 +388,9 @@ const BusinessDetail = () => {
                     </Collapsible>
                   )}
 
-                  {business.website && (
-                    <Button variant="outline" className="w-full" asChild>
-                      <a
-                        href={ensureHttps(business.website)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <Globe className="w-4 h-4 mr-2" />
-                        Visit Website
-                      </a>
-                    </Button>
-                  )}
-
-                  {/* Visit Shop Button - Always show for retail/shop businesses */}
+                  {/* Visit Shop Button */}
                   <Button 
-                    variant="default" 
-                    className="w-full"
+                    className="w-full bg-orange-500 hover:bg-orange-600 text-white"
                     onClick={() => navigate(`/businesses/${id}/shop`)}
                   >
                     <ShoppingBag className="w-4 h-4 mr-2" />
