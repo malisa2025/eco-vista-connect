@@ -392,17 +392,15 @@ const BusinessDetail = () => {
                     </Button>
                   )}
 
-                  {/* Visit Shop Button */}
-                  {hasProducts && (
-                    <Button 
-                      variant="default" 
-                      className="w-full"
-                      onClick={() => navigate(`/businesses/${id}/shop`)}
-                    >
-                      <ShoppingBag className="w-4 h-4 mr-2" />
-                      Visit Shop
-                    </Button>
-                  )}
+                  {/* Visit Shop Button - Always show for retail/shop businesses */}
+                  <Button 
+                    variant="default" 
+                    className="w-full"
+                    onClick={() => navigate(`/businesses/${id}/shop`)}
+                  >
+                    <ShoppingBag className="w-4 h-4 mr-2" />
+                    Visit Shop
+                  </Button>
                 </CardContent>
               </Card>
             </div>
