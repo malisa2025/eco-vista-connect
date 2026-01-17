@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Hls from 'hls.js';
 
 interface HLSVideoPlayerProps {
@@ -24,13 +24,28 @@ export const HLSVideoPlayer = ({
 }: HLSVideoPlayerProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
+  const [useIframe, setUseIframe] = useState(false);
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video || !src) return;
 
+    // Check if this is a Cloudflare watch URL (needs iframe)
+    if (src.includes('watch.cloudflarestream.com') || src.includes('cloudflarestream.com/') && !src.includes('.m3u8')) {
+      setUseIframe(true);
+      return;
+    }
+
+    setUseIframe(false);
+
     // Check if this is an HLS stream
     const isHLS = src.includes('.m3u8');
+
+    // Clean up previous HLS instance
+    if (hlsRef.current) {
+      hlsRef.current.destroy();
+      hlsRef.current = null;
+    }
 
     if (isHLS && Hls.isSupported()) {
       // Use HLS.js for browsers that don't natively support HLS
@@ -81,6 +96,21 @@ export const HLSVideoPlayer = ({
       }
     };
   }, [src, autoPlay, onError]);
+
+  // For Cloudflare watch URLs, use iframe embed
+  if (useIframe) {
+    // Extract video ID from watch URL
+    const videoId = src.split('/').pop()?.split('?')[0] || '';
+    return (
+      <iframe
+        src={`https://iframe.cloudflarestream.com/${videoId}?${autoPlay ? 'autoplay=true&' : ''}${muted ? 'muted=true&' : ''}${loop ? 'loop=true&' : ''}controls=${controls}`}
+        className={className}
+        allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
+        allowFullScreen
+        style={{ border: 'none', width: '100%', aspectRatio: '16/9' }}
+      />
+    );
+  }
 
   return (
     <video

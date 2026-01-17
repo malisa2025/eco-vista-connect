@@ -50,6 +50,7 @@ serve(async (req) => {
       });
 
       const result = await response.json();
+      console.log('Cloudflare Stream response:', JSON.stringify(result, null, 2));
       
       if (!response.ok) {
         console.error('Cloudflare Stream error:', result);
@@ -58,22 +59,33 @@ serve(async (req) => {
 
       const videoData = result[resultKey];
       
-      // Cloudflare Stream uses format: https://customer-{subdomain}.cloudflarestream.com/{uid}/manifest/video.m3u8
-      // The subdomain is in the playback property or we can use iframe embed
-      // For direct HLS playback, use the watch URL pattern
-      const hlsUrl = `https://customer-${videoData.preview?.split('customer-')[1]?.split('.')[0] || CLOUDFLARE_ACCOUNT_ID}.cloudflarestream.com/${videoData.uid}/manifest/video.m3u8`;
+      // Cloudflare Stream provides playback URLs in the response
+      // playback.hls is the HLS URL, playback.dash is the DASH URL
+      // If playback is not immediately available, construct from preview URL
+      let hlsUrl = videoData.playback?.hls;
+      let dashUrl = videoData.playback?.dash;
       
-      // Also provide MP4 download URL for fallback
-      const mp4Url = `https://customer-${videoData.preview?.split('customer-')[1]?.split('.')[0] || CLOUDFLARE_ACCOUNT_ID}.cloudflarestream.com/${videoData.uid}/downloads/default.mp4`;
+      // If playback URLs not yet available (video still processing), use preview/watch URL
+      if (!hlsUrl && videoData.preview) {
+        // Preview URL format: https://watch.cloudflarestream.com/{uid}
+        // HLS URL format: https://customer-{subdomain}.cloudflarestream.com/{uid}/manifest/video.m3u8
+        // We need to use the iframe embed or wait for processing
+        hlsUrl = videoData.preview; // Use preview URL as fallback
+      }
+      
+      // Thumbnail URL
+      const thumbnailUrl = videoData.thumbnail || `https://customer-${CLOUDFLARE_ACCOUNT_ID}.cloudflarestream.com/${videoData.uid}/thumbnails/thumbnail.jpg`;
       
       return new Response(JSON.stringify({
         success: true,
-        url: hlsUrl,
-        mp4Url: mp4Url,
+        url: hlsUrl || videoData.preview,
+        dashUrl: dashUrl,
         previewUrl: videoData.preview,
-        thumbnailUrl: videoData.thumbnail,
+        thumbnailUrl: thumbnailUrl,
         duration: videoData.duration,
         uid: videoData.uid,
+        status: videoData.status?.state || 'processing',
+        readyToStream: videoData.readyToStream || false,
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
