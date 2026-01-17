@@ -35,6 +35,15 @@ import {
   Globe,
 } from "lucide-react";
 
+// Helper to ensure URLs have a protocol
+const ensureHttps = (url: string | null): string => {
+  if (!url) return '';
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+  return `https://${url}`;
+};
+
 const BusinessDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -287,7 +296,7 @@ const BusinessDetail = () => {
                       <div>
                         <p className="font-medium">Website</p>
                         <a
-                          href={business.website}
+                          href={ensureHttps(business.website)}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-sm text-primary hover:underline break-all"
@@ -330,7 +339,7 @@ const BusinessDetail = () => {
                   {business.website && (
                     <Button variant="outline" className="w-full" asChild>
                       <a
-                        href={business.website}
+                        href={ensureHttps(business.website)}
                         target="_blank"
                         rel="noopener noreferrer"
                       >
