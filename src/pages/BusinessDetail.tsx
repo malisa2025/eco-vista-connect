@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTrackBusinessView } from "@/hooks/useBusinessViews";
+import { useBusinessProducts } from "@/hooks/useBusinessProducts";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import VideoPlayer from "@/components/VideoPlayer";
@@ -18,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import ReviewSummary from "@/components/reviews/ReviewSummary";
 import ReviewForm from "@/components/reviews/ReviewForm";
 import ReviewsList from "@/components/reviews/ReviewsList";
@@ -33,6 +35,9 @@ import {
   Phone,
   Mail,
   Globe,
+  ShoppingBag,
+  MessageCircle,
+  ChevronDown,
 } from "lucide-react";
 
 // Helper to ensure URLs have a protocol
@@ -49,9 +54,15 @@ const BusinessDetail = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [showReviewForm, setShowReviewForm] = useState(false);
+  const [getInTouchOpen, setGetInTouchOpen] = useState(false);
+  const [writeReviewOpen, setWriteReviewOpen] = useState(false);
 
   // Track business view
   useTrackBusinessView(id!);
+
+  // Fetch products to check if shop should be shown
+  const { data: products = [] } = useBusinessProducts(id!);
+  const hasProducts = products.length > 0;
 
   const { data: reviews, isLoading: reviewsLoading } = useBusinessReviews(id!);
   const { data: userReview } = useUserReview(id!, user?.id);
@@ -229,14 +240,8 @@ const BusinessDetail = () => {
               {/* Message Business Button */}
               <ContactBusinessButton businessId={id!} />
 
-              {/* Lead Capture Form */}
-              <Card>
-                <CardContent className="pt-6">
-                  <h2 className="text-2xl font-bold mb-4">Get in Touch</h2>
-                  <EmbeddedLeadForm businessId={id!} />
-                </CardContent>
-              </Card>
             </div>
+
 
             {/* Sidebar */}
             <div className="space-y-6">
@@ -336,6 +341,44 @@ const BusinessDetail = () => {
                       </a>
                     </Button>
                   )}
+
+                  {/* Collapsible Get in Touch */}
+                  <Collapsible open={getInTouchOpen} onOpenChange={setGetInTouchOpen}>
+                    <CollapsibleTrigger asChild>
+                      <Button variant="outline" className="w-full justify-between group">
+                        <span className="flex items-center gap-2">
+                          <MessageCircle className="w-4 h-4" />
+                          Get in Touch
+                        </span>
+                        <ChevronDown className="w-4 h-4 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                      </Button>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="pt-4">
+                      <EmbeddedLeadForm businessId={id!} />
+                    </CollapsibleContent>
+                  </Collapsible>
+
+                  {/* Collapsible Write Review */}
+                  {user && !userReview && (
+                    <Collapsible open={writeReviewOpen} onOpenChange={setWriteReviewOpen}>
+                      <CollapsibleTrigger asChild>
+                        <Button variant="outline" className="w-full justify-between group">
+                          <span className="flex items-center gap-2">
+                            <Star className="w-4 h-4" />
+                            Write a Review
+                          </span>
+                          <ChevronDown className="w-4 h-4 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                        </Button>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent className="pt-4">
+                        <ReviewForm
+                          businessId={id!}
+                          onSuccess={() => setWriteReviewOpen(false)}
+                        />
+                      </CollapsibleContent>
+                    </Collapsible>
+                  )}
+
                   {business.website && (
                     <Button variant="outline" className="w-full" asChild>
                       <a
@@ -346,6 +389,18 @@ const BusinessDetail = () => {
                         <Globe className="w-4 h-4 mr-2" />
                         Visit Website
                       </a>
+                    </Button>
+                  )}
+
+                  {/* Visit Shop Button */}
+                  {hasProducts && (
+                    <Button 
+                      variant="default" 
+                      className="w-full"
+                      onClick={() => navigate(`/businesses/${id}/shop`)}
+                    >
+                      <ShoppingBag className="w-4 h-4 mr-2" />
+                      Visit Shop
                     </Button>
                   )}
                 </CardContent>
