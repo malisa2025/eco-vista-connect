@@ -14,6 +14,7 @@ import { ImageUploader } from '@/components/business/ImageUploader';
 import { VideoUploader } from '@/components/business/VideoUploader';
 import { GalleryManager } from '@/components/business/GalleryManager';
 import { ProfileCompleteness } from '@/components/business/ProfileCompleteness';
+import { BusinessHoursEditor } from '@/components/business/BusinessHoursEditor';
 import { useBusinessUpdate } from '@/hooks/useBusinessUpdate';
 import { useAuth } from '@/contexts/AuthContext';
 import { ArrowLeft, Loader2 } from 'lucide-react';
@@ -117,8 +118,9 @@ export default function EditBusiness() {
             <div className="lg:col-span-2">
               <Card className="p-6">
                 <Tabs defaultValue="basic" className="space-y-6">
-                  <TabsList className="grid w-full grid-cols-4">
+                  <TabsList className="grid w-full grid-cols-5">
                     <TabsTrigger value="basic">Basic</TabsTrigger>
+                    <TabsTrigger value="hours">Hours</TabsTrigger>
                     <TabsTrigger value="contact">Contact</TabsTrigger>
                     <TabsTrigger value="media">Media</TabsTrigger>
                     <TabsTrigger value="location">Location</TabsTrigger>
@@ -183,6 +185,13 @@ export default function EditBusiness() {
                         </Select>
                       </div>
                     </div>
+                  </TabsContent>
+
+                  <TabsContent value="hours" className="space-y-4">
+                    <BusinessHoursEditor
+                      value={formData.business_hours}
+                      onChange={(hours) => handleInputChange('business_hours', hours)}
+                    />
                   </TabsContent>
 
                   <TabsContent value="contact" className="space-y-4">
