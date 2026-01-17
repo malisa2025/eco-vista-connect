@@ -417,23 +417,9 @@ const BusinessDetail = () => {
                 2: reviews?.filter(r => r.rating === 2).length || 0,
                 1: reviews?.filter(r => r.rating === 1).length || 0,
               }}
-              onWriteReview={() => setShowReviewForm(true)}
+              onWriteReview={() => setWriteReviewOpen(true)}
               canWriteReview={!!user && !userReview}
             />
-
-            {showReviewForm && !userReview && (
-              <Card>
-                <CardContent className="pt-6">
-                  <h3 className="text-xl font-semibold mb-4">Write a Review</h3>
-                  <ReviewForm
-                    businessId={id!}
-                    onSuccess={() => {
-                      setShowReviewForm(false);
-                    }}
-                  />
-                </CardContent>
-              </Card>
-            )}
 
             {userReview && (
               <Card className="border-primary">
