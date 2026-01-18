@@ -15,7 +15,7 @@ import { PaystackButton } from "react-paystack";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
+import { Loader2, CheckCircle } from "lucide-react";
 import { generatePaymentReference, toPesewas, PAYSTACK_PUBLIC_KEY, PAYSTACK_CURRENCY } from "@/lib/paystack";
 
 export default function BusinessSubscriptionCheckout() {
@@ -29,6 +29,7 @@ export default function BusinessSubscriptionCheckout() {
   const [promoCode, setPromoCode] = useState("");
   const [agreed, setAgreed] = useState(false);
   const [selectedBusinessId, setSelectedBusinessId] = useState<string>(businessIdParam || "");
+  const [isActivating, setIsActivating] = useState(false);
   const [companyDetails, setCompanyDetails] = useState({
     company_name: "",
     tax_id: "",
@@ -87,8 +88,48 @@ export default function BusinessSubscriptionCheckout() {
   const subtotal = selectedPlan.price;
   const discountAmount = subtotal * (discount / 100);
   const total = subtotal - discountAmount;
+  const isFreePlan = total === 0;
 
   const paymentReference = generatePaymentReference("business_subscription", selectedBusinessId);
+
+  // Handle free plan activation
+  const handleFreeSubscription = async () => {
+    if (!selectedBusinessId || !companyDetails.company_name) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
+    setIsActivating(true);
+
+    try {
+      const startDate = new Date();
+      const endDate = new Date();
+      endDate.setFullYear(endDate.getFullYear() + 100); // Effectively unlimited for free plan
+
+      const { error } = await supabase
+        .from('business_subscriptions')
+        .insert({
+          business_id: selectedBusinessId,
+          plan_id: selectedPlan.id,
+          status: 'active',
+          start_date: startDate.toISOString(),
+          end_date: endDate.toISOString(),
+          auto_renew: false,
+          payment_method: 'free',
+          amount: 0,
+        });
+
+      if (error) throw error;
+
+      toast.success("Free plan activated successfully!");
+      navigate("/manage-subscription");
+    } catch (error: any) {
+      console.error("Free subscription error:", error);
+      toast.error(error.message || "Failed to activate free plan. Please try again.");
+    } finally {
+      setIsActivating(false);
+    }
+  };
 
   const paystackConfig = {
     email: user?.email || "",
@@ -173,6 +214,8 @@ export default function BusinessSubscriptionCheckout() {
     );
   }
 
+  const isFormValid = agreed && companyDetails.company_name && selectedBusinessId;
+
   return (
     <>
       <Navbar />
@@ -227,19 +270,21 @@ export default function BusinessSubscriptionCheckout() {
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Promo Code</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <PromoCodeInput
-                    onApply={(code, discountPercent) => {
-                      setPromoCode(code);
-                      setDiscount(discountPercent);
-                    }}
-                  />
-                </CardContent>
-              </Card>
+              {!isFreePlan && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Promo Code</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <PromoCodeInput
+                      onApply={(code, discountPercent) => {
+                        setPromoCode(code);
+                        setDiscount(discountPercent);
+                      }}
+                    />
+                  </CardContent>
+                </Card>
+              )}
 
               <div className="flex items-start gap-2">
                 <Checkbox
@@ -270,10 +315,10 @@ export default function BusinessSubscriptionCheckout() {
                   <div className="space-y-2 pt-4 border-t">
                     <div className="flex justify-between">
                       <span>Subtotal</span>
-                      <span>GH₵{subtotal}</span>
+                      <span>{isFreePlan ? "Free" : `GH₵${subtotal}`}</span>
                     </div>
 
-                    {discount > 0 && (
+                    {discount > 0 && !isFreePlan && (
                       <div className="flex justify-between text-green-600">
                         <span>Discount ({discount}%)</span>
                         <span>-GH₵{discountAmount.toFixed(2)}</span>
@@ -282,18 +327,42 @@ export default function BusinessSubscriptionCheckout() {
 
                     <div className="flex justify-between font-bold text-lg pt-2 border-t">
                       <span>Total</span>
-                      <span>GH₵{total.toFixed(2)}</span>
+                      <span>{isFreePlan ? "Free" : `GH₵${total.toFixed(2)}`}</span>
                     </div>
                   </div>
 
-                  <PaystackButton
-                    {...paystackConfig}
-                    className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 rounded-md disabled:opacity-50"
-                    disabled={!agreed || !companyDetails.company_name || !selectedBusinessId}
-                  />
+                  {isFreePlan && (
+                    <p className="text-sm text-green-600 text-center flex items-center justify-center gap-2">
+                      <CheckCircle className="h-4 w-4" />
+                      No payment required
+                    </p>
+                  )}
+
+                  {isFreePlan ? (
+                    <Button
+                      className="w-full"
+                      onClick={handleFreeSubscription}
+                      disabled={!isFormValid || isActivating}
+                    >
+                      {isActivating ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Activating...
+                        </>
+                      ) : (
+                        "Activate Free Plan"
+                      )}
+                    </Button>
+                  ) : (
+                    <PaystackButton
+                      {...paystackConfig}
+                      className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 rounded-md disabled:opacity-50"
+                      disabled={!isFormValid}
+                    />
+                  )}
 
                   <p className="text-xs text-muted-foreground text-center">
-                    Secure payment powered by Paystack
+                    {isFreePlan ? "Start using your free plan immediately" : "Secure payment powered by Paystack"}
                   </p>
                 </CardContent>
               </Card>

@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import {
   Select,
   SelectContent,
@@ -25,7 +26,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ArrowLeft, Search, LayoutGrid, List, ShoppingCart, Plus, Play, Images, Eye } from "lucide-react";
+import { ArrowLeft, Search, LayoutGrid, List, ShoppingCart, Plus, Play, Images, Eye, Minus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import ImageLightbox from "@/components/ui/image-lightbox";
 import ProductVideoModal from "@/components/business/ProductVideoModal";
@@ -40,6 +41,7 @@ const BusinessShop = () => {
   const [sortBy, setSortBy] = useState("featured");
   const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
   const [cart, setCart] = useState<{ productId: string; quantity: number }[]>([]);
+  const [cartOpen, setCartOpen] = useState(false);
 
   // Lightbox state
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -130,7 +132,38 @@ const BusinessShop = () => {
     toast.success("Added to cart!");
   };
 
+  const removeFromCart = (productId: string) => {
+    setCart(cart.filter((item) => item.productId !== productId));
+    toast.success("Removed from cart");
+  };
+
+  const updateCartQuantity = (productId: string, quantity: number) => {
+    if (quantity <= 0) {
+      removeFromCart(productId);
+      return;
+    }
+    setCart(cart.map((item) => (item.productId === productId ? { ...item, quantity } : item)));
+  };
+
   const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+  const cartTotal = useMemo(() => {
+    return cart.reduce((sum, item) => {
+      const product = products.find((p) => p.id === item.productId);
+      return sum + (product?.price || 0) * item.quantity;
+    }, 0);
+  }, [cart, products]);
+
+  const handleCartCheckout = () => {
+    if (cart.length === 0) return;
+    const firstItem = cart[0];
+    const product = products.find((p) => p.id === firstItem.productId);
+    if (product) {
+      setCheckoutProduct(product);
+      setCheckoutOpen(true);
+      setCartOpen(false);
+    }
+  };
 
   // Get all images for a product
   const getProductImages = (product: BusinessProduct): string[] => {
@@ -210,7 +243,7 @@ const BusinessShop = () => {
             <ArrowLeft className="w-4 h-4" />
             Back to Business
           </Button>
-          <Button variant="outline" className="relative">
+          <Button variant="outline" className="relative" onClick={() => setCartOpen(true)}>
             <ShoppingCart className="w-5 h-5" />
             {cartItemCount > 0 && (
               <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs">
@@ -526,6 +559,108 @@ const BusinessShop = () => {
       </main>
 
       <Footer />
+
+      {/* Cart Sheet */}
+      <Sheet open={cartOpen} onOpenChange={setCartOpen}>
+        <SheetContent className="w-full sm:max-w-md flex flex-col">
+          <SheetHeader>
+            <SheetTitle className="flex items-center gap-2">
+              <ShoppingCart className="h-5 w-5" />
+              Shopping Cart ({cartItemCount})
+            </SheetTitle>
+          </SheetHeader>
+
+          <div className="flex-1 overflow-y-auto py-4">
+            {cart.length === 0 ? (
+              <div className="text-center py-12">
+                <ShoppingCart className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground">Your cart is empty</p>
+                <Button variant="outline" className="mt-4" onClick={() => setCartOpen(false)}>
+                  Continue Shopping
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {cart.map((item) => {
+                  const product = products.find((p) => p.id === item.productId);
+                  if (!product) return null;
+                  return (
+                    <div key={item.productId} className="flex gap-3 border-b pb-4">
+                      {/* Product image */}
+                      <div className="w-16 h-16 rounded-lg overflow-hidden bg-muted flex-shrink-0">
+                        {product.image_url ? (
+                          <img
+                            src={product.image_url}
+                            alt={product.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-lg font-bold text-muted-foreground/50">
+                            {product.name.charAt(0)}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Product details */}
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate">{product.name}</p>
+                        <p className="text-primary font-bold">GH₵ {product.price.toFixed(2)}</p>
+
+                        {/* Quantity controls */}
+                        <div className="flex items-center gap-2 mt-2">
+                          <Button
+                            size="icon"
+                            variant="outline"
+                            className="h-8 w-8"
+                            onClick={() => updateCartQuantity(item.productId, item.quantity - 1)}
+                          >
+                            <Minus className="h-3 w-3" />
+                          </Button>
+                          <span className="w-8 text-center font-medium">{item.quantity}</span>
+                          <Button
+                            size="icon"
+                            variant="outline"
+                            className="h-8 w-8"
+                            onClick={() => updateCartQuantity(item.productId, item.quantity + 1)}
+                          >
+                            <Plus className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+
+                      {/* Remove button */}
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8 text-destructive hover:text-destructive"
+                        onClick={() => removeFromCart(item.productId)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Cart footer with total and checkout */}
+          {cart.length > 0 && (
+            <div className="border-t pt-4 mt-auto space-y-4">
+              <div className="flex justify-between text-lg font-bold">
+                <span>Total:</span>
+                <span className="text-primary">GH₵ {cartTotal.toFixed(2)}</span>
+              </div>
+              <Button className="w-full" size="lg" onClick={handleCartCheckout}>
+                Proceed to Checkout
+              </Button>
+              <p className="text-xs text-muted-foreground text-center">
+                Note: Currently supports single-item checkout. Multi-item checkout coming soon.
+              </p>
+            </div>
+          )}
+        </SheetContent>
+      </Sheet>
 
       {/* Image Lightbox */}
       <ImageLightbox
