@@ -135,10 +135,14 @@ export function ProductCheckoutDialog({
     setIsProcessing(true);
 
     try {
-      // Create order first
-      const { data: order, error } = await supabase
+      // Generate order ID client-side to avoid RLS SELECT issues
+      const orderId = crypto.randomUUID();
+      
+      // Create order with pre-generated ID
+      const { error } = await supabase
         .from("product_orders")
         .insert({
+          id: orderId,
           product_id: product.id,
           business_id: businessId,
           buyer_name: buyerName,
@@ -151,17 +155,15 @@ export function ProductCheckoutDialog({
           notes: notes || null,
           status: "pending",
           payment_status: "pending",
-        })
-        .select()
-        .single();
+        });
 
       if (error) throw error;
 
       // Set pending order ID - this will trigger the useEffect to initialize payment
-      setPendingOrderId(order.id);
+      setPendingOrderId(orderId);
     } catch (error: any) {
       console.error("Error creating order:", error);
-      toast.error(error.message || "Failed to create order");
+      toast.error(error.message || "Failed to create order. Please try again.");
       setIsProcessing(false);
     }
   };
