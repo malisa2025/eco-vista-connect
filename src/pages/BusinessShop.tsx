@@ -25,10 +25,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ArrowLeft, Search, LayoutGrid, List, ShoppingCart, Plus, Play, Images } from "lucide-react";
+import { ArrowLeft, Search, LayoutGrid, List, ShoppingCart, Plus, Play, Images, Eye } from "lucide-react";
 import { toast } from "sonner";
 import ImageLightbox from "@/components/ui/image-lightbox";
 import ProductVideoModal from "@/components/business/ProductVideoModal";
+import ProductDetailModal from "@/components/business/ProductDetailModal";
+import { ProductCheckoutDialog } from "@/components/business/ProductCheckoutDialog";
 
 const BusinessShop = () => {
   const { id } = useParams();
@@ -47,6 +49,14 @@ const BusinessShop = () => {
   // Video modal state
   const [videoModalOpen, setVideoModalOpen] = useState(false);
   const [selectedVideoProduct, setSelectedVideoProduct] = useState<BusinessProduct | null>(null);
+
+  // Product detail modal state
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [selectedDetailProduct, setSelectedDetailProduct] = useState<BusinessProduct | null>(null);
+
+  // Checkout dialog state
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [checkoutProduct, setCheckoutProduct] = useState<BusinessProduct | null>(null);
 
   const { data: business, isLoading: businessLoading } = useQuery({
     queryKey: ["business", id],
@@ -142,6 +152,16 @@ const BusinessShop = () => {
   const openVideoModal = (product: BusinessProduct) => {
     setSelectedVideoProduct(product);
     setVideoModalOpen(true);
+  };
+
+  const openDetailModal = (product: BusinessProduct) => {
+    setSelectedDetailProduct(product);
+    setDetailModalOpen(true);
+  };
+
+  const handleBuyNow = (product: BusinessProduct) => {
+    setCheckoutProduct(product);
+    setCheckoutOpen(true);
   };
 
   if (businessLoading || productsLoading) {
@@ -372,14 +392,24 @@ const BusinessShop = () => {
                         {product.in_stock ? "In Stock" : "Out of Stock"}
                       </Badge>
                     </div>
-                    <Button
-                      className="w-full"
-                      onClick={() => addToCart(product.id)}
-                      disabled={!product.in_stock}
-                    >
-                      <Plus className="w-4 h-4 mr-2" />
-                      Add to Cart
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        className="flex-1"
+                        onClick={() => openDetailModal(product)}
+                      >
+                        <Eye className="w-4 h-4 mr-2" />
+                        View
+                      </Button>
+                      <Button
+                        className="flex-1"
+                        onClick={() => addToCart(product.id)}
+                        disabled={!product.in_stock}
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
               );
@@ -469,13 +499,22 @@ const BusinessShop = () => {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button
-                          size="sm"
-                          onClick={() => addToCart(product.id)}
-                          disabled={!product.in_stock}
-                        >
-                          Add to Cart
-                        </Button>
+                        <div className="flex gap-2 justify-end">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => openDetailModal(product)}
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={() => addToCart(product.id)}
+                            disabled={!product.in_stock}
+                          >
+                            Add to Cart
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   );
@@ -504,6 +543,40 @@ const BusinessShop = () => {
           videoUrl={selectedVideoProduct.video_url!}
           thumbnailUrl={selectedVideoProduct.video_thumbnail_url || undefined}
           productName={selectedVideoProduct.name}
+        />
+      )}
+
+      {/* Product Detail Modal */}
+      {selectedDetailProduct && (
+        <ProductDetailModal
+          open={detailModalOpen}
+          onOpenChange={setDetailModalOpen}
+          product={selectedDetailProduct}
+          businessId={id!}
+          businessName={business?.name || ""}
+          onAddToCart={(productId, qty) => {
+            for (let i = 0; i < qty; i++) addToCart(productId);
+          }}
+          onBuyNow={handleBuyNow}
+          onOpenLightbox={(images, index) => {
+            setLightboxImages(images);
+            setLightboxIndex(index);
+            setLightboxOpen(true);
+          }}
+          onPlayVideo={() => {
+            openVideoModal(selectedDetailProduct);
+          }}
+        />
+      )}
+
+      {/* Checkout Dialog */}
+      {checkoutProduct && (
+        <ProductCheckoutDialog
+          open={checkoutOpen}
+          onOpenChange={setCheckoutOpen}
+          product={checkoutProduct}
+          businessId={id!}
+          businessName={business?.name || ""}
         />
       )}
     </div>

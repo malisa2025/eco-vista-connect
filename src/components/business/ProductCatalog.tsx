@@ -5,10 +5,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Package, Star, CheckCircle, XCircle, ShoppingCart, Play, Images } from "lucide-react";
+import { Package, Star, CheckCircle, XCircle, ShoppingCart, Play, Images, Eye } from "lucide-react";
 import { ProductCheckoutDialog } from "./ProductCheckoutDialog";
 import ImageLightbox from "@/components/ui/image-lightbox";
 import ProductVideoModal from "./ProductVideoModal";
+import ProductDetailModal from "./ProductDetailModal";
 
 interface ProductCatalogProps {
   businessId: string;
@@ -28,6 +29,10 @@ const ProductCatalog = ({ businessId, businessName = "this business" }: ProductC
   // Video modal state
   const [videoModalOpen, setVideoModalOpen] = useState(false);
   const [videoProduct, setVideoProduct] = useState<BusinessProduct | null>(null);
+
+  // Product detail modal state
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [detailProduct, setDetailProduct] = useState<BusinessProduct | null>(null);
 
   if (isLoading) {
     return (
@@ -84,6 +89,11 @@ const ProductCatalog = ({ businessId, businessName = "this business" }: ProductC
   const openVideoModal = (product: BusinessProduct) => {
     setVideoProduct(product);
     setVideoModalOpen(true);
+  };
+
+  const openDetailModal = (product: BusinessProduct) => {
+    setDetailProduct(product);
+    setDetailModalOpen(true);
   };
 
   const ProductCard = ({ product }: { product: BusinessProduct }) => {
@@ -175,16 +185,27 @@ const ProductCatalog = ({ businessId, businessName = "this business" }: ProductC
               )}
             </Badge>
           </div>
-          {product.in_stock && (
-            <Button 
-              className="w-full gap-2" 
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
               size="sm"
-              onClick={() => handleBuyNow(product)}
+              className="flex-1 gap-1"
+              onClick={() => openDetailModal(product)}
             >
-              <ShoppingCart className="h-4 w-4" />
-              Buy Now
+              <Eye className="h-4 w-4" />
+              View
             </Button>
-          )}
+            {product.in_stock && (
+              <Button 
+                className="flex-1 gap-1" 
+                size="sm"
+                onClick={() => handleBuyNow(product)}
+              >
+                <ShoppingCart className="h-4 w-4" />
+                Buy
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     );
@@ -277,6 +298,24 @@ const ProductCatalog = ({ businessId, businessName = "this business" }: ProductC
           videoUrl={videoProduct.video_url!}
           thumbnailUrl={videoProduct.video_thumbnail_url || undefined}
           productName={videoProduct.name}
+        />
+      )}
+
+      {/* Product Detail Modal */}
+      {detailProduct && (
+        <ProductDetailModal
+          open={detailModalOpen}
+          onOpenChange={setDetailModalOpen}
+          product={detailProduct}
+          businessId={businessId}
+          businessName={businessName}
+          onBuyNow={handleBuyNow}
+          onOpenLightbox={(images, index) => {
+            setLightboxImages(images);
+            setLightboxIndex(index);
+            setLightboxOpen(true);
+          }}
+          onPlayVideo={() => openVideoModal(detailProduct)}
         />
       )}
     </>
