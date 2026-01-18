@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBusinessOwners } from '@/hooks/useBusinessClaims';
 import { useAdSpots, useAdMutations } from '@/hooks/useAdvertisements';
+import { usePaystackPublicKey } from '@/hooks/usePaystackPublicKey';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { UpgradePrompt } from '@/components/subscriptions/UpgradePrompt';
@@ -17,7 +18,7 @@ import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { usePaystackPayment } from 'react-paystack';
 import { supabase } from '@/integrations/supabase/client';
-import { PAYSTACK_PUBLIC_KEY, PAYSTACK_CURRENCY } from '@/lib/paystack';
+import { PAYSTACK_CURRENCY } from '@/lib/paystack';
 import { VideoUploader } from '@/components/business/VideoUploader';
 import { ImageUploader } from '@/components/business/ImageUploader';
 
@@ -38,6 +39,7 @@ const PurchaseAd = () => {
   const { data: ownerships } = useBusinessOwners(user?.id);
   const { data: adSpots } = useAdSpots();
   const { createAd } = useAdMutations();
+  const { publicKey, isConfigured } = usePaystackPublicKey();
 
   const [formData, setFormData] = useState({
     business_id: '',
@@ -71,7 +73,7 @@ const PurchaseAd = () => {
     email: user?.email || '',
     amount: pendingPayment?.amount || 0,
     currency: PAYSTACK_CURRENCY,
-    publicKey: PAYSTACK_PUBLIC_KEY,
+    publicKey: publicKey,
     metadata: pendingPayment?.metadata || { custom_fields: [] },
   };
 
@@ -79,7 +81,7 @@ const PurchaseAd = () => {
 
   // Effect to trigger payment when pendingPayment is set
   useEffect(() => {
-    if (pendingPayment && pendingPayment.reference) {
+    if (pendingPayment && pendingPayment.reference && isConfigured) {
       initializePayment({
         onSuccess: async (reference: any) => {
           toast.success('Payment successful! Verifying...');
@@ -107,7 +109,7 @@ const PurchaseAd = () => {
         }
       });
     }
-  }, [pendingPayment, initializePayment, navigate]);
+  }, [pendingPayment, initializePayment, navigate, isConfigured]);
 
   const handlePayment = async () => {
     if (!formData.business_id || !formData.ad_spot_id || !formData.title || (!formData.image_url && !formData.video_url)) {
@@ -117,6 +119,11 @@ const PurchaseAd = () => {
 
     if (totalCost <= 0) {
       toast.error('Invalid ad duration');
+      return;
+    }
+
+    if (!isConfigured) {
+      toast.error('Payment system is not configured. Please try again later.');
       return;
     }
 
@@ -322,7 +329,7 @@ const PurchaseAd = () => {
                     </div>
                   )}
 
-                  <Button type="submit" className="w-full" disabled={createAd.isPending || isProcessing}>
+                  <Button type="submit" className="w-full" disabled={createAd.isPending || isProcessing || !isConfigured}>
                     {createAd.isPending || isProcessing ? 'Processing...' : 'Purchase Advertisement'}
                   </Button>
                 </form>

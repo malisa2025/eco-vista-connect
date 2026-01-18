@@ -1,9 +1,11 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { PAYSTACK_PUBLIC_KEY, PAYSTACK_CURRENCY, generatePaymentReference, toPesewas, type PaymentType } from "@/lib/paystack";
+import { usePaystackPublicKey } from "@/hooks/usePaystackPublicKey";
+import { PAYSTACK_CURRENCY, generatePaymentReference, toPesewas, type PaymentType } from "@/lib/paystack";
 
 interface UsePaystackConfigOptions {
   amount: number; // in GHS
   type: PaymentType;
+  email?: string; // Optional email for guest checkout
   entityId?: string;
   metadata?: Record<string, any>;
   onSuccess: (reference: any) => void;
@@ -13,18 +15,23 @@ interface UsePaystackConfigOptions {
 export function usePaystackConfig({
   amount,
   type,
+  email,
   entityId,
   metadata,
   onSuccess,
   onClose,
 }: UsePaystackConfigOptions) {
   const { user } = useAuth();
+  const { publicKey, isLoading: isLoadingKey, isConfigured } = usePaystackPublicKey();
+
+  // Use provided email first, then fall back to authenticated user's email
+  const resolvedEmail = email || user?.email || "";
 
   const config = {
-    email: user?.email || "",
+    email: resolvedEmail,
     amount: toPesewas(amount),
     currency: PAYSTACK_CURRENCY,
-    publicKey: PAYSTACK_PUBLIC_KEY,
+    publicKey,
     reference: generatePaymentReference(type, entityId),
     metadata: {
       user_id: user?.id,
@@ -44,11 +51,13 @@ export function usePaystackConfig({
     onClose: onClose || (() => {}),
   };
 
-  const isReady = Boolean(user?.email && PAYSTACK_PUBLIC_KEY && amount > 0);
+  // Ready when: email available, public key loaded, and amount > 0
+  const isReady = Boolean(resolvedEmail && isConfigured && publicKey && amount > 0 && !isLoadingKey);
 
   return {
     config,
     isReady,
-    publicKey: PAYSTACK_PUBLIC_KEY,
+    publicKey,
+    isLoadingKey,
   };
 }

@@ -1,9 +1,13 @@
 // Paystack payment utilities
 
-export const PAYSTACK_PUBLIC_KEY = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || "";
 export const PAYSTACK_CURRENCY = "GHS";
 
-export type PaymentType = "hotel_booking" | "advertisement" | "business_subscription" | "job_seeker_subscription";
+export type PaymentType = 
+  | "hotel_booking" 
+  | "advertisement" 
+  | "business_subscription" 
+  | "job_seeker_subscription"
+  | "product_order";
 
 /**
  * Generate a unique payment reference with a type prefix
@@ -14,6 +18,7 @@ export function generatePaymentReference(type: PaymentType, entityId?: string): 
     advertisement: "AD",
     business_subscription: "BSUB",
     job_seeker_subscription: "JSUB",
+    product_order: "PRD",
   };
 
   const timestamp = Date.now();
@@ -50,6 +55,7 @@ export function formatCurrency(amount: number): string {
 export function buildPaystackConfig({
   email,
   amount,
+  publicKey,
   reference,
   metadata,
   onSuccess,
@@ -57,6 +63,7 @@ export function buildPaystackConfig({
 }: {
   email: string;
   amount: number; // in GHS
+  publicKey: string;
   reference?: string;
   metadata?: Record<string, any>;
   onSuccess: (reference: any) => void;
@@ -66,7 +73,7 @@ export function buildPaystackConfig({
     email,
     amount: toPesewas(amount),
     currency: PAYSTACK_CURRENCY,
-    publicKey: PAYSTACK_PUBLIC_KEY,
+    publicKey,
     reference: reference || generatePaymentReference("hotel_booking"),
     metadata: {
       ...metadata,
@@ -75,11 +82,4 @@ export function buildPaystackConfig({
     onSuccess,
     onClose,
   };
-}
-
-/**
- * Validate that Paystack public key is configured
- */
-export function isPaystackConfigured(): boolean {
-  return Boolean(PAYSTACK_PUBLIC_KEY && PAYSTACK_PUBLIC_KEY !== "");
 }

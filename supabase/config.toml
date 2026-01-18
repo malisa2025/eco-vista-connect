@@ -63,3 +63,6 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.verify-product-order-payment]
+
+[functions.get-paystack-public-key]
+verify_jwt = false

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -40,62 +40,74 @@ export function ProductCheckoutDialog({
   const [shippingAddress, setShippingAddress] = useState("");
   const [notes, setNotes] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
-  const [orderId, setOrderId] = useState<string | null>(null);
+  const [pendingOrderId, setPendingOrderId] = useState<string | null>(null);
 
   const totalPrice = product.price * quantity;
 
   const handlePaymentSuccess = async (reference: any) => {
     try {
-      // Update order with payment reference
-      if (orderId) {
-        const { error } = await supabase
-          .from("product_orders")
-          .update({
-            payment_reference: reference.reference,
-            payment_status: "paid",
-            status: "confirmed",
-            paid_at: new Date().toISOString(),
-          })
-          .eq("id", orderId);
+      // Verify payment with edge function
+      const { data, error } = await supabase.functions.invoke("verify-product-order-payment", {
+        body: { reference: reference.reference },
+      });
 
-        if (error) throw error;
+      if (error) {
+        console.error("Payment verification error:", error);
+        toast.error("Payment verification failed. Please contact support.");
+        return;
+      }
+
+      if (!data?.success) {
+        toast.error("Payment verification failed. Please contact support.");
+        return;
       }
 
       toast.success("Payment successful! Your order has been confirmed.");
       onOpenChange(false);
       resetForm();
     } catch (error) {
-      console.error("Error updating order:", error);
-      toast.error("Payment received but order update failed. Please contact support.");
+      console.error("Error verifying payment:", error);
+      toast.error("Payment verification failed. Please contact support.");
     } finally {
       setIsProcessing(false);
+      setPendingOrderId(null);
     }
   };
 
-  const { config, isReady } = usePaystackConfig({
+  const { config, isReady, isLoadingKey } = usePaystackConfig({
     amount: totalPrice,
-    type: "advertisement", // Using this type for product orders
-    entityId: orderId || undefined,
+    type: "product_order",
+    email: buyerEmail, // Pass email for guest checkout
+    entityId: pendingOrderId || undefined,
     metadata: {
       product_id: product.id,
       product_name: product.name,
       quantity,
-      order_id: orderId,
+      order_id: pendingOrderId,
       buyer_name: buyerName,
     },
     onSuccess: handlePaymentSuccess,
     onClose: () => {
       setIsProcessing(false);
+      toast.info("Payment cancelled");
     },
   });
 
-  // Override email for non-authenticated users
-  const paystackConfig = {
-    ...config,
-    email: buyerEmail || config.email,
-  };
+  const initializePayment = usePaystackPayment(config);
 
-  const initializePayment = usePaystackPayment(paystackConfig);
+  // Trigger payment when order is created and config is ready
+  useEffect(() => {
+    if (pendingOrderId && isReady && isProcessing) {
+      initializePayment({
+        onSuccess: handlePaymentSuccess,
+        onClose: () => {
+          setIsProcessing(false);
+          setPendingOrderId(null);
+          toast.info("Payment cancelled");
+        },
+      });
+    }
+  }, [pendingOrderId, isReady, isProcessing]);
 
   const resetForm = () => {
     setQuantity(1);
@@ -104,7 +116,7 @@ export function ProductCheckoutDialog({
     setBuyerPhone("");
     setShippingAddress("");
     setNotes("");
-    setOrderId(null);
+    setPendingOrderId(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -115,7 +127,7 @@ export function ProductCheckoutDialog({
       return;
     }
 
-    if (!isReady) {
+    if (!isReady && !isLoadingKey) {
       toast.error("Payment system is not available. Please try again later.");
       return;
     }
@@ -145,16 +157,8 @@ export function ProductCheckoutDialog({
 
       if (error) throw error;
 
-      setOrderId(order.id);
-
-      // Initialize Paystack payment
-      initializePayment({
-        onSuccess: handlePaymentSuccess,
-        onClose: () => {
-          setIsProcessing(false);
-          toast.info("Payment cancelled");
-        },
-      });
+      // Set pending order ID - this will trigger the useEffect to initialize payment
+      setPendingOrderId(order.id);
     } catch (error: any) {
       console.error("Error creating order:", error);
       toast.error(error.message || "Failed to create order");
@@ -163,6 +167,7 @@ export function ProductCheckoutDialog({
   };
 
   const isFormValid = buyerName.trim() && buyerEmail.trim();
+  const canPay = isFormValid && isReady && !isLoadingKey;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -281,7 +286,7 @@ export function ProductCheckoutDialog({
             </div>
 
             {/* Payment not ready warning */}
-            {!isReady && (
+            {!isReady && !isLoadingKey && (
               <div className="flex items-center gap-2 p-3 bg-destructive/10 text-destructive rounded-lg text-sm">
                 <AlertCircle className="h-4 w-4 flex-shrink-0" />
                 <span>Payment system is not available. Please try again later.</span>
@@ -302,12 +307,12 @@ export function ProductCheckoutDialog({
               <Button 
                 type="submit" 
                 className="flex-1"
-                disabled={isProcessing || !isFormValid || !isReady}
+                disabled={isProcessing || !canPay}
               >
-                {isProcessing ? (
+                {isProcessing || isLoadingKey ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Processing...
+                    {isLoadingKey ? "Loading..." : "Processing..."}
                   </>
                 ) : (
                   <>

@@ -11,12 +11,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useSubscriptionPlans } from "@/hooks/useSubscriptionPlans";
 import { PromoCodeInput } from "@/components/subscriptions/PromoCodeInput";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePaystackPublicKey } from "@/hooks/usePaystackPublicKey";
 import { PaystackButton } from "react-paystack";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2, CheckCircle } from "lucide-react";
-import { generatePaymentReference, toPesewas, PAYSTACK_PUBLIC_KEY, PAYSTACK_CURRENCY } from "@/lib/paystack";
+import { generatePaymentReference, toPesewas, PAYSTACK_CURRENCY } from "@/lib/paystack";
 
 export default function BusinessSubscriptionCheckout() {
   const navigate = useNavigate();
@@ -25,6 +26,7 @@ export default function BusinessSubscriptionCheckout() {
   const businessIdParam = searchParams.get("business");
   const { user } = useAuth();
   const { plans } = useSubscriptionPlans();
+  const { publicKey, isLoading: isLoadingKey, isConfigured } = usePaystackPublicKey();
   const [discount, setDiscount] = useState(0);
   const [promoCode, setPromoCode] = useState("");
   const [agreed, setAgreed] = useState(false);
@@ -135,7 +137,7 @@ export default function BusinessSubscriptionCheckout() {
     email: user?.email || "",
     amount: toPesewas(total),
     currency: PAYSTACK_CURRENCY,
-    publicKey: PAYSTACK_PUBLIC_KEY,
+    publicKey: publicKey,
     reference: paymentReference,
     text: "Complete Purchase",
     metadata: {
@@ -215,6 +217,7 @@ export default function BusinessSubscriptionCheckout() {
   }
 
   const isFormValid = agreed && companyDetails.company_name && selectedBusinessId;
+  const isPaymentReady = isFormValid && isConfigured && !isLoadingKey;
 
   return (
     <>
@@ -353,11 +356,16 @@ export default function BusinessSubscriptionCheckout() {
                         "Activate Free Plan"
                       )}
                     </Button>
+                  ) : isLoadingKey ? (
+                    <Button disabled className="w-full">
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Loading...
+                    </Button>
                   ) : (
                     <PaystackButton
                       {...paystackConfig}
                       className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 rounded-md disabled:opacity-50"
-                      disabled={!isFormValid}
+                      disabled={!isPaymentReady}
                     />
                   )}
 

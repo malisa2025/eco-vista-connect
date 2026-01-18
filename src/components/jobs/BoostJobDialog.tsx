@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { TrendingUp, Mail, Eye, Clock, CheckCircle2 } from 'lucide-react';
+import { TrendingUp, Mail, Eye, Clock, CheckCircle2, Loader2 } from 'lucide-react';
 import { usePaystackPayment } from 'react-paystack';
+import { usePaystackPublicKey } from '@/hooks/usePaystackPublicKey';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { PAYSTACK_PUBLIC_KEY, PAYSTACK_CURRENCY } from '@/lib/paystack';
+import { PAYSTACK_CURRENCY } from '@/lib/paystack';
 
 interface BoostJobDialogProps {
   open: boolean;
@@ -21,6 +21,7 @@ const BOOST_PRICE = 20; // GH₵20
 const BoostJobDialog = ({ open, onOpenChange, jobId, jobTitle }: BoostJobDialogProps) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const queryClient = useQueryClient();
+  const { publicKey, isLoading: isLoadingKey, isConfigured } = usePaystackPublicKey();
 
   const boostJob = useMutation({
     mutationFn: async (reference: string) => {
@@ -52,7 +53,7 @@ const BoostJobDialog = ({ open, onOpenChange, jobId, jobTitle }: BoostJobDialogP
     email: '',
     amount: BOOST_PRICE * 100, // Convert to pesewas
     currency: PAYSTACK_CURRENCY,
-    publicKey: PAYSTACK_PUBLIC_KEY,
+    publicKey: publicKey,
     reference: `boost_${jobId}_${Date.now()}`,
   };
 
@@ -64,6 +65,11 @@ const BoostJobDialog = ({ open, onOpenChange, jobId, jobTitle }: BoostJobDialogP
   const initializePayment = usePaystackPayment(config);
 
   const handleBoost = async () => {
+    if (!isConfigured) {
+      toast.error('Payment system is not available. Please try again later.');
+      return;
+    }
+
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       toast.error('Please sign in to boost your job');
@@ -210,10 +216,15 @@ const BoostJobDialog = ({ open, onOpenChange, jobId, jobTitle }: BoostJobDialogP
             <Button
               onClick={handleBoost}
               className="flex-1"
-              disabled={isProcessing}
+              disabled={isProcessing || isLoadingKey || !isConfigured}
             >
               {isProcessing ? (
                 <>Processing...</>
+              ) : isLoadingKey ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Loading...
+                </>
               ) : (
                 <>
                   <CheckCircle2 className="h-4 w-4 mr-2" />
