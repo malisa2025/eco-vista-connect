@@ -1,19 +1,21 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePaystackPublicKey } from "@/hooks/usePaystackPublicKey";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { CheckCircle2, Shield, CreditCard } from "lucide-react";
+import { CheckCircle2, Shield, CreditCard, Loader2 } from "lucide-react";
 import { usePaystackPayment } from "react-paystack";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { PAYSTACK_PUBLIC_KEY, PAYSTACK_CURRENCY } from "@/lib/paystack";
+import { PAYSTACK_CURRENCY } from "@/lib/paystack";
 
 const SubscribeJobSeeker = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { publicKey, isLoading: isLoadingKey, isConfigured } = usePaystackPublicKey();
   const [isProcessing, setIsProcessing] = useState(false);
 
   const config = {
@@ -21,7 +23,7 @@ const SubscribeJobSeeker = () => {
     email: user?.email || "",
     amount: 10 * 100, // 10 GHS in pesewas
     currency: PAYSTACK_CURRENCY,
-    publicKey: PAYSTACK_PUBLIC_KEY,
+    publicKey: publicKey,
   };
 
   const onSuccess = async (reference: any) => {
@@ -53,6 +55,10 @@ const SubscribeJobSeeker = () => {
     if (!user) {
       toast.error('Please sign in to subscribe');
       navigate('/auth');
+      return;
+    }
+    if (!isConfigured) {
+      toast.error('Payment system is not available. Please try again later.');
       return;
     }
     initializePayment({ onSuccess, onClose });
@@ -135,9 +141,14 @@ const SubscribeJobSeeker = () => {
                 onClick={handleSubscribe} 
                 size="lg" 
                 className="w-full mb-4"
-                disabled={isProcessing}
+                disabled={isProcessing || isLoadingKey || !isConfigured}
               >
-                {isProcessing ? "Processing..." : "Subscribe Now"}
+                {isProcessing ? "Processing..." : isLoadingKey ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Loading...
+                  </>
+                ) : "Subscribe Now"}
               </Button>
 
               <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">

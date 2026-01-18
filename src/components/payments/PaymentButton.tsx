@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, CreditCard } from "lucide-react";
 import { useState } from "react";
 import { usePaystackConfig } from "@/hooks/usePaystackConfig";
-import { isPaystackConfigured, type PaymentType } from "@/lib/paystack";
+import { type PaymentType } from "@/lib/paystack";
 import { toast } from "sonner";
 
 interface PaymentButtonProps {
@@ -51,27 +51,25 @@ export function PaymentButton({
     onClose?.();
   };
 
-  const { config, isReady } = usePaystackConfig({
+  const { config, isReady, isLoadingKey } = usePaystackConfig({
     amount,
     type,
+    email, // Pass email to usePaystackConfig for guest checkout support
     entityId,
-    metadata: { ...metadata, email },
+    metadata: { ...metadata },
     onSuccess: handleSuccess,
     onClose: handleClose,
   });
 
-  // Override email if provided directly
-  const finalConfig = email ? { ...config, email } : config;
-
-  const initializePayment = usePaystackPayment(finalConfig);
+  const initializePayment = usePaystackPayment(config);
 
   const handleClick = () => {
-    if (!isPaystackConfigured()) {
-      toast.error("Payment system is not configured. Please contact support.");
+    if (!isReady) {
+      toast.error("Payment system is not available. Please try again later.");
       return;
     }
     
-    if (!finalConfig.email) {
+    if (!config.email) {
       toast.error("Please provide an email address");
       return;
     }
@@ -86,15 +84,15 @@ export function PaymentButton({
   return (
     <Button
       onClick={handleClick}
-      disabled={disabled || isProcessing || !isReady}
+      disabled={disabled || isProcessing || !isReady || isLoadingKey}
       className={className}
       variant={variant}
       size={size}
     >
-      {isProcessing ? (
+      {isProcessing || isLoadingKey ? (
         <>
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          Processing...
+          {isLoadingKey ? "Loading..." : "Processing..."}
         </>
       ) : (
         children || (

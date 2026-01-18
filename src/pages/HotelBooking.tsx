@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useReservationFee } from "@/hooks/useReservationFee";
+import { usePaystackPublicKey } from "@/hooks/usePaystackPublicKey";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,11 +16,9 @@ import { Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { PaystackButton } from "react-paystack";
 import { 
-  PAYSTACK_PUBLIC_KEY,
   PAYSTACK_CURRENCY,
   generatePaymentReference, 
-  toPesewas, 
-  isPaystackConfigured 
+  toPesewas,
 } from "@/lib/paystack";
 
 const HotelBooking = () => {
@@ -27,6 +26,7 @@ const HotelBooking = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { publicKey, isLoading: isLoadingKey, isConfigured } = usePaystackPublicKey();
 
   const [guestName, setGuestName] = useState("");
   const [guestEmail, setGuestEmail] = useState("");
@@ -152,13 +152,13 @@ const HotelBooking = () => {
 
   // Validate form and payment readiness
   const isFormValid = guestName && guestEmail && guestPhone;
-  const isPaymentReady = isFormValid && reservationFee > 0 && !feeLoading && isPaystackConfigured();
+  const isPaymentReady = isFormValid && reservationFee > 0 && !feeLoading && isConfigured && !isLoadingKey;
 
   const paystackConfig = {
     email: guestEmail,
     amount: toPesewas(reservationFee),
     currency: PAYSTACK_CURRENCY,
-    publicKey: PAYSTACK_PUBLIC_KEY,
+    publicKey: publicKey,
     reference: paymentReference,
     metadata: {
       payment_type: "hotel_booking",
@@ -338,7 +338,12 @@ const HotelBooking = () => {
                     )}
                   </div>
 
-                  {!isPaystackConfigured() ? (
+                  {isLoadingKey ? (
+                    <Button disabled className="w-full">
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Loading...
+                    </Button>
+                  ) : !isConfigured ? (
                     <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-md text-center">
                       <AlertCircle className="w-5 h-5 mx-auto mb-2 text-destructive" />
                       <p className="text-sm text-destructive">Payment system not configured</p>
