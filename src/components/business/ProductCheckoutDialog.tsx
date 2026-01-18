@@ -173,8 +173,8 @@ export function ProductCheckoutDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] flex flex-col p-0">
-        <DialogHeader className="px-6 pt-6 pb-2">
+      <DialogContent className="sm:max-w-[500px] h-[100dvh] sm:h-auto max-h-[100dvh] sm:max-h-[85vh] flex flex-col p-0">
+        <DialogHeader className="px-6 pt-6 pb-2 flex-shrink-0">
           <DialogTitle className="flex items-center gap-2">
             <Package className="h-5 w-5" />
             Buy Product
@@ -184,8 +184,8 @@ export function ProductCheckoutDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 px-6">
-          <form onSubmit={handleSubmit} className="space-y-4 pb-6">
+        <ScrollArea className="flex-1 min-h-0 px-6">
+          <form id="checkout-form" onSubmit={handleSubmit} className="space-y-4 pb-4">
             {/* Product Summary */}
             <div className="flex gap-4 p-4 bg-muted rounded-lg">
               {product.image_url && (
@@ -294,38 +294,41 @@ export function ProductCheckoutDialog({
                 <span>Payment system is not available. Please try again later.</span>
               </div>
             )}
-
-            {/* Action Buttons */}
-            <div className="flex gap-3 pt-2">
-              <Button
-                type="button"
-                variant="outline"
-                className="flex-1"
-                onClick={() => onOpenChange(false)}
-                disabled={isProcessing}
-              >
-                Cancel
-              </Button>
-              <Button 
-                type="submit" 
-                className="flex-1"
-                disabled={isProcessing || !canPay}
-              >
-                {isProcessing || isLoadingKey ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {isLoadingKey ? "Loading..." : "Processing..."}
-                  </>
-                ) : (
-                  <>
-                    <CreditCard className="mr-2 h-4 w-4" />
-                    Pay {formatCurrency(totalPrice)}
-                  </>
-                )}
-              </Button>
-            </div>
           </form>
         </ScrollArea>
+
+        {/* Sticky Footer with Action Buttons - Always visible */}
+        <div className="flex-shrink-0 border-t bg-background px-6 py-4">
+          <div className="flex gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1"
+              onClick={() => onOpenChange(false)}
+              disabled={isProcessing}
+            >
+              Cancel
+            </Button>
+            <Button 
+              type="submit"
+              form="checkout-form"
+              className="flex-1"
+              disabled={isProcessing || !canPay}
+            >
+              {isProcessing || isLoadingKey ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {isLoadingKey ? "Loading..." : "Processing..."}
+                </>
+              ) : (
+                <>
+                  <CreditCard className="mr-2 h-4 w-4" />
+                  Pay {formatCurrency(totalPrice)}
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );
