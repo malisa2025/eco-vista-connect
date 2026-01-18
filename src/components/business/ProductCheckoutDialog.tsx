@@ -1,14 +1,15 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { usePaystackPayment } from "react-paystack";
 import { usePaystackConfig } from "@/hooks/usePaystackConfig";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Loader2, Package, CreditCard } from "lucide-react";
+import { Loader2, Package, CreditCard, AlertCircle } from "lucide-react";
 import { formatCurrency } from "@/lib/paystack";
 
 interface ProductCheckoutDialogProps {
@@ -114,6 +115,11 @@ export function ProductCheckoutDialog({
       return;
     }
 
+    if (!isReady) {
+      toast.error("Payment system is not available. Please try again later.");
+      return;
+    }
+
     setIsProcessing(true);
 
     try {
@@ -156,10 +162,12 @@ export function ProductCheckoutDialog({
     }
   };
 
+  const isFormValid = buyerName.trim() && buyerEmail.trim();
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] flex flex-col p-0">
+        <DialogHeader className="px-6 pt-6 pb-2">
           <DialogTitle className="flex items-center gap-2">
             <Package className="h-5 w-5" />
             Buy Product
@@ -169,132 +177,148 @@ export function ProductCheckoutDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Product Summary */}
-          <div className="flex gap-4 p-4 bg-muted rounded-lg">
-            {product.image_url && (
-              <img
-                src={product.image_url}
-                alt={product.name}
-                className="w-20 h-20 object-cover rounded"
-              />
-            )}
-            <div className="flex-1">
-              <h4 className="font-medium">{product.name}</h4>
-              {product.description && (
-                <p className="text-sm text-muted-foreground line-clamp-2">
-                  {product.description}
+        <ScrollArea className="flex-1 px-6">
+          <form onSubmit={handleSubmit} className="space-y-4 pb-6">
+            {/* Product Summary */}
+            <div className="flex gap-4 p-4 bg-muted rounded-lg">
+              {product.image_url && (
+                <img
+                  src={product.image_url}
+                  alt={product.name}
+                  className="w-20 h-20 object-cover rounded"
+                />
+              )}
+              <div className="flex-1">
+                <h4 className="font-medium">{product.name}</h4>
+                {product.description && (
+                  <p className="text-sm text-muted-foreground line-clamp-2">
+                    {product.description}
+                  </p>
+                )}
+                <p className="text-lg font-bold text-primary mt-1">
+                  {formatCurrency(product.price)}
                 </p>
-              )}
-              <p className="text-lg font-bold text-primary mt-1">
-                {formatCurrency(product.price)}
-              </p>
+              </div>
             </div>
-          </div>
 
-          {/* Quantity */}
-          <div className="space-y-2">
-            <Label htmlFor="quantity">Quantity</Label>
-            <Input
-              id="quantity"
-              type="number"
-              min={1}
-              max={100}
-              value={quantity}
-              onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-            />
-          </div>
-
-          {/* Buyer Info */}
-          <div className="grid gap-4 sm:grid-cols-2">
+            {/* Quantity */}
             <div className="space-y-2">
-              <Label htmlFor="buyerName">Full Name *</Label>
+              <Label htmlFor="quantity">Quantity</Label>
               <Input
-                id="buyerName"
-                value={buyerName}
-                onChange={(e) => setBuyerName(e.target.value)}
-                placeholder="Your full name"
-                required
+                id="quantity"
+                type="number"
+                min={1}
+                max={100}
+                value={quantity}
+                onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
               />
             </div>
+
+            {/* Buyer Info */}
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="buyerName">Full Name *</Label>
+                <Input
+                  id="buyerName"
+                  value={buyerName}
+                  onChange={(e) => setBuyerName(e.target.value)}
+                  placeholder="Your full name"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="buyerEmail">Email *</Label>
+                <Input
+                  id="buyerEmail"
+                  type="email"
+                  value={buyerEmail}
+                  onChange={(e) => setBuyerEmail(e.target.value)}
+                  placeholder="your@email.com"
+                  required
+                />
+              </div>
+            </div>
+
             <div className="space-y-2">
-              <Label htmlFor="buyerEmail">Email *</Label>
+              <Label htmlFor="buyerPhone">Phone Number</Label>
               <Input
-                id="buyerEmail"
-                type="email"
-                value={buyerEmail}
-                onChange={(e) => setBuyerEmail(e.target.value)}
-                placeholder="your@email.com"
-                required
+                id="buyerPhone"
+                type="tel"
+                value={buyerPhone}
+                onChange={(e) => setBuyerPhone(e.target.value)}
+                placeholder="+233 XX XXX XXXX"
               />
             </div>
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="buyerPhone">Phone Number</Label>
-            <Input
-              id="buyerPhone"
-              type="tel"
-              value={buyerPhone}
-              onChange={(e) => setBuyerPhone(e.target.value)}
-              placeholder="+233 XX XXX XXXX"
-            />
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="shippingAddress">Shipping Address</Label>
+              <Textarea
+                id="shippingAddress"
+                value={shippingAddress}
+                onChange={(e) => setShippingAddress(e.target.value)}
+                placeholder="Enter your delivery address"
+                rows={2}
+              />
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="shippingAddress">Shipping Address</Label>
-            <Textarea
-              id="shippingAddress"
-              value={shippingAddress}
-              onChange={(e) => setShippingAddress(e.target.value)}
-              placeholder="Enter your delivery address"
-              rows={2}
-            />
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="notes">Order Notes (optional)</Label>
+              <Textarea
+                id="notes"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Any special instructions..."
+                rows={2}
+              />
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="notes">Order Notes (optional)</Label>
-            <Textarea
-              id="notes"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Any special instructions..."
-              rows={2}
-            />
-          </div>
+            {/* Total */}
+            <div className="flex justify-between items-center py-4 border-t">
+              <span className="text-lg font-medium">Total:</span>
+              <span className="text-2xl font-bold text-primary">
+                {formatCurrency(totalPrice)}
+              </span>
+            </div>
 
-          {/* Total */}
-          <div className="flex justify-between items-center py-4 border-t">
-            <span className="text-lg font-medium">Total:</span>
-            <span className="text-2xl font-bold text-primary">
-              {formatCurrency(totalPrice)}
-            </span>
-          </div>
+            {/* Payment not ready warning */}
+            {!isReady && (
+              <div className="flex items-center gap-2 p-3 bg-destructive/10 text-destructive rounded-lg text-sm">
+                <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                <span>Payment system is not available. Please try again later.</span>
+              </div>
+            )}
 
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={isProcessing}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isProcessing || !buyerName || !buyerEmail}>
-              {isProcessing ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                <>
-                  <CreditCard className="mr-2 h-4 w-4" />
-                  Pay {formatCurrency(totalPrice)}
-                </>
-              )}
-            </Button>
-          </DialogFooter>
-        </form>
+            {/* Action Buttons */}
+            <div className="flex gap-3 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                className="flex-1"
+                onClick={() => onOpenChange(false)}
+                disabled={isProcessing}
+              >
+                Cancel
+              </Button>
+              <Button 
+                type="submit" 
+                className="flex-1"
+                disabled={isProcessing || !isFormValid || !isReady}
+              >
+                {isProcessing ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    <CreditCard className="mr-2 h-4 w-4" />
+                    Pay {formatCurrency(totalPrice)}
+                  </>
+                )}
+              </Button>
+            </div>
+          </form>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );
