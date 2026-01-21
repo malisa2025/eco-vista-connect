@@ -564,6 +564,68 @@ export type Database = {
           },
         ]
       }
+      business_events: {
+        Row: {
+          additional_info: Json | null
+          attendees_count: number | null
+          business_id: string
+          capacity: number | null
+          created_at: string
+          description: string | null
+          end_date: string | null
+          id: string
+          image_url: string | null
+          location: string | null
+          price: number | null
+          start_date: string
+          status: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          additional_info?: Json | null
+          attendees_count?: number | null
+          business_id: string
+          capacity?: number | null
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          image_url?: string | null
+          location?: string | null
+          price?: number | null
+          start_date: string
+          status?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          additional_info?: Json | null
+          attendees_count?: number | null
+          business_id?: string
+          capacity?: number | null
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          image_url?: string | null
+          location?: string | null
+          price?: number | null
+          start_date?: string
+          status?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_events_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_leads: {
         Row: {
           assigned_to: string | null
@@ -1148,6 +1210,47 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      event_registrations: {
+        Row: {
+          created_at: string
+          email: string
+          event_id: string
+          id: string
+          name: string
+          phone: string | null
+          status: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          event_id: string
+          id?: string
+          name: string
+          phone?: string | null
+          status?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          event_id?: string
+          id?: string
+          name?: string
+          phone?: string | null
+          status?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_registrations_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "business_events"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       favorites: {
         Row: {
@@ -3141,6 +3244,7 @@ export type Database = {
         | "services"
         | "healthcare"
         | "other"
+        | "travel"
       claim_status: "pending" | "approved" | "rejected"
       claim_type: "new_business" | "claim_existing"
       experience_level: "entry" | "mid" | "senior" | "executive"
@@ -3305,6 +3409,7 @@ export const Constants = {
         "services",
         "healthcare",
         "other",
+        "travel",
       ],
       claim_status: ["pending", "approved", "rejected"],
       claim_type: ["new_business", "claim_existing"],

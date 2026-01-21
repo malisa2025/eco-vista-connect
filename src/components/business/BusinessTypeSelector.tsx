@@ -1,7 +1,7 @@
 import { Card, CardContent } from '@/components/ui/card';
-import { UtensilsCrossed, Hotel, ShoppingBag, Briefcase, Heart, Building2 } from 'lucide-react';
+import { UtensilsCrossed, Hotel, ShoppingBag, Briefcase, Heart, Building2, Plane } from 'lucide-react';
 
-export type BusinessType = 'restaurant' | 'hotel' | 'retail' | 'services' | 'healthcare' | 'other';
+export type BusinessType = 'restaurant' | 'hotel' | 'retail' | 'services' | 'healthcare' | 'travel' | 'other';
 
 interface BusinessTypeOption {
   type: BusinessType;
@@ -40,6 +40,12 @@ const businessTypes: BusinessTypeOption[] = [
     label: 'Healthcare',
     description: 'Clinics, pharmacies, hospitals, wellness',
     icon: Heart,
+  },
+  {
+    type: 'travel',
+    label: 'Travel & Tour',
+    description: 'Tour operators, travel agencies, safari companies',
+    icon: Plane,
   },
   {
     type: 'other',

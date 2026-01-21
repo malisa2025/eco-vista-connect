@@ -166,6 +166,12 @@ const Navbar = () => {
               Hotels
             </button>
             <button 
+              onClick={() => navigate('/events')}
+              className="text-sm font-medium hover:text-primary transition-smooth"
+            >
+              Events
+            </button>
+            <button 
               onClick={() => navigate('/jobs')}
               className="text-sm font-medium hover:text-primary transition-smooth"
             >
