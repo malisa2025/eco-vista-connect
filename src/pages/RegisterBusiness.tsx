@@ -24,6 +24,7 @@ import HotelFields, { HotelData } from '@/components/business/HotelFields';
 import RetailFields, { RetailData } from '@/components/business/RetailFields';
 import ServiceFields, { ServiceData } from '@/components/business/ServiceFields';
 import HealthcareFields, { HealthcareData } from '@/components/business/HealthcareFields';
+import TravelFields, { TravelData } from '@/components/business/TravelFields';
 
 const newBusinessSchema = z.object({
   name: z.string().min(2).max(100),
@@ -129,6 +130,16 @@ const RegisterBusiness = () => {
     specialties: [],
   });
 
+  const [travelData, setTravelData] = useState<TravelData>({
+    tour_types: [],
+    group_size_min: '',
+    group_size_max: '',
+    provides_transport: false,
+    provides_accommodation: false,
+    provides_guide: true,
+    languages_offered: ['English'],
+  });
+
   const handleClaimExisting = async () => {
     if (!selectedBusiness) {
       toast.error('Please select a business to claim');
@@ -161,6 +172,8 @@ const RegisterBusiness = () => {
         return { ...serviceData };
       case 'healthcare':
         return { ...healthcareData };
+      case 'travel':
+        return { ...travelData };
       default:
         return null;
     }
@@ -230,6 +243,8 @@ const RegisterBusiness = () => {
         return <ServiceFields data={serviceData} onChange={setServiceData} />;
       case 'healthcare':
         return <HealthcareFields data={healthcareData} onChange={setHealthcareData} />;
+      case 'travel':
+        return <TravelFields value={travelData} onChange={setTravelData} />;
       default:
         return (
           <div className="text-center py-8 text-muted-foreground">
@@ -247,6 +262,7 @@ const RegisterBusiness = () => {
       retail: 'Retail / Shop',
       services: 'Professional Services',
       healthcare: 'Healthcare',
+      travel: 'Travel & Tour',
       other: 'Other Business',
     };
     return businessType ? labels[businessType] : '';
@@ -340,7 +356,13 @@ const RegisterBusiness = () => {
                 <span className="font-medium">{healthcareData.facility_type}</span>
               </div>
             )}
-            {businessType === 'other' && (
+            {businessType === 'travel' && travelData.tour_types.length > 0 && (
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Tour Types:</span>
+                <span className="font-medium">{travelData.tour_types.slice(0, 2).join(', ')}{travelData.tour_types.length > 2 ? '...' : ''}</span>
+              </div>
+            )}
+            {(businessType === 'other' || (businessType === 'travel' && travelData.tour_types.length === 0)) && (
               <p className="text-muted-foreground">No additional details provided.</p>
             )}
           </div>

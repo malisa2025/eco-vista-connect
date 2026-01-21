@@ -71,7 +71,7 @@ import Contact from "./pages/Contact";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import Cookies from "./pages/Cookies";
-
+import Events from "./pages/Events";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -91,6 +91,7 @@ const App = () => (
         <Route path="/businesses/:id/edit" element={<ProtectedRoute><EditBusiness /></ProtectedRoute>} />
         <Route path="/business-news" element={<BusinessNews />} />
         <Route path="/hotels" element={<Hotels />} />
+        <Route path="/events" element={<Events />} />
         <Route path="/hotels/:id" element={<HotelDetail />} />
         <Route path="/hotels/:id/book" element={<ProtectedRoute><HotelBooking /></ProtectedRoute>} />
           <Route path="/dashboard" element={<ProtectedRoute><UserDashboard /></ProtectedRoute>} />
