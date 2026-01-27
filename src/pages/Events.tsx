@@ -5,9 +5,11 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Search, Calendar, Filter, MapPin } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Search, Calendar, List, MapPin } from 'lucide-react';
 import EventCard from '@/components/events/EventCard';
 import EventDetailModal from '@/components/events/EventDetailModal';
+import EventCalendar from '@/components/events/EventCalendar';
 import { useUpcomingEvents } from '@/hooks/useBusinessEvents';
 
 const GHANA_REGIONS = [
@@ -23,6 +25,7 @@ export default function Events() {
   const [selectedRegion, setSelectedRegion] = useState('All Regions');
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
 
   // Filter events
   const filteredEvents = events?.filter((event) => {
@@ -91,8 +94,27 @@ export default function Events() {
           </div>
         </div>
 
-        {/* Events Grid */}
+        {/* Events Content */}
         <div className="container mx-auto px-4 py-12">
+          {/* View Toggle */}
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-lg font-semibold">
+              {filteredEvents.length} Upcoming Event{filteredEvents.length !== 1 ? 's' : ''}
+            </h2>
+            <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as 'list' | 'calendar')}>
+              <TabsList>
+                <TabsTrigger value="list" className="gap-2">
+                  <List className="h-4 w-4" />
+                  <span className="hidden sm:inline">List</span>
+                </TabsTrigger>
+                <TabsTrigger value="calendar" className="gap-2">
+                  <Calendar className="h-4 w-4" />
+                  <span className="hidden sm:inline">Calendar</span>
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+
           {isLoading ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[...Array(6)].map((_, i) => (
@@ -104,6 +126,8 @@ export default function Events() {
                 </div>
               ))}
             </div>
+          ) : viewMode === 'calendar' ? (
+            <EventCalendar onEventClick={handleViewDetails} />
           ) : filteredEvents.length === 0 ? (
             <div className="text-center py-16">
               <Calendar className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
@@ -126,23 +150,16 @@ export default function Events() {
               )}
             </div>
           ) : (
-            <>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-semibold">
-                  {filteredEvents.length} Upcoming Event{filteredEvents.length !== 1 ? 's' : ''}
-                </h2>
-              </div>
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredEvents.map((event) => (
-                  <EventCard
-                    key={event.id}
-                    event={event}
-                    onViewDetails={handleViewDetails}
-                    onRegister={handleRegister}
-                  />
-                ))}
-              </div>
-            </>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredEvents.map((event) => (
+                <EventCard
+                  key={event.id}
+                  event={event}
+                  onViewDetails={handleViewDetails}
+                  onRegister={handleRegister}
+                />
+              ))}
+            </div>
           )}
         </div>
       </main>

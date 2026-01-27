@@ -7,7 +7,8 @@ export type PaymentType =
   | "advertisement" 
   | "business_subscription" 
   | "job_seeker_subscription"
-  | "product_order";
+  | "product_order"
+  | "event_ticket";
 
 /**
  * Generate a unique payment reference with a type prefix
@@ -19,6 +20,7 @@ export function generatePaymentReference(type: PaymentType, entityId?: string): 
     business_subscription: "BSUB",
     job_seeker_subscription: "JSUB",
     product_order: "PRD",
+    event_ticket: "EVT",
   };
 
   const timestamp = Date.now();

@@ -181,6 +181,25 @@ serve(async (req) => {
           }
         }
 
+        // Handle event ticket payments
+        if (paymentType === "event_ticket" && metadata.event_id) {
+          console.log("Processing event ticket via webhook:", metadata.event_id);
+          
+          // Tickets should already be created by verify-event-ticket-payment
+          // This is a fallback in case the client-side verification failed
+          const { data: existingTickets } = await supabase
+            .from("event_tickets")
+            .select("id")
+            .eq("payment_reference", reference)
+            .eq("payment_status", "paid");
+
+          if (!existingTickets || existingTickets.length === 0) {
+            console.log("No tickets found for reference, may need manual handling:", reference);
+          } else {
+            console.log(`Found ${existingTickets.length} tickets for reference ${reference}`);
+          }
+        }
+
         break;
       }
 
