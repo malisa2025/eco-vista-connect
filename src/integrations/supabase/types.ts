@@ -1252,6 +1252,78 @@ export type Database = {
           },
         ]
       }
+      event_tickets: {
+        Row: {
+          attendee_email: string | null
+          attendee_name: string | null
+          checked_in: boolean
+          checked_in_at: string | null
+          created_at: string
+          event_id: string
+          id: string
+          payment_reference: string | null
+          payment_status: string
+          price_paid: number
+          qr_code: string | null
+          registration_id: string | null
+          ticket_number: string
+          ticket_type: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          attendee_email?: string | null
+          attendee_name?: string | null
+          checked_in?: boolean
+          checked_in_at?: string | null
+          created_at?: string
+          event_id: string
+          id?: string
+          payment_reference?: string | null
+          payment_status?: string
+          price_paid?: number
+          qr_code?: string | null
+          registration_id?: string | null
+          ticket_number: string
+          ticket_type?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          attendee_email?: string | null
+          attendee_name?: string | null
+          checked_in?: boolean
+          checked_in_at?: string | null
+          created_at?: string
+          event_id?: string
+          id?: string
+          payment_reference?: string | null
+          payment_status?: string
+          price_paid?: number
+          qr_code?: string | null
+          registration_id?: string | null
+          ticket_number?: string
+          ticket_type?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_tickets_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "business_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_tickets_registration_id_fkey"
+            columns: ["registration_id"]
+            isOneToOne: false
+            referencedRelation: "event_registrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       favorites: {
         Row: {
           business_id: string
@@ -3179,6 +3251,7 @@ export type Database = {
       }
       expire_old_jobs: { Args: never; Returns: undefined }
       generate_booking_reference: { Args: never; Returns: string }
+      generate_ticket_number: { Args: never; Returns: string }
       get_admin_stats: {
         Args: never
         Returns: {
