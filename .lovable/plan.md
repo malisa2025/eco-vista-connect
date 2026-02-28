@@ -1,68 +1,81 @@
 
-## Plan: Business Benefits Page + Downloadable PDF Brochure
+## Plan: Full-Scope Platform Document on `/platform-overview`
 
-### What we're building
-1. A new public-facing page `/platform-overview` with a polished brochure-style layout covering all platform benefits & dashboard features for businesses
-2. A "Download PDF" button that generates and downloads a formatted PDF using the browser's print-to-PDF API (no extra library needed)
-3. Add a link to this page from the homepage and navbar
+The user wants the existing `/platform-overview` page to be a comprehensive, no-limit full-scope document — deeply detailed on every feature, the complete dashboard breakdown, and commercial benefits. No new page or rewrite approach — enhance the existing `PlatformOverview.tsx` by **adding new sections** and **expanding existing ones** in-place.
 
----
+### What to add/expand in `src/pages/PlatformOverview.tsx`
 
-### Content to include (pulled from codebase)
+**1. Executive Summary section** (new, before hero content on the page)
+- What GHKonect is, market it serves (Ghana SMEs across 16 regions), core value proposition
+- "One platform replaces 6+ separate tools" statement
 
-**Benefits for Businesses:**
-- Verified business profile with logo, gallery, hours, map location
-- Product/shop catalog with online orders and payment (Paystack)
-- Menu management (restaurants) with item categories and pricing
-- Room management & booking system (hotels)
-- Event creation, ticketing, and calendar view
-- Job posting, applicant tracking, and hiring pipeline
-- Lead capture forms, CRM kanban board, and activity timeline
-- Ad campaigns with A/B testing, ROI tracking, and smart recommendations
-- Customer reviews with authenticity scoring and public responses
-- Analytics dashboard: profile views, leads, ratings, view trends
-- Business verification badge (trust signal for customers)
-- Subscription plans: Free → Pro (GHS 99) → Business (GHS 299)
+**2. Expand every benefits card** — 8–10 detailed bullet points each (currently 5):
+- Verified Profile: add map GPS, Registrar General verification, social handles, open/closed live status, cover image, gallery up to 20 photos, video URL, response to reviews shown
+- Online Shop: add cart drawer, slide-out checkout, Paystack PRD-prefix orders, product video (Cloudflare Stream), drag-and-drop image reordering, stock management, featured product badge
+- Restaurant: add dietary tags, real-time toggle availability, table reservation fee collection, category groupings, featured dish spotlight
+- Hotel: add room type CRUD, seasonal pricing, availability calendar, deposit vs full payment options, amenities categorised, guest special requests, enquiry handling
+- Events: add QR ticket generation, capacity limits, calendar view, check-in tracking, EVT/TKT payment prefix
+- Jobs: add AI job description generator, Kanban pipeline (Applied→Screened→Interview→Offer→Hired), video applications, resume database, job alerts, job boosting, applicant notes, cover letter AI
+- CRM/Leads: add exit-intent popup, embedded form (copy-paste), AI lead scoring 0–100, Kanban board stages, activity timeline per lead, lead notes, email notification on new lead
+- Ad Campaigns: add A/B testing variants, ROI calculator, competitor benchmarks, smart AI recommendations, CTR/impression charts, sponsored listing placement, ad alert notifications
+- Reviews: add AI authenticity score per review, flag review option, public reply, sentiment breakdown, trust score
+- Analytics: add 30/60/90 day view filters, line charts, traffic source breakdown, job performance chart, export CSV
 
-**Dashboard features:**
-- Profile views this month (vs. last month trend)
-- Total leads & leads this month
-- Active job listings & total applications
-- Average star rating & total reviews
-- 7-day views trend chart
-- Quick Actions: Edit Profile, Run Ads, Post Job, View Leads, Manage Shop/Menu/Rooms, Analytics
-- Recent leads list
-- Recent reviews list
-- Profile completeness score
+**3. Complete Dashboard Deep-Dive section** (new, much more detailed than current icon grid):
+Pulled directly from `BusinessDashboard.tsx`:
 
----
+**Header Card:**
+- Business logo (click-to-upload), name, category badge, region badge, verified badge, description preview, "View Public Page" + "Settings" buttons
 
-### Files to create/modify
+**4 KPI Stat Cards (each with details):**
+- Profile Views: views this month, % growth vs last month, TrendingUp/Down icon coloured green/red
+- Total Leads: lifetime count + leads this month sub-stat
+- Active Jobs: count of active listings + total applications received
+- Rating: average star rating (e.g. 4.7) + total review count
 
-**Create `src/pages/PlatformOverview.tsx`:**
-- Hero section: "Everything Your Business Needs to Grow in Ghana"
-- Benefits section with bullet lists (Business, Customers, Government)
-- Dashboard features section with icon grid
-- Pricing tiers summary
-- "Download Brochure (PDF)" button using `window.print()` with a `@media print` stylesheet
-- Print-specific CSS via a `<style>` tag injected into `<head>` (hide navbar/footer, format cleanly)
-- "Register Your Business" and "View Pricing" CTAs
+**Quick Actions Grid (type-specific):**
+- Restaurant: Manage Menu, Reservations + base actions
+- Hotel: Manage Rooms, Bookings + base actions
+- Retail: Manage Shop + base actions
+- Services/Healthcare: Services edit + base actions
+- Base actions (all types): Edit Profile, Set Hours, Post a Job, Run Ads, View Leads, Analytics, View Public Page
 
-**Modify `src/App.tsx`:**
-- Add route `/platform-overview`
+**Views Trend Chart:**
+- 7-day line chart with cyan-to-blue gradient, XAxis dates, YAxis count, hover tooltip
 
-**Modify `src/components/Navbar.tsx`:**
-- Add "Why GHKonect" link pointing to `/platform-overview`
+**Profile Completeness Tracker:**
+- % bar (cyan-to-blue gradient)
+- 10 checklist items: Business logo, Cover image, Description, Phone number, Email address, Website, Business hours, Gallery images, Video, Verification badge
+- "Complete Profile" CTA if < 100%
 
-**Modify `src/index.css` or inline in component:**
-- `@media print` styles: hide nav, footer, buttons; show full content; page breaks; A4 layout
+**Recent Leads Feed:**
+- Avatar initial circle, name, email, status badge (new = cyan, others = grey), time ago
 
----
+**Recent Reviews Feed:**
+- 5-star rating row, comment preview, time ago
 
-### PDF Generation approach
-Use `window.print()` — no external library needed. The page will have a dedicated print stylesheet that:
-- Hides navbar, footer, download button, and all interactive elements
-- Formats content as a clean A4 brochure with the GHKonect logo and brand colors
-- Adds page headers and footers with platform URL
+**Active Campaigns Panel:**
+- Shows count of running ads with orange gradient icon
+- "Create Your First Ad" CTA when empty
+- "Manage Ads" link when active
 
-This works in all browsers and produces a professional PDF via "Save as PDF" in the print dialog, which we'll auto-trigger.
+**4. Commercial Benefits section** (new):
+- Tool consolidation table: what GHKonect replaces (CRM → Leads module, Job Board → Jobs module, Booking System → Hotels/Reservations, E-commerce → Shop, Ad Platform → Campaigns, Review Platform → Reviews)
+- Revenue streams unlocked: product sales 24/7, ticket sales, table reservation fees, hotel booking deposits
+- Trust & discovery: verified badge = higher conversion, map listing = foot traffic, 16-region reach
+- Hiring efficiency: Kanban pipeline, AI descriptions, video interviews
+- Marketing ROI: A/B tested ads, competitor benchmarks, ROI calculator with revenue attribution
+
+**5. Who Is It For section** (new):
+- Restaurants, Hotels, Retail Shops, Service Businesses, Healthcare Providers, Event Organisers, Employers/Recruiters
+- Each with 3–4 specific use-case bullet points
+
+**6. Expand Pricing table** — add feature comparison rows (currently just bullet lists per plan):
+- Full feature matrix: checkmarks per tier for each capability
+
+**7. Print stylesheet update:**
+- Add page breaks before each new major section
+- Ensure new tables and grids render cleanly on A4
+
+### Files to modify
+- `src/pages/PlatformOverview.tsx` — add all new sections and expand benefits data array
