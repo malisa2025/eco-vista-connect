@@ -148,6 +148,12 @@ const Navbar = () => {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
             <button 
+              onClick={() => navigate('/platform-overview')}
+              className="text-sm font-medium hover:text-primary transition-smooth"
+            >
+              Why GHKonect
+            </button>
+            <button 
               onClick={() => navigate('/businesses')}
               className="text-sm font-medium hover:text-primary transition-smooth"
             >
