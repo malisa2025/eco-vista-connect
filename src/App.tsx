@@ -73,6 +73,7 @@ import Terms from "./pages/Terms";
 import Cookies from "./pages/Cookies";
 import Events from "./pages/Events";
 import MyTickets from "./pages/MyTickets";
+import PlatformOverview from "./pages/PlatformOverview";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -349,7 +350,8 @@ const App = () => (
             }
           />
           <Route path="/resume-database" element={<ProtectedRoute requireRole="business_owner"><ResumeDatabase /></ProtectedRoute>} />
-          <Route path="/seed-demo-data" element={<SeedDemoData />} />
+        <Route path="/platform-overview" element={<PlatformOverview />} />
+        <Route path="/seed-demo-data" element={<SeedDemoData />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
